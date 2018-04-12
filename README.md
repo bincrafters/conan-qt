@@ -1,8 +1,11 @@
+Conan package for Qt
+-----------------------------------
+
 ## Package Status
 
 | Bintray | Windows | Linux & macOS |
 |:--------:|:---------:|:-----------------:|
-|BINTRAY_BADGE_URL|APPVEYOR_BADGE_URL|TRAVIS_BADGE_URL|
+|BINTRAY_BADGE_URL|[![Build status](https://ci.appveyor.com/api/projects/status/ut5dry62vi15aqn9?svg=true)](https://ci.appveyor.com/project/lucienboillod/conan-qt)|TRAVIS_BADGE_URL|
 
 ## Conan.io Information
 
