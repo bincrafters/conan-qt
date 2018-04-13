@@ -5,7 +5,7 @@ from conan.packager import ConanMultiPackager
 
 if __name__ == "__main__":
 
-    builder = ConanMultiPackager(username="impressivedev", channel="testing")
+    builder = ConanMultiPackager(visual_versions=["15"], archs=["x86_64"], build_types=["Debug"], username="lboillod", channel="testing")
     builder.add_common_builds()
     filtered_builds = []
     for settings, options, env_vars, build_requires in builder.builds:
