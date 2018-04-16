@@ -9,7 +9,7 @@ import os
 
 class QtConan(ConanFile):
     name = "Qt"
-    version = "5.9.3"
+    version = "5.11"
     description = "Conan.io package for Qt library."
     url = "https://github.com/lucienboillod/conan-qt"
 
@@ -117,7 +117,7 @@ class QtConan(ConanFile):
             submodules.append("qtxmlpatterns")
 
         self.run("git clone https://code.qt.io/qt/qt5.git")
-        self.run("cd %s && git checkout v%s" % (self.source_dir, self.version))
+        self.run("cd %s && git checkout %s" % (self.source_dir, self.version))
         self.run("cd %s && git submodule update --init %s" % (self.source_dir, " ".join(submodules)))
 
         if self.settings.os != "Windows":
