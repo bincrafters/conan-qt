@@ -45,7 +45,6 @@ class QtConan(ConanFile):
                       "graphicaleffects=False", "imageformats=False", "location=False", \
                       "serialport=False", "svg=False", "tools=False", "translations=False", \
                       "webengine=False", "websockets=False", "xmlpatterns=False", "openssl=no"
-    url = "http://github.com/ImpressiveDev/conan-qt"
     license = "http://doc.qt.io/qt-5/lgpl.html"
     short_paths = True
 
