@@ -66,3 +66,15 @@ install:
 
 test_script:
   - python build.py
+
+deploy:
+  - provider: Bintray
+    username: lucienboillod
+    api_key:
+      secure: e79b3eb4d8bc436ec4637fc680c9302c6facf8fa
+    repo: conan-public
+    package: Qt:lboillod
+    version: 5.11
+    publish: true
+    override: true
+    explode: true
