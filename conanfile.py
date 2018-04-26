@@ -3,22 +3,19 @@
 
 from conans import ConanFile, CMake, tools
 from distutils.spawn import find_executable
-from conans import AutoToolsBuildEnvironment, ConanFile, tools, VisualStudioBuildEnvironment
+from conans import AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 import os
-
 
 class QtConan(ConanFile):
     name = "Qt"
     version = "5.11"
     description = "Conan.io package for Qt library."
     url = "https://github.com/lucienboillod/conan-qt"
-
     license = "http://doc.qt.io/qt-5/lgpl.html"
     exports = ["LICENSE.md"]
     source_dir = "qt5"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -45,7 +42,6 @@ class QtConan(ConanFile):
                       "graphicaleffects=False", "imageformats=False", "location=False", \
                       "serialport=False", "svg=False", "tools=False", "translations=False", \
                       "webengine=False", "websockets=False", "xmlpatterns=False", "openssl=no"
-    license = "http://doc.qt.io/qt-5/lgpl.html"
     short_paths = True
 
     def system_requirements(self):
@@ -58,15 +54,12 @@ class QtConan(ConanFile):
                           "libxcb-keysyms1-dev", "libxcb-image0", "libxcb-image0-dev",
                           "libxcb-shm0", "libxcb-shm0-dev", "libxcb-icccm4", "libx11-dev",
                           "libxcb-icccm4-dev", "libxcb-sync1", "libxcb-sync-dev",
-                          "libxcb-xfixes0-dev", "libxrender-dev", "libxcb-shape0-dev",
-                          "libxcb-randr0-dev", "libxcb-render-util0", "libxcb-render-util0-dev",
+                          "libxcb-xfixes0-dev", "libxcb-shape0-dev", "libxcb-render-util0-dev",
+                          "libxcb-randr0-dev", "libxcb-render-util0",
                           "libxcb-glx0-dev", "libxcb-xinerama0", "libxcb-xinerama0-dev"]
 
             if self.settings.arch == "x86":
-                full_pack_names = []
-                for pack_name in pack_names:
-                    full_pack_names += [pack_name + ":i386"]
-                pack_names = full_pack_names
+                pack_names = [item+":i386" for item in pack_names]
 
         if pack_names:
             installer = tools.SystemPackageTool()
@@ -80,9 +73,7 @@ class QtConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Windows":
-            if self.options.openssl == "yes":
-                self.requires("OpenSSL/1.0.2l@conan/stable")
-            elif self.options.openssl == "linked":
+            if self.options.openssl == "yes" or self.options.openssl == "linked":
                 self.requires("OpenSSL/1.0.2l@conan/stable")
 
     def source(self):
@@ -125,9 +116,6 @@ class QtConan(ConanFile):
             self.run("chmod +x ./%s/configure" % self.source_dir)
 
     def build(self):
-        """ Define your project building. You decide the way of building it
-            to reuse it later in any other project.
-        """
         args = ["-opensource", "-confirm-license", "-nomake examples", "-nomake tests",
                 "-prefix %s" % self.package_folder]
         if not self.options.shared:
@@ -162,10 +150,6 @@ class QtConan(ConanFile):
         env_build = VisualStudioBuildEnvironment(self)
         env.update(env_build.vars)
 
-        # Workaround for conan-io/conan#1408
-        for name, value in list(env.items()):
-            if not value:
-                del env[name]
         with tools.environment_append(env):
             vcvars = tools.vcvars_command(self.settings)
 
@@ -242,5 +226,4 @@ class QtConan(ConanFile):
             self.cpp_info.includedirs += ["include/Qt%s" % lib]
 
         if self.settings.os == "Windows":
-            # Some missing shared libs inside QML and others, but for the test it works
             self.env_info.path.append(os.path.join(self.package_folder, "bin"))
