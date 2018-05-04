@@ -5,7 +5,7 @@ Conan package for Qt
 
 | Bintray | Windows | Linux & macOS |
 |:--------:|:---------:|:-----------------:|
-| [ ![Download](https://api.bintray.com/packages/lucienboillod/conan-public/Qt%3Alboillod/images/download.svg?version=5.11%3Astable) ](https://bintray.com/lucienboillod/conan-public/Qt%3Alboillod/5.11%3Astable/link)|[![Build status](https://ci.appveyor.com/api/projects/status/ut5dry62vi15aqn9/branch/stable/5.11?svg=true)](https://ci.appveyor.com/project/lucienboillod/conan-qt/branch/stable/5.11)|[![Build Status](https://travis-ci.org/lucienboillod/conan-qt.svg?branch=stable%2F5.11)](https://travis-ci.org/lucienboillod/conan-qt)|
+| [ ![Download](https://api.bintray.com/packages/lucienboillod/conan-public/Qt%3Alucienboillod/images/download.svg?version=5.11%3Astable) ](https://bintray.com/lucienboillod/conan-public/Qt%3Alucienboillod/5.11%3Astable/link)|[![Build status](https://ci.appveyor.com/api/projects/status/ut5dry62vi15aqn9/branch/stable/5.11?svg=true)](https://ci.appveyor.com/project/lucienboillod/conan-qt/branch/stable/5.11)|[![Build Status](https://travis-ci.org/lucienboillod/conan-qt.svg?branch=stable%2F5.11)](https://travis-ci.org/lucienboillod/conan-qt)|
 
 ## Conan.io Information
 
