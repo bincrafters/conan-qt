@@ -161,12 +161,10 @@ class QtConan(ConanFile):
             else:
                 args += ["-openssl-linked"]
 
-            self.run("cd %s && %s && set" % (self.source_dir, vcvars))
-            self.run("cd %s && %s && configure %s"
-                     % (self.source_dir, vcvars, " ".join(args)))
-            self.run("cd %s && %s && %s %s"
-                     % (self.source_dir, vcvars, build_command, " ".join(build_args)))
-            self.run("cd %s && %s && %s install" % (self.source_dir, vcvars, build_command))
+            with tools.chdir(self.source_dir):
+                self.run("%s && configure %s" % (vcvars, " ".join(args)))
+                self.run("%s && %s %s" % (vcvars, build_command, " ".join(build_args)))
+                self.run("%s && %s install" % (vcvars, build_command))
 
     def _build_mingw(self, args):
         env_build = AutoToolsBuildEnvironment(self)
