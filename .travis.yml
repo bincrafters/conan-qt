@@ -243,22 +243,6 @@ matrix:
     env: CONAN_CLANG_VERSIONS=4.0 CONAN_DOCKER_IMAGE=lasote/conanclang40 CONAN_CURRENT_PAGE=6
   - os: osx
     language: generic
-    osx_image: xcode7.3
-    env: CONAN_APPLE_CLANG_VERSIONS=7.3 CONAN_CURRENT_PAGE=1
-  - os: osx
-    language: generic
-    osx_image: xcode7.3
-    env: CONAN_APPLE_CLANG_VERSIONS=7.3 CONAN_CURRENT_PAGE=2
-  - os: osx
-    language: generic
-    osx_image: xcode7.3
-    env: CONAN_APPLE_CLANG_VERSIONS=7.3 CONAN_CURRENT_PAGE=3
-  - os: osx
-    language: generic
-    osx_image: xcode7.3
-    env: CONAN_APPLE_CLANG_VERSIONS=7.3 CONAN_CURRENT_PAGE=4
-  - os: osx
-    language: generic
     osx_image: xcode8.3
     env: CONAN_APPLE_CLANG_VERSIONS=8.1 CONAN_CURRENT_PAGE=1
   - os: osx
