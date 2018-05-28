@@ -77,7 +77,15 @@ class QtConan(ConanFile):
                 self.requires("OpenSSL/1.0.2l@conan/stable")
 
     def source(self):
-        submodules = ["qtbase"]
+        self.run("git clone https://code.qt.io/qt/qt5.git")
+        self.run("cd %s && git checkout %s" % (self.source_dir, self.version))
+        self.run("cd %s && git submodule update --init %s" % (self.source_dir, "qtbase"))
+
+        if self.settings.os != "Windows":
+            self.run("chmod +x ./%s/configure" % self.source_dir)
+
+    def build(self):
+        submodules = []
 
         if self.options.activeqt:
             submodules.append("qtactiveqt")
@@ -108,14 +116,9 @@ class QtConan(ConanFile):
         if self.options.xmlpatterns:
             submodules.append("qtxmlpatterns")
 
-        self.run("git clone https://code.qt.io/qt/qt5.git")
-        self.run("cd %s && git checkout %s" % (self.source_dir, self.version))
-        self.run("cd %s && git submodule update --init %s" % (self.source_dir, " ".join(submodules)))
+        if len(submodules) > 0:
+            self.run("cd %s && git submodule update --init %s" % (self.source_dir, " ".join(submodules)))
 
-        if self.settings.os != "Windows":
-            self.run("chmod +x ./%s/configure" % self.source_dir)
-
-    def build(self):
         args = ["-opensource", "-confirm-license", "-nomake examples", "-nomake tests",
                 "-prefix %s" % self.package_folder]
         if not self.options.shared:
