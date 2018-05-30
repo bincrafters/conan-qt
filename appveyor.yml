@@ -74,7 +74,7 @@ deploy:
       secure: DmdFk2R80Vx8l/EKvmlIsE1Hf/VOsoWzfpSewHEcpxkDHqeNouRcycbsB6UoGbrh
     repo: conan-public
     package: Qt:lboillod
-    version: 5.11
+    version: 5.11.0
     publish: true
     override: true
     explode: true
