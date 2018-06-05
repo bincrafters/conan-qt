@@ -3,7 +3,7 @@
 
 from conans import ConanFile, tools
 from distutils.spawn import find_executable
-from conans import AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
+from conans import VisualStudioBuildEnvironment
 import os
 import shutil
 
@@ -140,15 +140,7 @@ class QtConan(ConanFile):
             build_args = []
         self.output.info("Using '%s %s' to build" % (build_command, " ".join(build_args)))
 
-        env = {}
-        env.update({'PATH': ['%s/qtbase/bin' % self.source_folder,
-                             '%s/gnuwin32/bin' % self.source_folder,
-                             '%s/qtrepotools/bin' % self.source_folder]})
-
-        env_build = VisualStudioBuildEnvironment(self)
-        env.update(env_build.vars)
-
-        with tools.environment_append(env):
+        with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
             vcvars = tools.vcvars_command(self.settings)
 
             args += ["-opengl %s" % self.options.opengl]
@@ -167,27 +159,20 @@ class QtConan(ConanFile):
             self.run("%s && %s install" % (vcvars, build_command))
 
     def _build_mingw(self, args):
-        env_build = AutoToolsBuildEnvironment(self)
-        env = {'PATH': ['%s/bin' % self.source_folder,
-                        '%s/qtbase/bin' % self.source_folder,
-                        '%s/gnuwin32/bin' % self.source_folder,
-                        '%s/qtrepotools/bin' % self.source_folder]}
-        env.update(env_build.vars)
-        with tools.environment_append(env):
-            # Workaround for configure using clang first if in the path
-            new_path = []
-            for item in os.environ['PATH'].split(';'):
-                if item != 'C:\\Program Files\\LLVM\\bin':
-                    new_path.append(item)
-            os.environ['PATH'] = ';'.join(new_path)
-            # end workaround
-            args += ["-opengl %s" % self.options.opengl,
-                     "-platform win32-g++"]
+        # Workaround for configure using clang first if in the path
+        new_path = []
+        for item in os.environ['PATH'].split(';'):
+            if item != 'C:\\Program Files\\LLVM\\bin':
+                new_path.append(item)
+        os.environ['PATH'] = ';'.join(new_path)
+        # end workaround
+        args += ["-opengl %s" % self.options.opengl,
+                 "-platform win32-g++"]
 
-            self.output.info("Using '%d' threads" % tools.cpu_count())
-            self.run("%s/qt5/configure.bat %s" % (self.source_folder, " ".join(args)))
-            self.run("mingw32-make -j %d" % tools.cpu_count())
-            self.run("mingw32-make install")
+        self.output.info("Using '%d' threads" % tools.cpu_count())
+        self.run("%s/qt5/configure.bat %s" % (self.source_folder, " ".join(args)))
+        self.run("mingw32-make -j %d" % tools.cpu_count())
+        self.run("mingw32-make install")
 
     def _build_unix(self, args):
         if self.settings.os == "Linux":
@@ -205,21 +190,7 @@ class QtConan(ConanFile):
         self.run("make install")
 
     def package_info(self):
-        libs = ['Concurrent', 'Core', 'DBus',
-                'Gui', 'Network', 'OpenGL',
-                'Sql', 'Test', 'Widgets', 'Xml']
-
-        self.cpp_info.libs = []
-        self.cpp_info.includedirs = ["include"]
-        for lib in libs:
-            if self.settings.os == "Windows" and self.settings.build_type == "Debug":
-                suffix = "d"
-            elif self.settings.os == "Macos" and self.settings.build_type == "Debug":
-                suffix = "_debug"
-            else:
-                suffix = ""
-            self.cpp_info.libs += ["Qt5%s%s" % (lib, suffix)]
-            self.cpp_info.includedirs += ["include/Qt%s" % lib]
-
         if self.settings.os == "Windows":
             self.env_info.path.append(os.path.join(self.package_folder, "bin"))
+        self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
+
