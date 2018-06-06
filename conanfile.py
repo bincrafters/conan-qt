@@ -197,8 +197,10 @@ class QtConan(ConanFile):
         # end workaround
         args += ["-platform win32-g++"]
 
-        with tools.environment_append({"MAKEFLAGS":"-j %d" % tools.cpu_count()}):
-            self.output.info("Using '%d' threads" % tools.cpu_count())
+        with tools.environment_append({"MAKEFLAGS":"-j %d" % tools.cpu_count()}):        
+            configurePath = os.path.join(self.build_folder, "qtbase", "tools", "configure")
+            os.makedirs(configurePath)
+            shutil.copy2(os.path.join(self.source_folder, "qt5", "qtbase", "tools", "configure", "configure_pch.h"), configurePath)
             self.run("%s/qt5/configure.bat %s" % (self.source_folder, " ".join(args)))
             self.run("mingw32-make")
             self.run("mingw32-make install")
