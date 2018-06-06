@@ -69,16 +69,16 @@ class QtConan(ConanFile):
     def system_requirements(self):
         pack_names = None
         if tools.os_info.linux_distro == "ubuntu":
-            pack_names = ["libx11-6", "libfontconfig1-dev", "libxrender-dev", "libxcursor-dev",
-                          "libxext-dev", "libxfixes-dev", "libxft-dev", "libxi-dev",
-                          "libgl1-mesa-dev", "libxcb1", "libxcb1-dev", "libxrandr-dev",
-                          "libx11-xcb1", "libx11-xcb-dev", "libxcb-keysyms1",
-                          "libxcb-keysyms1-dev", "libxcb-image0", "libxcb-image0-dev",
-                          "libxcb-shm0", "libxcb-shm0-dev", "libxcb-icccm4", "libx11-dev",
-                          "libxcb-icccm4-dev", "libxcb-sync1", "libxcb-sync-dev",
+            pack_names = ["libfontconfig1-dev", "libxrender-dev",
+                          "libxext-dev", "libxfixes-dev", "libxi-dev",
+                          "libgl1-mesa-dev", "libxcb1-dev",
+                          "libx11-xcb-dev",
+                          "libxcb-keysyms1-dev", "libxcb-image0-dev",
+                          "libxcb-shm0-dev", "libx11-dev",
+                          "libxcb-icccm4-dev", "libxcb-sync-dev",
                           "libxcb-xfixes0-dev", "libxcb-shape0-dev", "libxcb-render-util0-dev",
-                          "libxcb-randr0-dev", "libxcb-render-util0",
-                          "libxcb-glx0-dev", "libxcb-xinerama0", "libxcb-xinerama0-dev"]
+                          "libxcb-randr0-dev", 
+                          "libxcb-glx0-dev"]
 
             if self.settings.arch == "x86":
                 pack_names = [item+":i386" for item in pack_names]
