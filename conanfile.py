@@ -28,7 +28,7 @@ class QtConan(ConanFile):
     submodules = getsubmodules()
 
     name = "Qt"
-    version = "5.11.0"
+    version = "5.9.6"
     description = "Conan.io package for Qt library."
     url = "https://github.com/bincrafters/conan-qt"
     homepage = "https://www.qt.io/"
@@ -111,13 +111,13 @@ class QtConan(ConanFile):
             installer.install(" ".join(pack_names)) # Install the package
 
     def source(self):
-        url = "http://download.qt.io/official_releases/qt/{0}/{1}/single/qt-everywhere-src-{1}"\
+        url = "http://download.qt.io/official_releases/qt/{0}/{1}/single/qt-everywhere-opensource-src-{1}"\
             .format(self.version[:self.version.rfind('.')], self.version)
         if tools.os_info.is_windows:
             tools.get("%s.zip" % url)
         else:
             self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
-        shutil.move("qt-everywhere-src-%s" % self.version, "qt5")
+        shutil.move("qt-everywhere-opensource-src-%s" % self.version, "qt5")
 
     def build(self):
         args = ["-opensource", "-confirm-license", "-nomake examples", "-nomake tests",
