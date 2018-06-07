@@ -19,6 +19,10 @@ class TestPackageConan(ConanFile):
         with tools.environment_append(RunEnvironment(self).vars):
             bin_path = os.path.join("bin", "test_package")
             if self.settings.os == "Windows":
+                if self.settings.compiler == "gcc":
+                    self.run("echo %PATH%")
+                    self.run("ldd %s" % bin_path)
+                    self.run("cd bin && ldd test_package")
                 self.run(bin_path)
             elif self.settings.os == "Macos":
                 self.run("DYLD_LIBRARY_PATH=%s %s" % (os.environ.get('DYLD_LIBRARY_PATH', ''), bin_path))
