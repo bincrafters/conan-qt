@@ -66,9 +66,8 @@ class QtConan(ConanFile):
     default_options = ("shared=True", "fPIC=True", "opengl=desktop", "openssl=no") + tuple(module[2:] + "=False" for module in submodules)
     short_paths = True
 
-    def system_requirements(self):
-        pack_names = None
-        if tools.os_info.linux_distro == "ubuntu":
+    def build_requirements(self):
+        if tools.os_info.is_linux:    
             pack_names = ["libfontconfig1-dev", "libxrender-dev",
                           "libxext-dev", "libxfixes-dev", "libxi-dev",
                           "libgl1-mesa-dev", "libxcb1-dev",
@@ -83,7 +82,6 @@ class QtConan(ConanFile):
             if self.settings.arch == "x86":
                 pack_names = [item+":i386" for item in pack_names]
 
-        if pack_names:
             installer = tools.SystemPackageTool()
             installer.update() # Update the package database
             installer.install(" ".join(pack_names)) # Install the package
@@ -94,9 +92,28 @@ class QtConan(ConanFile):
             del self.options.openssl
 
     def requirements(self):
-        if self.settings.os == "Windows":
+        if tools.os_info.is_windows:
             if self.options.openssl == "yes" or self.options.openssl == "linked":
                 self.requires("OpenSSL/1.0.2l@conan/stable")
+        
+        if tools.os_info.is_linux:
+            pack_names = ["libfontconfig1", "libxrender1",
+                          "libxext6", "libxfixes3", "libxi6",
+                          "libgl1-mesa-dri", "libxcb1",
+                          "libx11-xcb1",
+                          "libxcb-keysyms1", "libxcb-image0",
+                          "libxcb-shm0", "libx11-6",
+                          "libxcb-icccm4", "libxcb-sync1",
+                          "libxcb-xfixes0", "libxcb-shape0", "libxcb-render-util0",
+                          "libxcb-randr0", 
+                          "libxcb-glx0"]
+
+            if self.settings.arch == "x86":
+                pack_names = [item+":i386" for item in pack_names]
+
+            installer = tools.SystemPackageTool()
+            installer.update() # Update the package database
+            installer.install(" ".join(pack_names)) # Install the package
 
     def source(self):
         url = "http://download.qt.io/official_releases/qt/{0}/{1}/single/qt-everywhere-src-{1}"\
@@ -104,10 +121,7 @@ class QtConan(ConanFile):
         if tools.os_info.is_windows:
             tools.get("%s.zip" % url)
         else:
-            installer = tools.SystemPackageTool()
-            installer.update() # Update the package database
-            installer.install("pv")
-            self.run("wget -qO- %s.tar.xz | pv | tar -xJ " % url)
+            self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
         shutil.move("qt-everywhere-src-%s" % self.version, "qt5")
 
     def build(self):
