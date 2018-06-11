@@ -65,6 +65,7 @@ class QtConan(ConanFile):
     no_copy_source = True
     default_options = ("shared=True", "fPIC=True", "opengl=desktop", "openssl=no") + tuple(module[2:] + "=False" for module in submodules)
     short_paths = True
+    build_policy = "missing"
 
     def build_requirements(self):
         if tools.os_info.is_linux:    
@@ -95,6 +96,7 @@ class QtConan(ConanFile):
         if tools.os_info.is_windows:
             if self.options.openssl == "yes" or self.options.openssl == "linked":
                 self.requires("OpenSSL/1.0.2l@conan/stable")
+                self.options["OpenSSL"].no_zlib = True
         
         if tools.os_info.is_linux:
             pack_names = ["libfontconfig1", "libxrender1",
@@ -168,7 +170,7 @@ class QtConan(ConanFile):
             elif self.options.openssl == "yes":
                 args += ["-openssl"]
             else:
-                args += ["-openssl-linked"]
+                args += ["-openssl-linked", "OPENSSL_LIBS=\"-lssleay32 -llibeay32 -lGdi32 -lUser32\""]
 
             self.run("%s && set" % vcvars)
             self.run("%s && %s/qt5/configure %s"
