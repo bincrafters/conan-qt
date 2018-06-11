@@ -129,6 +129,11 @@ class QtConan(ConanFile):
                 "-prefix %s" % self.package_folder]
         if not self.options.shared:
             args.insert(0, "-static")
+            if self.settings.os == "Windows":
+                if self.settings.compiler.runtime == "MT":
+                    args.append("-static-runtime")
+        else:
+            args.insert(0, "-shared")
         if self.settings.build_type == "Debug":
             args.append("-debug")
         else:
