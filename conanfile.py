@@ -143,24 +143,28 @@ class QtConan(ConanFile):
             if not getattr(self.options, module[2:]):
                 args.append("-skip " + module)
 
+        # openGL
         if self.options.opengl == "no":
             args += ["-no-opengl"]
         elif self.options.opengl == "es2":
             args += ["-opengl es2"]
         elif self.options.opengl == "desktop":
             args += ["-opengl desktop"]
-
         if self.settings.os == "Windows":
             if self.options.opengl == "dynamic":
                 args += ["-opengl dynamic"]
 
-            if self.options.openssl == "no":
-                args += ["-no-openssl"]
-            elif self.options.openssl == "yes":
-                args += ["-openssl"]
-            else:
-                args += ["-openssl-linked", "OPENSSL_LIBS=\"-lssleay32 -llibeay32 -lGdi32 -lUser32\""]
+        # openSSL
+        if self.options.openssl == "no":
+            args += ["-no-openssl"]
+        elif self.options.openssl == "yes":
+            args += ["-openssl"]
+        else:
+            args += ["-openssl-linked"]
+            if settings.os == "Windows":
+                args += ["OPENSSL_LIBS=\"-lssleay32 -llibeay32 -lGdi32 -lUser32\""]
 
+        if self.settings.os == "windows":
             if self.settings.compiler == "Visual Studio":
                 self._build_msvc(args)
             else:
