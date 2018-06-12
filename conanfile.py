@@ -58,17 +58,17 @@ class QtConan(ConanFile):
     options = dict({
         "shared": [True, False],
         "fPIC": [True, False],
-        "opengl": ["desktop", "dynamic"],
+        "opengl": ["no", "es2", "desktop", "dynamic"],
         "openssl": ["no", "yes", "linked"],
         }, **{module[2:]: [True,False] for module in submodules}
     )
     no_copy_source = True
-    default_options = ("shared=True", "fPIC=True", "opengl=desktop", "openssl=no") + tuple(module[2:] + "=False" for module in submodules)
+    default_options = ("shared=True", "fPIC=True", "opengl=no", "openssl=no") + tuple(module[2:] + "=False" for module in submodules)
     short_paths = True
     build_policy = "missing"
 
     def build_requirements(self):
-        if tools.os_info.is_linux:    
+        if tools.os_info.is_linux:
             pack_names = ["libfontconfig1-dev", "libxrender-dev",
                           "libxext-dev", "libxfixes-dev", "libxi-dev",
                           "libgl1-mesa-dev", "libxcb1-dev",
@@ -77,7 +77,7 @@ class QtConan(ConanFile):
                           "libxcb-shm0-dev", "libx11-dev",
                           "libxcb-icccm4-dev", "libxcb-sync-dev",
                           "libxcb-xfixes0-dev", "libxcb-shape0-dev", "libxcb-render-util0-dev",
-                          "libxcb-randr0-dev", 
+                          "libxcb-randr0-dev",
                           "libxcb-glx0-dev"]
 
             if self.settings.arch == "x86":
@@ -89,15 +89,14 @@ class QtConan(ConanFile):
 
     def config_options(self):
         if self.settings.os != "Windows":
-            del self.options.opengl
-            del self.options.openssl
+            if self.options.opengl == "dynamic":
+                del self.options.opengl
 
     def requirements(self):
-        if tools.os_info.is_windows:
-            if self.options.openssl == "yes" or self.options.openssl == "linked":
-                self.requires("OpenSSL/1.0.2l@conan/stable")
-                self.options["OpenSSL"].no_zlib = True
-        
+        if self.options.openssl == "yes" or self.options.openssl == "linked":
+            self.requires("OpenSSL/1.0.2l@conan/stable")
+            self.options["OpenSSL"].no_zlib = True
+
         if tools.os_info.is_linux:
             pack_names = ["libfontconfig1", "libxrender1",
                           "libxext6", "libxfixes3", "libxi6",
@@ -107,7 +106,7 @@ class QtConan(ConanFile):
                           "libxcb-shm0", "libx11-6",
                           "libxcb-icccm4", "libxcb-sync1",
                           "libxcb-xfixes0", "libxcb-shape0", "libxcb-render-util0",
-                          "libxcb-randr0", 
+                          "libxcb-randr0",
                           "libxcb-glx0"]
 
             if self.settings.arch == "x86":
@@ -144,7 +143,17 @@ class QtConan(ConanFile):
             if not getattr(self.options, module[2:]):
                 args.append("-skip " + module)
 
+        if self.options.opengl == "no":
+            args += ["-no-opengl"]
+        elif self.options.opengl == "es2":
+            args += ["-opengl es2"]
+        elif self.options.opengl == "desktop":
+            args += ["-opengl desktop"]
+
         if self.settings.os == "Windows":
+            if self.options.opengl == "dynamic":
+                args += ["-opengl dynamic"]
+
             if self.options.openssl == "no":
                 args += ["-no-openssl"]
             elif self.options.openssl == "yes":
@@ -171,8 +180,6 @@ class QtConan(ConanFile):
         with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
             vcvars = tools.vcvars_command(self.settings)
 
-            args += ["-opengl %s" % self.options.opengl]
-
             self.run("%s && set" % vcvars)
             self.run("%s && %s/qt5/configure %s"
                      % (vcvars, self.source_folder, " ".join(args)))
@@ -188,8 +195,7 @@ class QtConan(ConanFile):
                 new_path.append(item)
         os.environ['PATH'] = ';'.join(new_path)
         # end workaround
-        args += ["-opengl %s" % self.options.opengl,
-                 "-platform win32-g++"]
+        args += ["-platform win32-g++"]
 
         self.output.info("Using '%d' threads" % tools.cpu_count())
         self.run("%s/qt5/configure.bat %s" % (self.source_folder, " ".join(args)))
@@ -215,4 +221,3 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             self.env_info.path.append(os.path.join(self.package_folder, "bin"))
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
-
