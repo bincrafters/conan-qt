@@ -156,7 +156,7 @@ class QtConan(ConanFile):
             args += ["-openssl"]
         else:
             args += ["-openssl-linked"]
-            if settings.os == "Windows":
+            if self.settings.os == "Windows":
                 args += ["OPENSSL_LIBS=\"-lssleay32 -llibeay32 -lGdi32 -lUser32\""]
 
         if self.settings.os == "Windows":
