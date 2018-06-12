@@ -145,6 +145,13 @@ class QtConan(ConanFile):
                 args.append("-skip " + module)
 
         if self.settings.os == "Windows":
+            if self.options.openssl == "no":
+                args += ["-no-openssl"]
+            elif self.options.openssl == "yes":
+                args += ["-openssl"]
+            else:
+                args += ["-openssl-linked", "OPENSSL_LIBS=\"-lssleay32 -llibeay32 -lGdi32 -lUser32\""]
+
             if self.settings.compiler == "Visual Studio":
                 self._build_msvc(args)
             else:
@@ -165,12 +172,6 @@ class QtConan(ConanFile):
             vcvars = tools.vcvars_command(self.settings)
 
             args += ["-opengl %s" % self.options.opengl]
-            if self.options.openssl == "no":
-                args += ["-no-openssl"]
-            elif self.options.openssl == "yes":
-                args += ["-openssl"]
-            else:
-                args += ["-openssl-linked", "OPENSSL_LIBS=\"-lssleay32 -llibeay32 -lGdi32 -lUser32\""]
 
             self.run("%s && set" % vcvars)
             self.run("%s && %s/qt5/configure %s"
