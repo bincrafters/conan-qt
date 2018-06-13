@@ -88,9 +88,15 @@ class QtConan(ConanFile):
             installer.install(" ".join(pack_names)) # Install the package
 
     def requirements(self):
-        if self.options.openssl == "yes" or self.options.openssl == "linked":
-            self.requires("OpenSSL/1.0.2l@conan/stable")
+        if self.options.openssl == "yes":
+            self.requires("OpenSSL/1.1.0g@conan/stable")
             self.options["OpenSSL"].no_zlib = True
+            self.options["OpenSSL"].shared = True
+        if self.options.openssl == "linked":
+            self.requires("OpenSSL/1.1.0g@conan/stable")
+            self.options["OpenSSL"].no_zlib = True
+            self.options["OpenSSL"].shared = False
+            
 
         if tools.os_info.is_linux:
             pack_names = ["libfontconfig1", "libxrender1",
@@ -156,9 +162,11 @@ class QtConan(ConanFile):
             args += ["-openssl"]
         else:
             args += ["-openssl-linked"]
-            if self.settings.os == "Windows":
-                args += ["OPENSSL_LIBS=\"-lssleay32 -llibeay32 -lGdi32 -lUser32\""]
-
+        if self.options.openssl != "no":
+            args += ["-I%s" % i for i in self.deps_cpp_info["OpenSSL"].include_paths]
+            libs = self.deps_cpp_info["OpenSSL"].libs
+            lib_paths = self.deps_cpp_info["OpenSSL"].lib_paths
+            args += ["OPENSSL_LIBS=\"%s %s\"" % (" ".join(["-L"+i for i in lib_paths]), " ".join(["-l"+i for i in libs]))]
         if self.settings.os == "Windows":
             if self.settings.compiler == "Visual Studio":
                 self._build_msvc(args)
@@ -196,10 +204,11 @@ class QtConan(ConanFile):
         # end workaround
         args += ["-platform win32-g++"]
 
-        self.output.info("Using '%d' threads" % tools.cpu_count())
-        self.run("%s/qt5/configure.bat %s" % (self.source_folder, " ".join(args)))
-        self.run("mingw32-make -j %d" % tools.cpu_count())
-        self.run("mingw32-make install")
+        with tools.environment_append({"MAKEFLAGS":"-j %d" % tools.cpu_count()}):
+            self.output.info("Using '%d' threads" % tools.cpu_count())
+            self.run("%s/qt5/configure.bat %s" % (self.source_folder, " ".join(args)))
+            self.run("mingw32-make")
+            self.run("mingw32-make install")
 
     def _build_unix(self, args):
         if self.settings.os == "Linux":
@@ -211,10 +220,11 @@ class QtConan(ConanFile):
             if self.settings.arch == "x86":
                 args += ["-platform macx-clang-32"]
 
-        self.output.info("Using '%d' threads" % tools.cpu_count())
-        self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
-        self.run("make -j %d" % tools.cpu_count())
-        self.run("make install")
+        with tools.environment_append({"MAKEFLAGS":"-j %d" % tools.cpu_count()}):
+            self.output.info("Using '%d' threads" % tools.cpu_count())
+            self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
+            self.run("make")
+            self.run("make install")
 
     def package_info(self):
         if self.settings.os == "Windows":
