@@ -11,7 +11,7 @@ class QtConan(ConanFile):
     name = "Qt"
     version = "5.11.0"
     description = "Conan.io package for Qt library."
-    url = "https://github.com/lucienboillod/conan-qt"
+    url = "https://github.com/bincrafters/conan-qt"
     license = "http://doc.qt.io/qt-5/lgpl.html"
     exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
