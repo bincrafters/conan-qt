@@ -132,7 +132,7 @@ class QtConan(ConanFile):
         if not self.options.shared:
             args.insert(0, "-static")
             if self.settings.os == "Windows":
-                if self.settings.compiler.runtime == "MT":
+                if self.settings.compiler.runtime == "MT" or self.settings.compiler.runtime == "MTd":
                     args.append("-static-runtime")
         else:
             args.insert(0, "-shared")
