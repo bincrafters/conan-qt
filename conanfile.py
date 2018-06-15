@@ -3,7 +3,6 @@
 
 from conans import ConanFile, tools
 from distutils.spawn import find_executable
-from conans import VisualStudioBuildEnvironment
 import os
 import shutil
 
@@ -37,6 +36,7 @@ class QtConan(ConanFile):
         "qtpurchasing",
         "qtquickcontrols",
         "qtquickcontrols2",
+        "qtremoteobjects",
         "qtscript",
         "qtscxml",
         "qtsensors",
@@ -184,15 +184,15 @@ class QtConan(ConanFile):
             build_args = []
         self.output.info("Using '%s %s' to build" % (build_command, " ".join(build_args)))
 
-        with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-            vcvars = tools.vcvars_command(self.settings)
+        
+        vcvars = tools.vcvars_command(self.settings)
 
-            self.run("%s && set" % vcvars)
-            self.run("%s && %s/qt5/configure %s"
-                     % (vcvars, self.source_folder, " ".join(args)))
-            self.run("%s && %s %s"
-                     % (vcvars, build_command, " ".join(build_args)))
-            self.run("%s && %s install" % (vcvars, build_command))
+        self.run("%s && set" % vcvars)
+        self.run("%s && %s/qt5/configure %s"
+                % (vcvars, self.source_folder, " ".join(args)))
+        self.run("%s && %s %s"
+                % (vcvars, build_command, " ".join(build_args)))
+        self.run("%s && %s install" % (vcvars, build_command))
 
     def _build_mingw(self, args):
         # Workaround for configure using clang first if in the path
