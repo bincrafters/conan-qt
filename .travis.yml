@@ -295,10 +295,3 @@ install:
 script:
 - chmod +x .travis/run.sh
 - "./.travis/run.sh"
-
-deploy:
-  provider: bintray
-  user: lucienboillod
-  key:
-    secure: jyatjkww3cgasBfrQKQoYDPUala4v4mD70FqR8zasuvpVn20Urf0YDWwhqXZSMYVQA03Wu8PZV9vwA9xjBmqRWLyAjMucpVcMaHIHyHQmM3QcG6GdWuZYvbC4CipWj5XTI72VW11KKaLQ+xCAJrGcrHjrrKfCMq3FWRY0YDGUCzfih6MF/mTPgyNgUZ12xrqi682BZd6xM5KfiM+3JuHeNbJ46yqZSjemOhX17eye8mmoHCyVUN1r+HLZTup8pNSp7jAyv3m2rvl/pOU5W6ISVGsMsIIMoirvk58zM+O5ncj2RUybA42Yzp8khCP4Rs3+umSP517/M8mmdEg7UrZ82/THufqg1vL6vM/6CVKg+Xt1y5/DaFpfFbRtPx/lWYdCgUxQ5Hq6hXX4wl2b9j04RCOC63+o7qGMOG43eaiGyRx2HasAo7gpE8HqJ0qPiVSAsxNeQJINUvtyFP9t6pD+j3JLyzs7JEymZNOVdLgdpkGl4D1vVdkxolcnEVmPQNihGxdCkU5ytBuASgMiJX6TOHBwgPEL3su77XEl73g2R/9RPmRMd7j2+EX8pREjeWjRTNqvfixbNSJyjswKwolsx8ImNF67e1zFsW/4torhi+vtQkz8zQqLQMBKEcLeGipNJG4eoLq/dPileXUxNUzBcm5+UlCAkjEkqYG2LB0VWM=
-  skip_cleanup: true
