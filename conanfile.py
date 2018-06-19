@@ -31,7 +31,6 @@ class QtConan(ConanFile):
         "qtmultimedia",
         "qtquickcontrols",
         "qtquickcontrols2",
-        "qtremoteobjects",
         "qtscript",
         "qtsensors",
         "qtserialbus",
