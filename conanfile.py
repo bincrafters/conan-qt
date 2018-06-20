@@ -61,7 +61,7 @@ class QtConan(ConanFile):
                           "libxcb-icccm4-dev", "libxcb-sync-dev",
                           "libxcb-xfixes0-dev", "libxcb-shape0-dev", "libxcb-render-util0-dev",
                           "libxcb-randr0-dev",
-                          "libxcb-glx0-dev"]
+                          "libxcb-glx0-dev", "libxcb-xinerama0-dev"]
 
             if self.settings.arch == "x86":
                 pack_names = [item+":i386" for item in pack_names]
