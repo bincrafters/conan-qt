@@ -5,65 +5,47 @@ from conans import ConanFile, tools
 from distutils.spawn import find_executable
 import os
 import shutil
+import configparser
 
 class QtConan(ConanFile):
+
+    def getsubmodules():
+        config = configparser.ConfigParser()
+        config.read('qtmodules.conf')
+        res = {}
+        assert config.sections()        
+        for s in config.sections():
+            section = str(s)
+            assert section.startswith("submodule ")
+            assert section.count('"') == 2
+            modulename = section[section.find('"') + 1 : section.rfind('"')]            
+            res[modulename] = {"branch":str(config.get(section, "branch")), "status":str(config.get(section, "status"))}
+            if config.has_option(section, "depends"):
+                res[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
+            else:
+                res[modulename]["depends"] = []
+        return res
+    submodules = getsubmodules()
+    
     name = "Qt"
     version = "5.11.0"
     description = "Conan.io package for Qt library."
     url = "https://github.com/bincrafters/conan-qt"
     license = "http://doc.qt.io/qt-5/lgpl.html"
-    exports = ["LICENSE.md"]
+    exports = ["LICENSE.md", "qtmodules.conf"]
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    submodules = [
-        "qt3d",
-        "qtactiveqt",
-        "qtandroidextras",
-        "qtcanvas3d",
-        "qtcharts",
-        "qtconnectivity",
-        "qtdatavis3d",
-        "qtdeclarative",
-        "qtdoc",
-        "qtgamepad",
-        "qtgraphicaleffects",
-        "qtimageformats",
-        "qtlocation",
-        "qtmacextras",
-        "qtmultimedia",
-        "qtnetworkauth",
-        "qtpurchasing",
-        "qtquickcontrols",
-        "qtquickcontrols2",
-        "qtremoteobjects",
-        "qtscript",
-        "qtscxml",
-        "qtsensors",
-        "qtserialbus",
-        "qtserialport",
-        "qtspeech",
-        "qtsvg",
-        "qttools",
-        "qttranslations",
-        "qtvirtualkeyboard",
-        "qtwayland",
-        "qtwebchannel",
-        "qtwebengine",
-        "qtwebsockets",
-        "qtwebview",
-        "qtwinextras",
-        "qtx11extras",
-        "qtxmlpatterns"]
+    
     options = dict({
         "shared": [True, False],
         "fPIC": [True, False],
         "opengl": ["no", "es2", "desktop", "dynamic"],
         "openssl": ["no", "yes", "linked"],
-        }, **{module[2:]: [True,False] for module in submodules}
+        }, **{module: [True,False] for module in submodules}
     )
     no_copy_source = True
-    default_options = ("shared=True", "fPIC=True", "opengl=no", "openssl=no") + tuple(module[2:] + "=False" for module in submodules)
+    default_options = ("shared=True", "fPIC=True", "opengl=no", "openssl=no") + tuple(module + "=False" for module in submodules)
     short_paths = True
     build_policy = "missing"
 
@@ -86,8 +68,8 @@ class QtConan(ConanFile):
             installer = tools.SystemPackageTool()
             installer.update() # Update the package database
             installer.install(" ".join(pack_names)) # Install the package
-
-    def requirements(self):
+        
+    def configure(self):
         if self.options.openssl == "yes":
             self.requires("OpenSSL/1.1.0g@conan/stable")
             self.options["OpenSSL"].no_zlib = True
@@ -96,8 +78,18 @@ class QtConan(ConanFile):
             self.requires("OpenSSL/1.1.0g@conan/stable")
             self.options["OpenSSL"].no_zlib = True
             self.options["OpenSSL"].shared = False
-            
 
+        assert QtConan.version == QtConan.submodules['qtbase']['branch']
+        def enablemodule(self, module):
+            setattr(self.options, module, True)
+            for req in QtConan.submodules[module]["depends"]:
+                enablemodule(self, req)
+        self.options.qtbase = True
+        for module in QtConan.submodules:
+            if getattr(self.options, module):
+                enablemodule(self, module)
+            
+    def requirements(self):
         if tools.os_info.is_linux:
             pack_names = ["libfontconfig1", "libxrender1",
                           "libxext6", "libxfixes3", "libxi6",
@@ -140,8 +132,8 @@ class QtConan(ConanFile):
             args.append("-debug")
         else:
             args.append("-release")
-        for module in self.submodules:
-            if not getattr(self.options, module[2:]):
+        for module in QtConan.submodules:
+            if not getattr(self.options, module):
                 args.append("-skip " + module)
 
         # openGL
