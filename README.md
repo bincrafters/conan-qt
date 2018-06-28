@@ -1,11 +1,18 @@
 Conan package for Qt
 -----------------------------------
 
+This is the master branch from where we are rebasing, please make pull request from here.
+
+The available versions are:
+* 5.6.3
+* 5.9.6
+* 5.11.0
+
 ## Package Status
 
-| Bintray | Windows | Linux & macOS |
-|:--------:|:---------:|:-----------------:|
-|[ ![Download](https://api.bintray.com/packages/luciano/conan-qt/Qt%3Alucienboillod/images/download.svg) ](https://bintray.com/luciano/conan-qt/Qt%3Alucienboillod/_latestVersion)|[![Build status](https://ci.appveyor.com/api/projects/status/ut5dry62vi15aqn9?svg=true)](https://ci.appveyor.com/project/lucienboillod/conan-qt)|[![Build status](https://travis-ci.org/lucienboillod/conan-qt.svg?branch=master)](https://travis-ci.org/lucienboillod/conan-qt)|
+| Windows | Linux & macOS |
+|:---------:|:-----------------:|
+|[![Build status](https://ci.appveyor.com/api/projects/status/5ahde54to6veh3fp/branch/master?svg=true)](https://ci.appveyor.com/project/lucienboillod/conan-qt-7dc4w/branch/master)|[![Build Status](https://travis-ci.org/bincrafters/conan-qt.svg?branch=master)](https://travis-ci.org/bincrafters/conan-qt)|
 
 ## Conan.io Information
 

@@ -13,12 +13,12 @@ class QtConan(ConanFile):
         config = configparser.ConfigParser()
         config.read('qtmodules.conf')
         res = {}
-        assert config.sections()        
+        assert config.sections()
         for s in config.sections():
             section = str(s)
             assert section.startswith("submodule ")
             assert section.count('"') == 2
-            modulename = section[section.find('"') + 1 : section.rfind('"')]            
+            modulename = section[section.find('"') + 1 : section.rfind('"')]
             res[modulename] = {"branch":str(config.get(section, "branch")), "status":str(config.get(section, "status"))}
             if config.has_option(section, "depends"):
                 res[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
@@ -26,17 +26,18 @@ class QtConan(ConanFile):
                 res[modulename]["depends"] = []
         return res
     submodules = getsubmodules()
-    
+
     name = "Qt"
     version = "5.11.0"
     description = "Conan.io package for Qt library."
     url = "https://github.com/bincrafters/conan-qt"
+    homepage = "https://www.qt.io/"
     license = "http://doc.qt.io/qt-5/lgpl.html"
+    author = "Bincrafters <bincrafters@gmail.com>"
     exports = ["LICENSE.md", "qtmodules.conf"]
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    
+
     options = dict({
         "shared": [True, False],
         "fPIC": [True, False],
@@ -68,7 +69,7 @@ class QtConan(ConanFile):
             installer = tools.SystemPackageTool()
             installer.update() # Update the package database
             installer.install(" ".join(pack_names)) # Install the package
-        
+
     def configure(self):
         if self.options.openssl == "yes":
             self.requires("OpenSSL/1.1.0g@conan/stable")
@@ -88,7 +89,7 @@ class QtConan(ConanFile):
         for module in QtConan.submodules:
             if getattr(self.options, module):
                 enablemodule(self, module)
-            
+
     def requirements(self):
         if tools.os_info.is_linux:
             pack_names = ["libfontconfig1", "libxrender1",
@@ -176,7 +177,7 @@ class QtConan(ConanFile):
             build_args = []
         self.output.info("Using '%s %s' to build" % (build_command, " ".join(build_args)))
 
-        
+
         vcvars = tools.vcvars_command(self.settings)
 
         self.run("%s && set" % vcvars)
