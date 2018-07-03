@@ -19,11 +19,13 @@ class QtConan(ConanFile):
             assert section.startswith("submodule ")
             assert section.count('"') == 2
             modulename = section[section.find('"') + 1 : section.rfind('"')]
-            res[modulename] = {"branch":str(config.get(section, "branch")), "status":str(config.get(section, "status"))}
-            if config.has_option(section, "depends"):
-                res[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
-            else:
-                res[modulename]["depends"] = []
+            status = str(config.get(section, "status"))
+            if status != "obsolete" and status != "ignore":
+                res[modulename] = {"branch":str(config.get(section, "branch")), "status":status, "path":str(config.get(section, "path"))}
+                if config.has_option(section, "depends"):
+                    res[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
+                else:
+                    res[modulename]["depends"] = []
         return res
     submodules = getsubmodules()
 
@@ -134,7 +136,7 @@ class QtConan(ConanFile):
         else:
             args.append("-release")
         for module in QtConan.submodules:
-            if not getattr(self.options, module):
+            if not getattr(self.options, module) and os.path.isdir(os.path.join(self.source_folder, 'qt5', QtConan.submodules[module]['path'])):
                 args.append("-skip " + module)
 
         # openGL
@@ -156,7 +158,7 @@ class QtConan(ConanFile):
         else:
             args += ["-openssl-linked"]
         if self.options.openssl != "no":
-            args += ["-I%s" % i for i in self.deps_cpp_info["OpenSSL"].include_paths]
+            args += ["-I %s" % i for i in self.deps_cpp_info["OpenSSL"].include_paths]
             libs = self.deps_cpp_info["OpenSSL"].libs
             lib_paths = self.deps_cpp_info["OpenSSL"].lib_paths
             args += ["OPENSSL_LIBS=\"%s %s\"" % (" ".join(["-L"+i for i in lib_paths]), " ".join(["-l"+i for i in libs]))]
@@ -167,6 +169,9 @@ class QtConan(ConanFile):
                 self._build_mingw(args)
         else:
             self._build_unix(args)
+            
+        with open('qtbase/bin/qt.conf', 'w') as f: 
+            f.write('[Paths]\nPrefix = ..')
 
     def _build_msvc(self, args):
         build_command = find_executable("jom.exe")
@@ -218,6 +223,9 @@ class QtConan(ConanFile):
             self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
             self.run("make")
             self.run("make install")
+
+    def package(self):
+        self.copy("bin/qt.conf", src="qtbase")
 
     def package_info(self):
         if self.settings.os == "Windows":
