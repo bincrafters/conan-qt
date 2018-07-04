@@ -27,6 +27,7 @@ class QtConan(ConanFile):
                 else:
                     res[modulename]["depends"] = []
         return res
+
     submodules = getsubmodules()
 
     name = "Qt"
@@ -45,15 +46,18 @@ class QtConan(ConanFile):
         "fPIC": [True, False],
         "opengl": ["no", "es2", "desktop", "dynamic"],
         "openssl": ["no", "yes", "linked"],
+        "requirements": [True, False],
+        "config": "ANY"
         }, **{module: [True,False] for module in submodules}
     )
     no_copy_source = True
-    default_options = ("shared=True", "fPIC=True", "opengl=no", "openssl=no") + tuple(module + "=False" for module in submodules)
+    default_options = ("shared=False", "fPIC=True", "opengl=no", "openssl=no", "requirements=True", \
+        "config=\"\"") + tuple(module + "=False" for module in submodules)
     short_paths = True
     build_policy = "missing"
 
     def build_requirements(self):
-        if tools.os_info.is_linux:
+        if tools.os_info.is_linux and self.options.requirements:
             pack_names = ["libfontconfig1-dev", "libxrender-dev",
                           "libxext-dev", "libxfixes-dev", "libxi-dev",
                           "libgl1-mesa-dev", "libxcb1-dev",
@@ -93,7 +97,7 @@ class QtConan(ConanFile):
                 enablemodule(self, module)
 
     def requirements(self):
-        if tools.os_info.is_linux:
+        if tools.os_info.is_linux and self.options.requirements:
             pack_names = ["libfontconfig1", "libxrender1",
                           "libxext6", "libxfixes3", "libxi6",
                           "libgl1-mesa-dri", "libxcb1",
@@ -162,6 +166,9 @@ class QtConan(ConanFile):
             libs = self.deps_cpp_info["OpenSSL"].libs
             lib_paths = self.deps_cpp_info["OpenSSL"].lib_paths
             args += ["OPENSSL_LIBS=\"%s %s\"" % (" ".join(["-L"+i for i in lib_paths]), " ".join(["-l"+i for i in libs]))]
+
+        args += [str(self.options.config)]
+
         if self.settings.os == "Windows":
             if self.settings.compiler == "Visual Studio":
                 self._build_msvc(args)
@@ -181,7 +188,6 @@ class QtConan(ConanFile):
             build_command = "nmake.exe"
             build_args = []
         self.output.info("Using '%s %s' to build" % (build_command, " ".join(build_args)))
-
 
         vcvars = tools.vcvars_command(self.settings)
 
@@ -210,9 +216,17 @@ class QtConan(ConanFile):
 
     def _build_unix(self, args):
         if self.settings.os == "Linux":
-            args += ["-silent", "-xcb"]
-            if self.settings.arch == "x86":
-                args += ["-platform linux-g++-32"]
+            args += ["-silent"]
+            if self.settings.arch == "x86_64":
+                args += ["-xcb"]
+            elif self.settings.arch == "x86":
+                args += ["-platform linux-g++-32", "-xcb"]
+            elif self.settings.arch == "armv6":
+                args += ["-platform linux-g++", "-xplatform linux-arm-gnueabi-g++"]
+            elif self.settings.arch == "armv7":
+                args += ["-platform linux-g++", "-xplatform linux-arm-gnueabi-g++"]
+                tools.replace_in_file("%s/qt5/qtbase/mkspecs/linux-arm-gnueabi-g++/qmake.conf" \
+                    % self.source_folder, "arm-linux-gnueabi-", "arm-linux-gnueabihf-", False)
         else:
             args += ["-silent", "-no-framework"]
             if self.settings.arch == "x86":
