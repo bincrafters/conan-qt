@@ -45,32 +45,41 @@ class QtConan(ConanFile):
         "fPIC": [True, False],
         "opengl": ["no", "es2", "desktop", "dynamic"],
         "openssl": ["no", "yes", "linked"],
+        "GUI": [True, False],
+        "widgets": [True, False],
+        "config": "ANY",
         }, **{module: [True,False] for module in submodules}
     )
     no_copy_source = True
-    default_options = ("shared=True", "fPIC=True", "opengl=no", "openssl=no") + tuple(module + "=False" for module in submodules)
+    default_options = ("shared=True", "fPIC=True", "opengl=no", "openssl=no", "GUI=True", "widgets=True", "config=") + tuple(module + "=False" for module in submodules)
     short_paths = True
     build_policy = "missing"
 
     def build_requirements(self):
-        if tools.os_info.is_linux:
-            pack_names = ["libfontconfig1-dev", "libxrender-dev",
-                          "libxext-dev", "libxfixes-dev", "libxi-dev",
-                          "libgl1-mesa-dev", "libxcb1-dev",
-                          "libx11-xcb-dev",
-                          "libxcb-keysyms1-dev", "libxcb-image0-dev",
-                          "libxcb-shm0-dev", "libx11-dev",
-                          "libxcb-icccm4-dev", "libxcb-sync-dev",
-                          "libxcb-xfixes0-dev", "libxcb-shape0-dev", "libxcb-render-util0-dev",
-                          "libxcb-randr0-dev",
-                          "libxcb-glx0-dev"]
+        if self.options.GUI:
+            pack_names = []
+            if tools.os_info.linux_distro == "ubuntu":
+                pack_names = ["libfontconfig1-dev", "libxrender-dev",
+                              "libxext-dev", "libxfixes-dev", "libxi-dev",
+                              "libgl1-mesa-dev", "libxcb1-dev",
+                              "libx11-xcb-dev",
+                              "libxcb-keysyms1-dev", "libxcb-image0-dev",
+                              "libxcb-shm0-dev", "libx11-dev",
+                              "libxcb-icccm4-dev", "libxcb-sync-dev",
+                              "libxcb-xfixes0-dev", "libxcb-shape0-dev", "libxcb-render-util0-dev",
+                              "libxcb-randr0-dev",
+                              "libxcb-glx0-dev"]
+            elif tools.os_info.linux_distro == "fedora":
+                pack_names = ["libxcb-devel", "libXrender-devel", "xcb-util-wm-devel",
+                              "xcb-util-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel"]
 
             if self.settings.arch == "x86":
                 pack_names = [item+":i386" for item in pack_names]
 
-            installer = tools.SystemPackageTool()
-            installer.update() # Update the package database
-            installer.install(" ".join(pack_names)) # Install the package
+            if pack_names:
+                installer = tools.SystemPackageTool()
+                installer.update() # Update the package database
+                installer.install(" ".join(pack_names)) # Install the package
 
     def configure(self):
         if self.options.openssl == "yes":
@@ -81,6 +90,10 @@ class QtConan(ConanFile):
             self.requires("OpenSSL/1.1.0g@conan/stable")
             self.options["OpenSSL"].no_zlib = True
             self.options["OpenSSL"].shared = False
+        if self.options.widgets == True:
+            self.options.GUI = True
+        if not self.options.GUI:
+            self.options.opengl = "no"
 
         assert QtConan.version == QtConan.submodules['qtbase']['branch']
         def enablemodule(self, module):
@@ -93,24 +106,30 @@ class QtConan(ConanFile):
                 enablemodule(self, module)
 
     def requirements(self):
-        if tools.os_info.is_linux:
-            pack_names = ["libfontconfig1", "libxrender1",
-                          "libxext6", "libxfixes3", "libxi6",
-                          "libgl1-mesa-dri", "libxcb1",
-                          "libx11-xcb1",
-                          "libxcb-keysyms1", "libxcb-image0",
-                          "libxcb-shm0", "libx11-6",
-                          "libxcb-icccm4", "libxcb-sync1",
-                          "libxcb-xfixes0", "libxcb-shape0", "libxcb-render-util0",
-                          "libxcb-randr0",
-                          "libxcb-glx0"]
+        if self.options.GUI:
+            pack_names = []
+            if tools.os_info.linux_distro == "ubuntu":
+                pack_names = ["libfontconfig1", "libxrender1",
+                              "libxext6", "libxfixes3", "libxi6",
+                              "libgl1-mesa-dri", "libxcb1",
+                              "libx11-xcb1",
+                              "libxcb-keysyms1", "libxcb-image0",
+                              "libxcb-shm0", "libx11-6",
+                              "libxcb-icccm4", "libxcb-sync1",
+                              "libxcb-xfixes0", "libxcb-shape0", "libxcb-render-util0",
+                              "libxcb-randr0",
+                              "libxcb-glx0"]
+            elif tools.os_info.linux_distro == "fedora":
+                pack_names = ["libxcb", "libXrender", "xcb-util-wm", "xcb-util",
+                              "xcb-util-image", "xcb-util-keysyms"]
 
             if self.settings.arch == "x86":
                 pack_names = [item+":i386" for item in pack_names]
 
-            installer = tools.SystemPackageTool()
-            installer.update() # Update the package database
-            installer.install(" ".join(pack_names)) # Install the package
+            if pack_names:
+                installer = tools.SystemPackageTool()
+                installer.update() # Update the package database
+                installer.install(" ".join(pack_names)) # Install the package
 
     def source(self):
         url = "http://download.qt.io/official_releases/qt/{0}/{1}/single/qt-everywhere-opensource-src-{1}"\
@@ -122,8 +141,12 @@ class QtConan(ConanFile):
         shutil.move("qt-everywhere-opensource-src-%s" % self.version, "qt5")
 
     def build(self):
-        args = ["-opensource", "-confirm-license", "-nomake examples", "-nomake tests",
+        args = ["-opensource", "-confirm-license", "-silent", "-nomake examples", "-nomake tests",
                 "-prefix %s" % self.package_folder]
+        if not self.options.GUI:
+            args.append("-no-gui")
+        if not self.options.widgets:
+            args.append("-no-widgets")
         if not self.options.shared:
             args.insert(0, "-static")
             if self.settings.os == "Windows":
@@ -162,6 +185,11 @@ class QtConan(ConanFile):
             libs = self.deps_cpp_info["OpenSSL"].libs
             lib_paths = self.deps_cpp_info["OpenSSL"].lib_paths
             args += ["OPENSSL_LIBS=\"%s %s\"" % (" ".join(["-L"+i for i in lib_paths]), " ".join(["-l"+i for i in libs]))]
+        
+        config = str(self.options.config)
+        if(config):
+            args.append(config)
+            
         if self.settings.os == "Windows":
             if self.settings.compiler == "Visual Studio":
                 self._build_msvc(args)
@@ -200,7 +228,7 @@ class QtConan(ConanFile):
                 new_path.append(item)
         os.environ['PATH'] = ';'.join(new_path)
         # end workaround
-        args += ["-platform win32-g++"]
+        args += ["-xplatform win32-g++"]
 
         with tools.environment_append({"MAKEFLAGS":"-j %d" % tools.cpu_count()}):
             self.output.info("Using '%d' threads" % tools.cpu_count())
@@ -210,13 +238,18 @@ class QtConan(ConanFile):
 
     def _build_unix(self, args):
         if self.settings.os == "Linux":
-            args += ["-silent", "-xcb"]
+            if self.options.GUI:
+                args.append("-xcb")
             if self.settings.arch == "x86":
-                args += ["-platform linux-g++-32"]
+                args += ["-xplatform linux-g++-32"]
+            elif self.settings.arch == "armv6":
+                args += ["-xplatform linux-arm-gnueabi-g++"]
+            elif self.settings.arch == "armv7":
+                args += ["-xplatform linux-arm-gnueabi-g++"]
         else:
-            args += ["-silent", "-no-framework"]
+            args += ["-no-framework"]
             if self.settings.arch == "x86":
-                args += ["-platform macx-clang-32"]
+                args += ["-xplatform macx-clang-32"]
 
         with tools.environment_append({"MAKEFLAGS":"-j %d" % tools.cpu_count()}):
             self.output.info("Using '%d' threads" % tools.cpu_count())
