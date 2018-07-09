@@ -58,20 +58,10 @@ class QtConan(ConanFile):
     def build_requirements(self):
         if self.options.GUI:
             pack_names = []
-            if tools.os_info.linux_distro == "ubuntu":
-                pack_names = ["libfontconfig1-dev", "libxrender-dev",
-                              "libxext-dev", "libxfixes-dev", "libxi-dev",
-                              "libgl1-mesa-dev", "libxcb1-dev",
-                              "libx11-xcb-dev",
-                              "libxcb-keysyms1-dev", "libxcb-image0-dev",
-                              "libxcb-shm0-dev", "libx11-dev",
-                              "libxcb-icccm4-dev", "libxcb-sync-dev",
-                              "libxcb-xfixes0-dev", "libxcb-shape0-dev", "libxcb-render-util0-dev",
-                              "libxcb-randr0-dev",
-                              "libxcb-glx0-dev"]
-            elif tools.os_info.linux_distro == "fedora":
-                pack_names = ["libxcb-devel", "libXrender-devel", "xcb-util-wm-devel",
-                              "xcb-util-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel"]
+            if tools.os_info.linux_distro == "ubuntu" or tools.os_info.linux_distro == "debian": 
+                pack_names = ["libxcb1-dev", "libx11-dev", "libc6-dev"]
+            elif tools.os_info.is_linux:
+                pack_names = ["libxcb-devel", "libX11-devel", "glibc-devel"]
 
             if self.settings.arch == "x86":
                 pack_names = [item+":i386" for item in pack_names]
@@ -108,20 +98,10 @@ class QtConan(ConanFile):
     def requirements(self):
         if self.options.GUI:
             pack_names = []
-            if tools.os_info.linux_distro == "ubuntu":
-                pack_names = ["libfontconfig1", "libxrender1",
-                              "libxext6", "libxfixes3", "libxi6",
-                              "libgl1-mesa-dri", "libxcb1",
-                              "libx11-xcb1",
-                              "libxcb-keysyms1", "libxcb-image0",
-                              "libxcb-shm0", "libx11-6",
-                              "libxcb-icccm4", "libxcb-sync1",
-                              "libxcb-xfixes0", "libxcb-shape0", "libxcb-render-util0",
-                              "libxcb-randr0",
-                              "libxcb-glx0"]
-            elif tools.os_info.linux_distro == "fedora":
-                pack_names = ["libxcb", "libXrender", "xcb-util-wm", "xcb-util",
-                              "xcb-util-image", "xcb-util-keysyms"]
+            if tools.os_info.linux_distro == "ubuntu" or tools.os_info.linux_distro == "debian": 
+                pack_names = ["libxcb1", "libx11-6"]
+            elif tools.os_info.is_linux and tools.os_info.linux_distro != "opensuse":
+                pack_names = ["libxcb"]
 
             if self.settings.arch == "x86":
                 pack_names = [item+":i386" for item in pack_names]
@@ -242,7 +222,7 @@ class QtConan(ConanFile):
         if self.settings.os == "Linux":
             args += ["-silent"]
             if self.options.GUI:
-                args.append("-xcb")
+                args.append("-qt-xcb")
             if self.settings.arch == "x86":
                 args += ["-xplatform linux-g++-32"]
             elif self.settings.arch == "armv6":
