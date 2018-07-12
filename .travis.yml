@@ -169,6 +169,42 @@ matrix:
     python: '3.6'
     services: *1
     env: CONAN_GCC_VERSIONS=7 CONAN_DOCKER_IMAGE=lasote/conangcc7 CONAN_CURRENT_PAGE=6
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_GCC_VERSIONS=8 CONAN_DOCKER_IMAGE=lasote/conangcc8 CONAN_CURRENT_PAGE=1
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_GCC_VERSIONS=8 CONAN_DOCKER_IMAGE=lasote/conangcc8 CONAN_CURRENT_PAGE=2
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_GCC_VERSIONS=8 CONAN_DOCKER_IMAGE=lasote/conangcc8 CONAN_CURRENT_PAGE=3
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_GCC_VERSIONS=8 CONAN_DOCKER_IMAGE=lasote/conangcc8 CONAN_CURRENT_PAGE=4
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_GCC_VERSIONS=8 CONAN_DOCKER_IMAGE=lasote/conangcc8 CONAN_CURRENT_PAGE=5
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_GCC_VERSIONS=8 CONAN_DOCKER_IMAGE=lasote/conangcc8 CONAN_CURRENT_PAGE=6
   - os: osx
     language: generic
     osx_image: xcode7.3
