@@ -51,7 +51,7 @@ class QtConan(ConanFile):
         }, **{module: [True,False] for module in submodules}
     )
     no_copy_source = True
-    default_options = ("shared=True", "fPIC=True", "opengl=no", "openssl=no", "GUI=True", "widgets=True", "config=\"\"") + tuple(module + "=False" for module in submodules)
+    default_options = ("shared=True", "fPIC=True", "opengl=no", "openssl=no", "GUI=True", "widgets=True", "config=None") + tuple(module + "=False" for module in submodules)
     short_paths = True
     build_policy = "missing"
 
@@ -166,9 +166,8 @@ class QtConan(ConanFile):
             lib_paths = self.deps_cpp_info["OpenSSL"].lib_paths
             args += ["OPENSSL_LIBS=\"%s %s\"" % (" ".join(["-L"+i for i in lib_paths]), " ".join(["-l"+i for i in libs]))]
         
-        config = str(self.options.config)
-        if(config):
-            args.append(config)
+        if self.options.config:
+            args.append(str(self.options.config))
             
         if self.settings.os == "Windows":
             if self.settings.compiler == "Visual Studio":
