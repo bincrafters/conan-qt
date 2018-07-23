@@ -60,7 +60,7 @@ class QtConan(ConanFile):
             pack_names = []
             if tools.os_info.linux_distro == "ubuntu" or tools.os_info.linux_distro == "debian": 
                 pack_names = ["libxcb1-dev", "libx11-dev", "libc6-dev"]
-            elif tools.os_info.is_linux:
+            elif tools.os_info.is_linux and tools.os_info.linux_distro != "arch":
                 pack_names = ["libxcb-devel", "libX11-devel", "glibc-devel"]
 
             if self.settings.arch == "x86":
