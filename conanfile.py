@@ -51,7 +51,7 @@ class QtConan(ConanFile):
         }, **{module: [True,False] for module in submodules}
     )
     no_copy_source = True
-    default_options = ("shared=True", "fPIC=True", "opengl=no", "openssl=False", "GUI=True", "widgets=True", "config=None") + tuple(module + "=False" for module in submodules)
+    default_options = ("shared=True", "fPIC=True", "opengl=desktop", "openssl=False", "GUI=True", "widgets=True", "config=None") + tuple(module + "=False" for module in submodules)
     short_paths = True
     build_policy = "missing"
 
@@ -60,8 +60,12 @@ class QtConan(ConanFile):
             pack_names = []
             if tools.os_info.linux_distro == "ubuntu" or tools.os_info.linux_distro == "debian": 
                 pack_names = ["libxcb1-dev", "libx11-dev", "libc6-dev"]
+                if self.options.opengl == "desktop":
+                    pack_names.append("libgl1-mesa-dev")
             elif tools.os_info.is_linux and tools.os_info.linux_distro != "arch":
                 pack_names = ["libxcb-devel", "libX11-devel", "glibc-devel"]
+                if self.options.opengl == "desktop":
+                    pack_names.append("mesa-libGL-devel")
 
             if self.settings.arch == "x86":
                 pack_names = [item+":i386" for item in pack_names]
