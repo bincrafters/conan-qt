@@ -68,7 +68,6 @@ class QtConan(ConanFile):
 
             if pack_names:
                 installer = tools.SystemPackageTool()
-                installer.update() # Update the package database
                 installer.install(" ".join(pack_names)) # Install the package
 
     def configure(self):
@@ -95,7 +94,7 @@ class QtConan(ConanFile):
             if getattr(self.options, module):
                 enablemodule(self, module)
 
-    def requirements(self):
+    def system_requirements(self):
         if self.options.GUI:
             pack_names = []
             if tools.os_info.linux_distro == "ubuntu" or tools.os_info.linux_distro == "debian": 
@@ -108,7 +107,6 @@ class QtConan(ConanFile):
 
             if pack_names:
                 installer = tools.SystemPackageTool()
-                installer.update() # Update the package database
                 installer.install(" ".join(pack_names)) # Install the package
 
     def source(self):
