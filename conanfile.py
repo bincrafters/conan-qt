@@ -44,14 +44,14 @@ class QtConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "opengl": ["no", "es2", "desktop", "dynamic"],
-        "openssl": ["no", "yes", "linked"],
+        "openssl": [True, False],
         "GUI": [True, False],
         "widgets": [True, False],
         "config": "ANY",
         }, **{module: [True,False] for module in submodules}
     )
     no_copy_source = True
-    default_options = ("shared=True", "fPIC=True", "opengl=no", "openssl=no", "GUI=True", "widgets=True", "config=\"\"") + tuple(module + "=False" for module in submodules)
+    default_options = ("shared=True", "fPIC=True", "opengl=desktop", "openssl=False", "GUI=True", "widgets=True", "config=\"\"") + tuple(module + "=False" for module in submodules)
     short_paths = True
     build_policy = "missing"
 
@@ -60,8 +60,12 @@ class QtConan(ConanFile):
             pack_names = []
             if tools.os_info.linux_distro == "ubuntu" or tools.os_info.linux_distro == "debian": 
                 pack_names = ["libxcb1-dev", "libx11-dev", "libc6-dev"]
+                if self.options.opengl == "desktop":
+                    pack_names.append("libgl1-mesa-dev")
             elif tools.os_info.is_linux:
                 pack_names = ["libxcb-devel", "libX11-devel", "glibc-devel"]
+                if self.options.opengl == "desktop":
+                    pack_names.append("mesa-libGL-devel")
 
             if self.settings.arch == "x86":
                 pack_names = [item+":i386" for item in pack_names]
@@ -72,14 +76,9 @@ class QtConan(ConanFile):
                 installer.install(" ".join(pack_names)) # Install the package
 
     def configure(self):
-        if self.options.openssl == "yes":
+        if self.options.openssl:
             self.requires("OpenSSL/1.1.0g@conan/stable")
             self.options["OpenSSL"].no_zlib = True
-            self.options["OpenSSL"].shared = True
-        if self.options.openssl == "linked":
-            self.requires("OpenSSL/1.1.0g@conan/stable")
-            self.options["OpenSSL"].no_zlib = True
-            self.options["OpenSSL"].shared = False
         if self.options.widgets == True:
             self.options.GUI = True
         if not self.options.GUI:
@@ -154,13 +153,13 @@ class QtConan(ConanFile):
                 args += ["-opengl dynamic"]
 
         # openSSL
-        if self.options.openssl == "no":
+        if not self.options.openssl:
             args += ["-no-openssl"]
-        elif self.options.openssl == "yes":
-            args += ["-openssl"]
         else:
-            args += ["-openssl-linked"]
-        if self.options.openssl != "no":
+            if self.options["OpenSSL"].shared:
+                args += ["-openssl-linked"]
+            else:
+                args += ["-openssl"]
             args += ["-I %s" % i for i in self.deps_cpp_info["OpenSSL"].include_paths]
             libs = self.deps_cpp_info["OpenSSL"].libs
             lib_paths = self.deps_cpp_info["OpenSSL"].lib_paths
