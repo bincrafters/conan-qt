@@ -162,7 +162,7 @@ class QtConan(ConanFile):
             args += ["-I %s" % i for i in self.deps_cpp_info["OpenSSL"].include_paths]
             libs = self.deps_cpp_info["OpenSSL"].libs
             lib_paths = self.deps_cpp_info["OpenSSL"].lib_paths
-            args += ["OPENSSL_LIBS=\"%s %s\"" % (" ".join(["-L"+i for i in lib_paths]), " ".join(["-l"+i for i in libs]))]
+            os.environ["OPENSSL_LIBS"] = " ".join(["-L"+i for i in lib_paths] + ["-l"+i for i in libs])
         
         if self.options.config:
             args.append(str(self.options.config))
