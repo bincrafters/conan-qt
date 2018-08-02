@@ -15,18 +15,25 @@ class TestPackageConan(ConanFile):
         tools.mkdir("qmake_folder")
         with tools.chdir("qmake_folder"):
             self.output.info("Building with qmake")
-            with tools.environment_append(RunEnvironment(self).vars):
-                self.run("qmake %s" % self.source_folder)
-            if self.settings.os == "Windows":
-                if self.settings.compiler == "Visual Studio":
-                    make = find_executable("jom.exe")
-                    if not make:
-                        make = "nmake.exe"                
-                    self.run("%s && %s" % (tools.vcvars_command(self.settings), make))
+            def qmakeBuild(self):
+                with tools.environment_append(RunEnvironment(self).vars):
+                    self.run("qmake %s" % self.source_folder)
+                if self.settings.os == "Windows":
+                    if self.settings.compiler == "Visual Studio":
+                        make = find_executable("jom.exe")
+                        if not make:
+                            make = "nmake.exe"
+                    else:
+                        make = "mingw32-make"
                 else:
-                    self.run("mingw32-make")
+                    make = "make"
+                self.run(make)
+
+            if self.settings.compiler == "Visual Studio":
+                with tools.vcvars(self.settings):
+                    qmakeBuild(self)
             else:
-                self.run("make")
+                qmakeBuild(self)
                 
         if not self.options["Qt"].shared:
             self.output.info("disabled cmake test with static Qt, because of https://bugreports.qt.io/browse/QTBUG-38913")

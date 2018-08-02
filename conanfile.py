@@ -188,14 +188,10 @@ class QtConan(ConanFile):
         self.output.info("Using '%s %s' to build" % (build_command, " ".join(build_args)))
 
 
-        vcvars = tools.vcvars_command(self.settings)
-
-        self.run("%s && set" % vcvars)
-        self.run("%s && %s/qt5/configure %s"
-                % (vcvars, self.source_folder, " ".join(args)))
-        self.run("%s && %s %s"
-                % (vcvars, build_command, " ".join(build_args)))
-        self.run("%s && %s install" % (vcvars, build_command))
+        with tools.vcvars(self.settings):
+            self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
+            self.run("%s %s" % (build_command, " ".join(build_args)))
+            self.run("%s install" % build_command)
 
     def _build_mingw(self, args):
         # Workaround for configure using clang first if in the path
