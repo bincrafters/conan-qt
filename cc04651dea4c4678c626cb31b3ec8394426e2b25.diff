@@ -1,0 +1,154 @@
+From cc04651dea4c4678c626cb31b3ec8394426e2b25 Mon Sep 17 00:00:00 2001
+From: Eric Lemanissier <eric.lemanissier@gmail.com>
+Date: Tue, 28 Aug 2018 09:59:42 +0200
+Subject: [PATCH] add mkspecs for linux clang 32
+
+Change-Id: Ia0ca4d84070565f1f4f19415931ca4ee0d7cf138
+---
+ mkspecs/linux-clang-32/qmake.conf             | 20 ++++++++++
+ mkspecs/linux-clang-32/qplatformdefs.h        | 40 +++++++++++++++++++
+ mkspecs/linux-clang-libc++-32/qmake.conf      | 10 +++++
+ mkspecs/linux-clang-libc++-32/qplatformdefs.h | 40 +++++++++++++++++++
+ 4 files changed, 110 insertions(+)
+ create mode 100644 mkspecs/linux-clang-32/qmake.conf
+ create mode 100644 mkspecs/linux-clang-32/qplatformdefs.h
+ create mode 100644 mkspecs/linux-clang-libc++-32/qmake.conf
+ create mode 100644 mkspecs/linux-clang-libc++-32/qplatformdefs.h
+
+diff --git a/mkspecs/linux-clang-32/qmake.conf b/mkspecs/linux-clang-32/qmake.conf
+new file mode 100644
+index 0000000000..de872e7431
+--- /dev/null
++++ b/mkspecs/linux-clang-32/qmake.conf
+@@ -0,0 +1,20 @@
++#
++# qmake configuration for linux-clang
++#
++
++MAKEFILE_GENERATOR = UNIX
++CONFIG += incremental
++
++QMAKE_INCREMENTAL_STYLE = sublib
++
++include(../common/linux.conf)
++
++QMAKE_CFLAGS            = -m32
++QMAKE_LFLAGS            = -m32
++
++include(../common/gcc-base-unix.conf)
++include(../common/clang.conf)
++
++QMAKE_LFLAGS += -ccc-gcc-name g++
++
++load(qt_config)
+diff --git a/mkspecs/linux-clang-32/qplatformdefs.h b/mkspecs/linux-clang-32/qplatformdefs.h
+new file mode 100644
+index 0000000000..8f5ce17858
+--- /dev/null
++++ b/mkspecs/linux-clang-32/qplatformdefs.h
+@@ -0,0 +1,40 @@
++/****************************************************************************
++**
++** Copyright (C) 2016 The Qt Company Ltd.
++** Contact: https://www.qt.io/licensing/
++**
++** This file is part of the qmake spec of the Qt Toolkit.
++**
++** $QT_BEGIN_LICENSE:LGPL$
++** Commercial License Usage
++** Licensees holding valid commercial Qt licenses may use this file in
++** accordance with the commercial license agreement provided with the
++** Software or, alternatively, in accordance with the terms contained in
++** a written agreement between you and The Qt Company. For licensing terms
++** and conditions see https://www.qt.io/terms-conditions. For further
++** information use the contact form at https://www.qt.io/contact-us.
++**
++** GNU Lesser General Public License Usage
++** Alternatively, this file may be used under the terms of the GNU Lesser
++** General Public License version 3 as published by the Free Software
++** Foundation and appearing in the file LICENSE.LGPL3 included in the
++** packaging of this file. Please review the following information to
++** ensure the GNU Lesser General Public License version 3 requirements
++** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
++**
++** GNU General Public License Usage
++** Alternatively, this file may be used under the terms of the GNU
++** General Public License version 2.0 or (at your option) the GNU General
++** Public license version 3 or any later version approved by the KDE Free
++** Qt Foundation. The licenses are as published by the Free Software
++** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
++** included in the packaging of this file. Please review the following
++** information to ensure the GNU General Public License requirements will
++** be met: https://www.gnu.org/licenses/gpl-2.0.html and
++** https://www.gnu.org/licenses/gpl-3.0.html.
++**
++** $QT_END_LICENSE$
++**
++****************************************************************************/
++
++#include "../linux-clang/qplatformdefs.h"
+diff --git a/mkspecs/linux-clang-libc++-32/qmake.conf b/mkspecs/linux-clang-libc++-32/qmake.conf
+new file mode 100644
+index 0000000000..f4c006d383
+--- /dev/null
++++ b/mkspecs/linux-clang-libc++-32/qmake.conf
+@@ -0,0 +1,10 @@
++#
++# qmake configuration for linux-clang and libc++
++#
++
++include(../linux-clang-32/qmake.conf)
++
++QMAKE_CXXFLAGS    += -stdlib=libc++
++QMAKE_LFLAGS      += -stdlib=libc++
++
++load(qt_config)
+diff --git a/mkspecs/linux-clang-libc++-32/qplatformdefs.h b/mkspecs/linux-clang-libc++-32/qplatformdefs.h
+new file mode 100644
+index 0000000000..8f5ce17858
+--- /dev/null
++++ b/mkspecs/linux-clang-libc++-32/qplatformdefs.h
+@@ -0,0 +1,40 @@
++/****************************************************************************
++**
++** Copyright (C) 2016 The Qt Company Ltd.
++** Contact: https://www.qt.io/licensing/
++**
++** This file is part of the qmake spec of the Qt Toolkit.
++**
++** $QT_BEGIN_LICENSE:LGPL$
++** Commercial License Usage
++** Licensees holding valid commercial Qt licenses may use this file in
++** accordance with the commercial license agreement provided with the
++** Software or, alternatively, in accordance with the terms contained in
++** a written agreement between you and The Qt Company. For licensing terms
++** and conditions see https://www.qt.io/terms-conditions. For further
++** information use the contact form at https://www.qt.io/contact-us.
++**
++** GNU Lesser General Public License Usage
++** Alternatively, this file may be used under the terms of the GNU Lesser
++** General Public License version 3 as published by the Free Software
++** Foundation and appearing in the file LICENSE.LGPL3 included in the
++** packaging of this file. Please review the following information to
++** ensure the GNU Lesser General Public License version 3 requirements
++** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
++**
++** GNU General Public License Usage
++** Alternatively, this file may be used under the terms of the GNU
++** General Public License version 2.0 or (at your option) the GNU General
++** Public license version 3 or any later version approved by the KDE Free
++** Qt Foundation. The licenses are as published by the Free Software
++** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
++** included in the packaging of this file. Please review the following
++** information to ensure the GNU General Public License requirements will
++** be met: https://www.gnu.org/licenses/gpl-2.0.html and
++** https://www.gnu.org/licenses/gpl-3.0.html.
++**
++** $QT_END_LICENSE$
++**
++****************************************************************************/
++
++#include "../linux-clang/qplatformdefs.h"
+-- 
+2.18.0.windows.1
+

@@ -80,6 +80,8 @@ class QtConan(ConanFile):
             self.options.GUI = True
         if not self.options.GUI:
             self.options.opengl = "no"
+        if self.settings.os == "Android" and self.options.opengl == "desktop":
+            self.output.error("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
 
         assert QtConan.version == QtConan.submodules['qtbase']['branch']
         def enablemodule(self, module):
@@ -115,8 +117,72 @@ class QtConan(ConanFile):
             self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
         shutil.move("qt-everywhere-opensource-src-%s" % self.version, "qt5")
         
-        for patch in ["8dd78e8564d8c4249e85653a8119c1dd1a03d659.diff"]:
+        for patch in ["8dd78e8564d8c4249e85653a8119c1dd1a03d659.diff", "cc04651dea4c4678c626cb31b3ec8394426e2b25.diff"]:
             tools.patch("qt5/qtbase", patch)
+
+    def xplatform(self):
+        if self.settings.os == "Linux":
+            if self.settings.compiler == "gcc":
+                return {"x86": "linux-g++-32",
+                        "armv6": "linux-arm-gnueabi-g++",
+                        "armv7": "linux-arm-gnueabi-g++",
+                        "armv8": "linux-aarch64-gnu-g++"}.get(str(self.settings.arch), "linux-g++")
+            elif self.settings.compiler == "clang":
+                if self.settings.arch == "x86":
+                    return "linux-clang-libc++-32" if self.settings.compiler.libcxx == "libc++" else "linux-clang-32"
+                elif self.settings.arch == "x86_64":
+                    return "linux-clang-libc++" if self.settings.compiler.libcxx == "libc++" else "linux-clang"
+
+        elif self.settings.os == "Macos":
+            return {"clang": "macx-clang",
+                    "gcc": "macx-g++"}.get(str(self.settings.compiler))
+
+        elif self.settings.os == "iOS":
+            if self.settings.compiler == "clang":
+                return "macx-ios-clang"
+
+        elif self.settings.os == "watchOS":
+            if self.settings.compiler == "clang":
+                return "macx-watchos-clang"
+
+        elif self.settings.os == "tvOS":
+            if self.settings.compiler == "clang":
+                return "macx-tvos-clang"
+
+        elif self.settings.os == "Android":
+            return {"clang": "android-clang",
+                    "gcc": "android-g++"}.get(str(self.settings.compiler))
+
+        elif self.settings.os == "Windows":
+            return {"Visual Studio": "win32-msvc",
+                    "gcc": "win32-g++",
+                    "clang": "win32-clang-g++"}.get(str(self.settings.compiler))
+
+        elif self.settings.os == "WindowsStore":
+            if self.settings.compiler == "Visual Studio":
+                return {"14":{  "armv7": "winrt-arm-msvc2015",
+                                "x86": "winrt-x86-msvc2015",
+                                "x86_64": "winrt-x64-msvc2015"},
+                        "15":{  "armv7": "winrt-arm-msvc2017",
+                                "x86": "winrt-x86-msvc2017",
+                                "x86_64": "winrt-x64-msvc2017"}
+                        }.get(str(self.settings.compiler.version)).get(str(self.settings.arch))
+
+        elif self.settings.os == "FreeBSD":
+            return {"clang": "freebsd-clang",
+                    "gcc": "freebsd-g++"}.get(str(self.settings.compiler))
+
+        elif self.settings.os == "SunOS":
+            if self.settings.compiler == "sun-cc":
+                if self.settings.arch == "sparc":
+                    return "solaris-cc-stlport" if self.settings.compiler.libcxx == "libstlport" else "solaris-cc"
+                elif self.settings.arch == "sparcv9":
+                    return "solaris-cc64-stlport" if self.settings.compiler.libcxx == "libstlport" else "solaris-cc64"
+            elif self.settings.compiler == "gcc":
+                return {"sparc": "solaris-g++",
+                        "sparcv9": "solaris-g++-64"}.get(str(self.settings.arch))
+
+        return None
 
     def build(self):
         args = ["-opensource", "-confirm-license", "-silent", "-nomake examples", "-nomake tests",
@@ -164,10 +230,32 @@ class QtConan(ConanFile):
             lib_paths = self.deps_cpp_info["OpenSSL"].lib_paths
             os.environ["OPENSSL_LIBS"] = " ".join(["-L"+i for i in lib_paths] + ["-l"+i for i in libs])
         
+        if self.settings.os == "Linux":
+            if self.options.GUI:
+                args.append("-qt-xcb")
+        elif self.settings.os == "Macos":
+            args += ["-no-framework"]
+        elif self.settings.os == "Android":
+            args += ["-android-ndk-platform android-%s" % self.settings.os.api_level]
+            args += ["-android-arch %s" % {"armv6": "armeabi",
+                                           "armv7": "armeabi-v7a",
+                                           "armv8": "arm64-v8a",
+                                           "x86": "x86",
+                                           "x86_64": "x86_64",
+                                           "mips": "mips",
+                                           "mips64": "mips64"}.get(str(self.settings.arch))]
+            # args += ["-android-toolchain-version %s" % self.settings.compiler.version]
+
+        xplatform_val = self.xplatform()
+        if xplatform_val:
+            args += ["-xplatform %s" % xplatform_val]
+        else:
+            self.output.warn("host not supported: %s %s %s %s" % (self.settings.os, self.settings.compiler, self.settings.compiler.version, self.settings.arch))
+
         if self.options.config:
             args.append(str(self.options.config))
             
-        if self.settings.os == "Windows":
+        if tools.os_info.is_windows:
             if self.settings.compiler == "Visual Studio":
                 self._build_msvc(args)
             else:
@@ -201,7 +289,6 @@ class QtConan(ConanFile):
                 new_path.append(item)
         os.environ['PATH'] = ';'.join(new_path)
         # end workaround
-        args += ["-xplatform win32-g++"]
 
         with tools.environment_append({"MAKEFLAGS":"-j %d" % tools.cpu_count()}):
             self.output.info("Using '%d' threads" % tools.cpu_count())
@@ -210,20 +297,6 @@ class QtConan(ConanFile):
             self.run("mingw32-make install")
 
     def _build_unix(self, args):
-        if self.settings.os == "Linux":
-            if self.options.GUI:
-                args.append("-qt-xcb")
-            if self.settings.arch == "x86":
-                args += ["-xplatform linux-g++-32"]
-            elif self.settings.arch == "armv6":
-                args += ["-xplatform linux-arm-gnueabi-g++"]
-            elif self.settings.arch == "armv7":
-                args += ["-xplatform linux-arm-gnueabi-g++"]
-        else:
-            args += ["-no-framework"]
-            if self.settings.arch == "x86":
-                args += ["-xplatform macx-clang-32"]
-
         with tools.environment_append({"MAKEFLAGS":"-j %d" % tools.cpu_count()}):
             self.output.info("Using '%d' threads" % tools.cpu_count())
             self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
