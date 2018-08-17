@@ -62,7 +62,7 @@ class QtConan(ConanFile):
                 pack_names = ["libxcb1-dev", "libx11-dev", "libc6-dev"]
                 if self.options.opengl == "desktop":
                     pack_names.append("libgl1-mesa-dev")
-            elif tools.os_info.is_linux and tools.os_info.linux_distro != "arch":
+            elif tools.os_info.is_linux and tools.os_info.linux_distro not in ["arch", "manjaro"]:
                 pack_names = ["libxcb-devel", "libX11-devel", "glibc-devel"]
                 if self.options.opengl == "desktop":
                     pack_names.append("mesa-libGL-devel")
