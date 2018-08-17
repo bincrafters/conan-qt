@@ -277,6 +277,78 @@ matrix:
     python: '3.6'
     services: *1
     env: CONAN_CLANG_VERSIONS=4.0 CONAN_DOCKER_IMAGE=lasote/conanclang40 CONAN_CURRENT_PAGE=6
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_CLANG_VERSIONS=5.0 CONAN_DOCKER_IMAGE=lasote/conanclang50 CONAN_CURRENT_PAGE=1
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_CLANG_VERSIONS=5.0 CONAN_DOCKER_IMAGE=lasote/conanclang50 CONAN_CURRENT_PAGE=2
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_CLANG_VERSIONS=5.0 CONAN_DOCKER_IMAGE=lasote/conanclang50 CONAN_CURRENT_PAGE=3
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_CLANG_VERSIONS=5.0 CONAN_DOCKER_IMAGE=lasote/conanclang50 CONAN_CURRENT_PAGE=4
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_CLANG_VERSIONS=5.0 CONAN_DOCKER_IMAGE=lasote/conanclang50 CONAN_CURRENT_PAGE=5
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_CLANG_VERSIONS=5.0 CONAN_DOCKER_IMAGE=lasote/conanclang50 CONAN_CURRENT_PAGE=6
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_CLANG_VERSIONS=6.0 CONAN_DOCKER_IMAGE=lasote/conanclang60 CONAN_CURRENT_PAGE=1
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_CLANG_VERSIONS=6.0 CONAN_DOCKER_IMAGE=lasote/conanclang60 CONAN_CURRENT_PAGE=2
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_CLANG_VERSIONS=6.0 CONAN_DOCKER_IMAGE=lasote/conanclang60 CONAN_CURRENT_PAGE=3
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_CLANG_VERSIONS=6.0 CONAN_DOCKER_IMAGE=lasote/conanclang60 CONAN_CURRENT_PAGE=4
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_CLANG_VERSIONS=6.0 CONAN_DOCKER_IMAGE=lasote/conanclang60 CONAN_CURRENT_PAGE=5
+  - os: linux
+    sudo: required
+    language: python
+    python: '3.6'
+    services: *1
+    env: CONAN_CLANG_VERSIONS=6.0 CONAN_DOCKER_IMAGE=lasote/conanclang60 CONAN_CURRENT_PAGE=6
   - os: osx
     language: generic
     osx_image: xcode8.3
