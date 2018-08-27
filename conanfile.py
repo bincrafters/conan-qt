@@ -36,7 +36,7 @@ class QtConan(ConanFile):
     homepage = "https://www.qt.io/"
     license = "http://doc.qt.io/qt-5/lgpl.html"
     author = "Bincrafters <bincrafters@gmail.com>"
-    exports = ["LICENSE.md", "qtmodules.conf"]
+    exports = ["LICENSE.md", "qtmodules.conf", "*.diff"]
     exports_sources = ["CMakeLists.txt"]
     settings = "os", "arch", "compiler", "build_type"
 
@@ -115,6 +115,9 @@ class QtConan(ConanFile):
         else:
             self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
         shutil.move("qt-everywhere-opensource-src-%s" % self.version, "qt5")
+        
+        for patch in ["8dd78e8564d8c4249e85653a8119c1dd1a03d659.diff"]:
+            tools.patch("qt5/qtbase", patch)
 
     def build(self):
         args = ["-opensource", "-confirm-license", "-silent", "-nomake examples", "-nomake tests",
