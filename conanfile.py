@@ -42,7 +42,6 @@ class QtConan(ConanFile):
 
     options = dict({
         "shared": [True, False],
-        "fPIC": [True, False],
         "opengl": ["no", "es2", "desktop", "dynamic"],
         "openssl": [True, False],
         "GUI": [True, False],
@@ -51,7 +50,7 @@ class QtConan(ConanFile):
         }, **{module: [True,False] for module in submodules}
     )
     no_copy_source = True
-    default_options = ("shared=True", "fPIC=True", "opengl=desktop", "openssl=False", "GUI=True", "widgets=True", "config=None") + tuple(module + "=False" for module in submodules)
+    default_options = ("shared=True", "opengl=desktop", "openssl=False", "GUI=True", "widgets=True", "config=None") + tuple(module + "=False" for module in submodules)
     short_paths = True
     build_policy = "missing"
 
