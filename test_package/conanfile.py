@@ -18,7 +18,7 @@ class TestPackageConan(ConanFile):
             def qmakeBuild(self):
                 with tools.environment_append(RunEnvironment(self).vars):
                     self.run("qmake %s" % self.source_folder)
-                if self.settings.os == "Windows":
+                if tools.os_info.is_windows:
                     if self.settings.compiler == "Visual Studio":
                         make = find_executable("jom.exe")
                         if not make:
@@ -44,17 +44,18 @@ class TestPackageConan(ConanFile):
             cmake.build()
 
     def test(self):
-        self.output.info("Testing qmake")
-        if tools.os_info.is_windows:
-            bin_path = str(self.settings.build_type).lower()
-        elif tools.os_info.is_linux:
-            bin_path = "."
-        else:
-            bin_path = os.path.join("test_package.app", "Contents", "MacOS")
-        self.run(os.path.join("qmake_folder", bin_path, "test_package"))
+        if not tools.cross_building(self.settings):
+            self.output.info("Testing qmake")
+            if tools.os_info.is_windows:
+                bin_path = str(self.settings.build_type).lower()
+            elif tools.os_info.is_linux:
+                bin_path = "."
+            else:
+                bin_path = os.path.join("test_package.app", "Contents", "MacOS")
+            self.run(os.path.join("qmake_folder", bin_path, "test_package"))
 
-        if not self.options["Qt"].shared:
-            self.output.info("disabled cmake test with static Qt, because of https://bugreports.qt.io/browse/QTBUG-38913")
-        else:
-            self.output.info("Testing CMake")
-            self.run(os.path.join("cmake_folder", "bin", "test_package"))
+            if not self.options["Qt"].shared:
+                self.output.info("disabled cmake test with static Qt, because of https://bugreports.qt.io/browse/QTBUG-38913")
+            else:
+                self.output.info("Testing CMake")
+                self.run(os.path.join("cmake_folder", "bin", "test_package"))
