@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from conans import ConanFile, tools
-from distutils.spawn import find_executable
 import os
 import shutil
 import configparser
@@ -71,6 +70,9 @@ class QtConan(ConanFile):
             if pack_names:
                 installer = tools.SystemPackageTool()
                 installer.install(" ".join(pack_names)) # Install the package
+
+        if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
+            self.build_requires("jom_installer/1.1.2@bincrafters/stable")
 
     def configure(self):
         if self.options.openssl:
@@ -254,54 +256,31 @@ class QtConan(ConanFile):
 
         if self.options.config:
             args.append(str(self.options.config))
-            
+
+        def _build(self, make, args):
+            with tools.environment_append({"MAKEFLAGS":"j%d" % tools.cpu_count()}):
+                self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
+                self.run(make)
+                self.run("%s install" % make)
+
         if tools.os_info.is_windows:
             if self.settings.compiler == "Visual Studio":
-                self._build_msvc(args)
+                with tools.vcvars(self.settings):
+                    _build(self, "jom", args)
             else:
-                self._build_mingw(args)
+                # Workaround for configure using clang first if in the path
+                new_path = []
+                for item in os.environ['PATH'].split(';'):
+                    if item != 'C:\\Program Files\\LLVM\\bin':
+                        new_path.append(item)
+                os.environ['PATH'] = ';'.join(new_path)
+                # end workaround
+                _build(self, "mingw32-make", args)
         else:
-            self._build_unix(args)
+            _build(self, "make", args)
             
         with open('qtbase/bin/qt.conf', 'w') as f: 
             f.write('[Paths]\nPrefix = ..')
-
-    def _build_msvc(self, args):
-        build_command = find_executable("jom.exe")
-        if build_command:
-            build_args = ["-j", str(tools.cpu_count())]
-        else:
-            build_command = "nmake.exe"
-            build_args = []
-        self.output.info("Using '%s %s' to build" % (build_command, " ".join(build_args)))
-
-
-        with tools.vcvars(self.settings):
-            self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
-            self.run("%s %s" % (build_command, " ".join(build_args)))
-            self.run("%s install" % build_command)
-
-    def _build_mingw(self, args):
-        # Workaround for configure using clang first if in the path
-        new_path = []
-        for item in os.environ['PATH'].split(';'):
-            if item != 'C:\\Program Files\\LLVM\\bin':
-                new_path.append(item)
-        os.environ['PATH'] = ';'.join(new_path)
-        # end workaround
-
-        with tools.environment_append({"MAKEFLAGS":"-j %d" % tools.cpu_count()}):
-            self.output.info("Using '%d' threads" % tools.cpu_count())
-            self.run("%s/qt5/configure.bat %s" % (self.source_folder, " ".join(args)))
-            self.run("mingw32-make")
-            self.run("mingw32-make install")
-
-    def _build_unix(self, args):
-        with tools.environment_append({"MAKEFLAGS":"-j %d" % tools.cpu_count()}):
-            self.output.info("Using '%d' threads" % tools.cpu_count())
-            self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
-            self.run("make")
-            self.run("make install")
 
     def package(self):
         self.copy("bin/qt.conf", src="qtbase")
