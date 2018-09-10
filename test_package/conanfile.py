@@ -3,13 +3,16 @@
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
 from conans import ConanFile, CMake, tools, RunEnvironment
-from distutils.spawn import find_executable
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
+
+    def build_requirements(self):
+        if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
+            self.build_requires("jom_installer/1.1.2@bincrafters/stable")
 
     def build(self):
         tools.mkdir("qmake_folder")
@@ -20,14 +23,11 @@ class TestPackageConan(ConanFile):
                     self.run("qmake %s" % self.source_folder)
                 if tools.os_info.is_windows:
                     if self.settings.compiler == "Visual Studio":
-                        make = find_executable("jom.exe")
-                        if not make:
-                            make = "nmake.exe"
+                        self.run("jom")
                     else:
-                        make = "mingw32-make"
+                        self.run("mingw32-make")
                 else:
-                    make = "make"
-                self.run(make)
+                    self.run("make")
 
             if self.settings.compiler == "Visual Studio":
                 with tools.vcvars(self.settings):
