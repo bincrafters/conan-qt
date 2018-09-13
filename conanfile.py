@@ -63,7 +63,10 @@ class QtConan(ConanFile):
             elif tools.os_info.is_linux and tools.os_info.linux_distro not in ["arch", "manjaro"]:
                 pack_names = ["libxcb-devel", "libX11-devel", "glibc-devel"]
                 if self.options.opengl == "desktop":
-                    pack_names.append("mesa-libGL-devel")
+                    if tools.os_info.linux_distro.startswith("opensuse"):
+                        pack_names.append("Mesa-libGL-devel")
+                    else:
+                        pack_names.append("mesa-libGL-devel")
 
             if self.settings.arch == "x86":
                 pack_names = [item+":i386" for item in pack_names]
@@ -96,7 +99,7 @@ class QtConan(ConanFile):
             pack_names = []
             if tools.os_info.linux_distro == "ubuntu" or tools.os_info.linux_distro == "debian": 
                 pack_names = ["libxcb1", "libx11-6"]
-            elif tools.os_info.is_linux and tools.os_info.linux_distro != "opensuse":
+            elif tools.os_info.is_linux and not tools.os_info.linux_distro.startswith("opensuse"):
                 pack_names = ["libxcb"]
 
             if self.settings.arch == "x86":
