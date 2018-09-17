@@ -58,15 +58,8 @@ class QtConan(ConanFile):
             pack_names = []
             if tools.os_info.linux_distro == "ubuntu" or tools.os_info.linux_distro == "debian": 
                 pack_names = ["libxcb1-dev", "libx11-dev", "libc6-dev"]
-                if self.options.opengl == "desktop":
-                    pack_names.append("libgl1-mesa-dev")
             elif tools.os_info.is_linux and tools.os_info.linux_distro not in ["arch", "manjaro"]:
                 pack_names = ["libxcb-devel", "libX11-devel", "glibc-devel"]
-                if self.options.opengl == "desktop":
-                    if tools.os_info.linux_distro.startswith("opensuse"):
-                        pack_names.append("Mesa-libGL-devel")
-                    else:
-                        pack_names.append("mesa-libGL-devel")
 
             if self.settings.arch == "x86":
                 pack_names = [item+":i386" for item in pack_names]
@@ -97,10 +90,20 @@ class QtConan(ConanFile):
     def system_requirements(self):
         if self.options.GUI:
             pack_names = []
-            if tools.os_info.linux_distro == "ubuntu" or tools.os_info.linux_distro == "debian": 
-                pack_names = ["libxcb1", "libx11-6"]
-            elif tools.os_info.is_linux and not tools.os_info.linux_distro.startswith("opensuse"):
-                pack_names = ["libxcb"]
+            if tools.os_info.is_linux:
+                if tools.os_info.linux_distro == "ubuntu" or tools.os_info.linux_distro == "debian": 
+                    pack_names = ["libxcb1", "libx11-6"]
+                    if self.options.opengl == "desktop":
+                        pack_names.append("libgl1-mesa-dev")
+                else:
+                    if not tools.os_info.linux_distro.startswith("opensuse"):
+                        pack_names = ["libxcb"]
+                    if tools.os_info.linux_distro not in ["arch", "manjaro"]:
+                        if self.options.opengl == "desktop":
+                            if tools.os_info.linux_distro.startswith("opensuse"):
+                                pack_names.append("Mesa-libGL-devel")
+                            else:
+                                pack_names.append("mesa-libGL-devel")
 
             if self.settings.arch == "x86":
                 pack_names = [item+":i386" for item in pack_names]
