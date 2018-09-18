@@ -263,6 +263,8 @@ class QtConan(ConanFile):
         if self.options.config:
             args.append(str(self.options.config))
 
+        args.append("-qt-zlib")
+
         def _build(self, make, args):
             with tools.environment_append({"MAKEFLAGS":"j%d" % tools.cpu_count()}):
                 self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
