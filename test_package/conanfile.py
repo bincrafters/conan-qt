@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
-from conans import ConanFile, CMake, tools, RunEnvironment
+from conans import ConanFile, CMake, tools
 from distutils.spawn import find_executable
 import os
 
@@ -16,8 +16,7 @@ class TestPackageConan(ConanFile):
         with tools.chdir("qmake_folder"):
             self.output.info("Building with qmake")
             def qmakeBuild(self):
-                with tools.environment_append(RunEnvironment(self).vars):
-                    self.run("qmake %s" % self.source_folder)
+                self.run("qmake %s" % self.source_folder, run_environment=True)
                 if tools.os_info.is_windows:
                     if self.settings.compiler == "Visual Studio":
                         make = find_executable("jom.exe")

@@ -170,6 +170,8 @@ class QtConan(ConanFile):
         if self.options.config:
             args.append(str(self.options.config))
             
+        args.append("-qt-zlib")
+
         if self.settings.os == "Windows":
             if self.settings.compiler == "Visual Studio":
                 self._build_msvc(args)
