@@ -62,6 +62,8 @@ class QtConan(ConanFile):
 
             if self.settings.arch == "x86":
                 pack_names = [item+":i386" for item in pack_names]
+            elif self.settings.arch == "x86_64":
+                pack_names = [item+":amd64" for item in pack_names]
 
             if pack_names:
                 installer = tools.SystemPackageTool()
@@ -111,6 +113,8 @@ class QtConan(ConanFile):
 
             if self.settings.arch == "x86":
                 pack_names = [item+":i386" for item in pack_names]
+            elif self.settings.arch == "x86_64":
+                pack_names = [item+":amd64" for item in pack_names]
 
             if pack_names:
                 installer = tools.SystemPackageTool()
