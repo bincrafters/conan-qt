@@ -5,7 +5,7 @@ Conan package for Qt
 
 | Bintray | Windows | Linux & macOS |
 |:--------:|:---------:|:-----------------:|
-|[ ![Download](https://api.bintray.com/packages/bincrafters/public-conan/Qt%3Abincrafters/images/download.svg?version=5.11.1%3Astable) ](https://bintray.com/bincrafters/public-conan/Qt%3Abincrafters/5.11.1%3Astable/link)|[![Build status](https://ci.appveyor.com/api/projects/status/5pyart7x1kb9rg8u/branch/stable/5.11.1?svg=true)](https://ci.appveyor.com/project/BinCrafters/conan-qt/branch/stable/5.11.1)|[![Build Status](https://travis-ci.org/bincrafters/conan-qt.svg?branch=stable%2F5.11.1)](https://travis-ci.org/bincrafters/conan-qt)|
+|[ ![Download](https://api.bintray.com/packages/bincrafters/public-conan/Qt%3Abincrafters/images/download.svg?version=5.11.2%3Astable) ](https://bintray.com/bincrafters/public-conan/Qt%3Abincrafters/5.11.2%3Astable/link)|[![Build status](https://ci.appveyor.com/api/projects/status/5pyart7x1kb9rg8u/branch/stable/5.11.2?svg=true)](https://ci.appveyor.com/project/BinCrafters/conan-qt/branch/stable/5.11.2)|[![Build Status](https://travis-ci.org/bincrafters/conan-qt.svg?branch=stable%2F5.11.2)](https://travis-ci.org/bincrafters/conan-qt)|
 
 ## Conan.io Information
 
