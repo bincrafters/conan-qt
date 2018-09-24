@@ -52,23 +52,32 @@ class QtConan(ConanFile):
     default_options = ("shared=True", "opengl=desktop", "openssl=False", "GUI=True", "widgets=True", "config=None") + tuple(module + "=False" for module in submodules)
     short_paths = True
     build_policy = "missing"
+    
+    def system_package_architecture(self):
+        if tools.os_info.with_apt:
+            if self.settings.arch == "x86":
+                return ':i386'
+            elif self.settings.arch == "x86_64":
+                return ':amd64'
+
+        if tools.os_info.with_yum:
+            if self.settings.arch == "x86":
+                return '.i686'
+            elif self.settings.arch == 'x86_64':
+                return '.x86_64'
+        return ""
 
     def build_requirements(self):
         if self.options.GUI:
             pack_names = []
-            if tools.os_info.linux_distro == "ubuntu" or tools.os_info.linux_distro == "debian": 
+            if tools.os_info.with_apt:
                 pack_names = ["libxcb1-dev", "libx11-dev", "libc6-dev"]
-            elif tools.os_info.is_linux and tools.os_info.linux_distro not in ["arch", "manjaro"]:
+            elif tools.os_info.is_linux and not tools.os_info.with_pacman:
                 pack_names = ["libxcb-devel", "libX11-devel", "glibc-devel"]
-
-            if self.settings.arch == "x86":
-                pack_names = [item+":i386" for item in pack_names]
-            elif self.settings.arch == "x86_64":
-                pack_names = [item+":amd64" for item in pack_names]
 
             if pack_names:
                 installer = tools.SystemPackageTool()
-                installer.install(" ".join(pack_names)) # Install the package
+                installer.install(" ".join([item + self.system_package_architecture() for item in pack_names]))
 
     def configure(self):
         if self.options.openssl:
@@ -93,28 +102,23 @@ class QtConan(ConanFile):
         if self.options.GUI:
             pack_names = []
             if tools.os_info.is_linux:
-                if tools.os_info.linux_distro == "ubuntu" or tools.os_info.linux_distro == "debian": 
+                if tools.os_info.with_apt: 
                     pack_names = ["libxcb1", "libx11-6"]
                     if self.options.opengl == "desktop":
                         pack_names.append("libgl1-mesa-dev")
                 else:
                     if not tools.os_info.linux_distro.startswith("opensuse"):
                         pack_names = ["libxcb"]
-                    if tools.os_info.linux_distro not in ["arch", "manjaro"]:
+                    if not tools.os_info.with_pacman:
                         if self.options.opengl == "desktop":
                             if tools.os_info.linux_distro.startswith("opensuse"):
                                 pack_names.append("Mesa-libGL-devel")
                             else:
                                 pack_names.append("mesa-libGL-devel")
 
-            if self.settings.arch == "x86":
-                pack_names = [item+":i386" for item in pack_names]
-            elif self.settings.arch == "x86_64":
-                pack_names = [item+":amd64" for item in pack_names]
-
             if pack_names:
                 installer = tools.SystemPackageTool()
-                installer.install(" ".join(pack_names)) # Install the package
+                installer.install(" ".join([item + self.system_package_architecture() for item in pack_names]))
 
     def source(self):
         url = "http://download.qt.io/official_releases/qt/{0}/{1}/single/qt-everywhere-opensource-src-{1}"\
