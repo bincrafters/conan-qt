@@ -3,9 +3,19 @@
 
 from conans import ConanFile, tools
 from distutils.spawn import find_executable
+from conans.model import Generator
 import os
 import shutil
 import configparser
+
+class qt(Generator):
+    @property
+    def filename(self):
+        return "qt.conf"
+
+    @property
+    def content(self):
+        return "[Paths]\nPrefix = %s" % self.conanfile.deps_cpp_info["Qt"].rootpath.replace("\\", "/")
 
 class QtConan(ConanFile):
 
