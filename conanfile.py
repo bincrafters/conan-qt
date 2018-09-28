@@ -231,6 +231,9 @@ class QtConan(ConanFile):
             args.insert(0, "-shared")
         if self.settings.build_type == "Debug":
             args.append("-debug")
+        elif self.settings.build_type == "RelWithDebInfo":
+            args.append("-release")
+            args.append("-force-debug-info")
         else:
             args.append("-release")
         for module in QtConan.submodules:
