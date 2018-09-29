@@ -235,8 +235,8 @@ class QtConan(ConanFile):
             self.run("mingw32-make install")
 
     def _build_unix(self, args):
+        args += ["-silent"]
         if self.settings.os == "Linux":
-            args += ["-silent"]
             if self.options.GUI:
                 args.append("-qt-xcb")
             if self.settings.arch == "x86":
