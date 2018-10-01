@@ -141,7 +141,7 @@ class QtConan(ConanFile):
         if tools.os_info.is_windows:
             tools.get("%s.zip" % url)
         else:
-            self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
+            tools.get("%s.tar.xz" % url)
         shutil.move("qt-everywhere-opensource-src-%s" % self.version, "qt5")
         
         for patch in ["8dd78e8564d8c4249e85653a8119c1dd1a03d659.diff", "cc04651dea4c4678c626cb31b3ec8394426e2b25.diff"]:
