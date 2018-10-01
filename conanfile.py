@@ -137,7 +137,7 @@ class QtConan(ConanFile):
         if tools.os_info.is_windows:
             tools.get("%s.zip" % url)
         else:
-            self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
+            tools.get("%s.tar.xz" % url)
         shutil.move("qt-everywhere-opensource-src-%s" % self.version, "qt5")
 
     def build(self):
