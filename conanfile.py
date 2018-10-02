@@ -5,6 +5,7 @@ from conans import ConanFile, tools
 from distutils.spawn import find_executable
 from conans.model import Generator
 import os
+import sys
 import shutil
 import configparser
 
@@ -136,8 +137,10 @@ class QtConan(ConanFile):
             .format(self.version[:self.version.rfind('.')], self.version)
         if tools.os_info.is_windows:
             tools.get("%s.zip" % url)
-        else:
+        elif sys.version_info.major >= 3:
             tools.get("%s.tar.xz" % url)
+        else:  # python 2 cannot deal with .xz archives
+            self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
         shutil.move("qt-everywhere-opensource-src-%s" % self.version, "qt5")
 
     def build(self):
