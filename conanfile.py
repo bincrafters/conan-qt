@@ -163,6 +163,9 @@ class QtConan(ConanFile):
         elif self.settings.build_type == "RelWithDebInfo":
             args.append("-release")
             args.append("-force-debug-info")
+        elif self.settings.build_type == "MinSizeRel":
+            args.append("-release")
+            args.append("-optimize-size")
         else:
             args.append("-release")
         for module in QtConan.submodules:
