@@ -4,6 +4,7 @@
 from conans import ConanFile, tools
 from conans.model import Generator
 import os
+import sys
 import shutil
 import configparser
 
@@ -140,8 +141,10 @@ class QtConan(ConanFile):
             .format(self.version[:self.version.rfind('.')], self.version)
         if tools.os_info.is_windows:
             tools.get("%s.zip" % url)
-        else:
+        elif sys.version_info.major >= 3:
             tools.get("%s.tar.xz" % url)
+        else:  # python 2 cannot deal with .xz archives
+            self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
         shutil.move("qt-everywhere-src-%s" % self.version, "qt5")
         
         for patch in ["cc04651dea4c4678c626cb31b3ec8394426e2b25.diff", "ba22a6731377c8604d13e3855204c03652c0a2e3.diff"]:
