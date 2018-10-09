@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
+import shutil
+import sys
+
+import configparser
 from conans import ConanFile, tools
 from conans.model import Generator
-import os
-import sys
-import shutil
-import configparser
+from conans.errors import ConanInvalidConfiguration
+
 
 class qt(Generator):
     @property
@@ -17,9 +20,10 @@ class qt(Generator):
     def content(self):
         return "[Paths]\nPrefix = %s" % self.conanfile.deps_cpp_info["Qt"].rootpath.replace("\\", "/")
 
+
 class QtConan(ConanFile):
 
-    def getsubmodules():
+    def _getsubmodules():
         config = configparser.ConfigParser()
         config.read('qtmodules.conf')
         res = {}
@@ -28,16 +32,16 @@ class QtConan(ConanFile):
             section = str(s)
             assert section.startswith("submodule ")
             assert section.count('"') == 2
-            modulename = section[section.find('"') + 1 : section.rfind('"')]
+            modulename = section[section.find('"') + 1: section.rfind('"')]
             status = str(config.get(section, "status"))
             if status != "obsolete" and status != "ignore":
-                res[modulename] = {"branch":str(config.get(section, "branch")), "status":status, "path":str(config.get(section, "path"))}
+                res[modulename] = {"branch": str(config.get(section, "branch")), "status": status,
+                                   "path": str(config.get(section, "path")), "depends": []}
                 if config.has_option(section, "depends"):
                     res[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
-                else:
-                    res[modulename]["depends"] = []
         return res
-    submodules = getsubmodules()
+
+    _submodules = _getsubmodules()
 
     name = "Qt"
     version = "5.9.6"
@@ -57,14 +61,23 @@ class QtConan(ConanFile):
         "GUI": [True, False],
         "widgets": [True, False],
         "config": "ANY",
-        }, **{module: [True,False] for module in submodules}
+    }, **{module: [True, False] for module in _submodules}
     )
     no_copy_source = True
-    default_options = ("shared=True", "commercial=False", "opengl=desktop", "openssl=False", "GUI=True", "widgets=True", "config=None") + tuple(module + "=False" for module in submodules)
+    default_options = dict({
+        "shared": True,
+        "commercial": False,
+        "opengl": "desktop",
+        "openssl": False,
+        "GUI": True,
+        "widgets": True,
+        "config": None,
+    }, **{module: False for module in _submodules}
+    )
     short_paths = True
     build_policy = "missing"
-    
-    def system_package_architecture(self):
+
+    def _system_package_architecture(self):
         if tools.os_info.with_apt:
             if self.settings.arch == "x86":
                 return ':i386'
@@ -88,7 +101,7 @@ class QtConan(ConanFile):
 
             if pack_names:
                 installer = tools.SystemPackageTool()
-                installer.install(" ".join([item + self.system_package_architecture() for item in pack_names]))
+                installer.install(" ".join([item + self._system_package_architecture() for item in pack_names]))
 
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
             self.build_requires("jom_installer/1.1.2@bincrafters/stable")
@@ -97,28 +110,30 @@ class QtConan(ConanFile):
         if self.options.openssl:
             self.requires("OpenSSL/1.1.0g@conan/stable")
             self.options["OpenSSL"].no_zlib = True
-        if self.options.widgets == True:
+        if self.options.widgets:
             self.options.GUI = True
         if not self.options.GUI:
             self.options.opengl = "no"
         if self.settings.os == "Android" and self.options.opengl == "desktop":
-            self.output.error("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
+            raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
 
-        assert QtConan.version == QtConan.submodules['qtbase']['branch']
-        def enablemodule(self, module):
-            setattr(self.options, module, True)
-            for req in QtConan.submodules[module]["depends"]:
-                enablemodule(self, req)
+        assert QtConan.version == QtConan._submodules['qtbase']['branch']
+
+        def _enablemodule(mod):
+            setattr(self.options, mod, True)
+            for req in QtConan._submodules[mod]["depends"]:
+                _enablemodule(req)
+
         self.options.qtbase = True
-        for module in QtConan.submodules:
+        for module in QtConan._submodules:
             if getattr(self.options, module):
-                enablemodule(self, module)
+                _enablemodule(module)
 
     def system_requirements(self):
         if self.options.GUI:
             pack_names = []
             if tools.os_info.is_linux:
-                if tools.os_info.with_apt: 
+                if tools.os_info.with_apt:
                     pack_names = ["libxcb1", "libx11-6"]
                     if self.options.opengl == "desktop":
                         pack_names.append("libgl1-mesa-dev")
@@ -134,10 +149,10 @@ class QtConan(ConanFile):
 
             if pack_names:
                 installer = tools.SystemPackageTool()
-                installer.install(" ".join([item + self.system_package_architecture() for item in pack_names]))
+                installer.install(" ".join([item + self._system_package_architecture() for item in pack_names]))
 
     def source(self):
-        url = "http://download.qt.io/official_releases/qt/{0}/{1}/single/qt-everywhere-opensource-src-{1}"\
+        url = "http://download.qt.io/official_releases/qt/{0}/{1}/single/qt-everywhere-opensource-src-{1}" \
             .format(self.version[:self.version.rfind('.')], self.version)
         if tools.os_info.is_windows:
             tools.get("%s.zip" % url)
@@ -146,11 +161,11 @@ class QtConan(ConanFile):
         else:  # python 2 cannot deal with .xz archives
             self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
         shutil.move("qt-everywhere-opensource-src-%s" % self.version, "qt5")
-        
+
         for patch in ["8dd78e8564d8c4249e85653a8119c1dd1a03d659.diff", "cc04651dea4c4678c626cb31b3ec8394426e2b25.diff"]:
             tools.patch("qt5/qtbase", patch)
 
-    def xplatform(self):
+    def _xplatform(self):
         if self.settings.os == "Linux":
             if self.settings.compiler == "gcc":
                 return {"x86": "linux-g++-32",
@@ -190,12 +205,12 @@ class QtConan(ConanFile):
 
         elif self.settings.os == "WindowsStore":
             if self.settings.compiler == "Visual Studio":
-                return {"14":{  "armv7": "winrt-arm-msvc2015",
-                                "x86": "winrt-x86-msvc2015",
-                                "x86_64": "winrt-x64-msvc2015"},
-                        "15":{  "armv7": "winrt-arm-msvc2017",
-                                "x86": "winrt-x86-msvc2017",
-                                "x86_64": "winrt-x64-msvc2017"}
+                return {"14": {"armv7": "winrt-arm-msvc2015",
+                               "x86": "winrt-x86-msvc2015",
+                               "x86_64": "winrt-x64-msvc2015"},
+                        "15": {"armv7": "winrt-arm-msvc2017",
+                               "x86": "winrt-x86-msvc2017",
+                               "x86_64": "winrt-x64-msvc2017"}
                         }.get(str(self.settings.compiler.version)).get(str(self.settings.arch))
 
         elif self.settings.os == "FreeBSD":
@@ -242,8 +257,9 @@ class QtConan(ConanFile):
             args.append("-optimize-size")
         else:
             args.append("-release")
-        for module in QtConan.submodules:
-            if not getattr(self.options, module) and os.path.isdir(os.path.join(self.source_folder, 'qt5', QtConan.submodules[module]['path'])):
+        for module in QtConan._submodules:
+            if not getattr(self.options, module) \
+                    and os.path.isdir(os.path.join(self.source_folder, 'qt5', QtConan._submodules[module]['path'])):
                 args.append("-skip " + module)
 
         # openGL
@@ -268,8 +284,8 @@ class QtConan(ConanFile):
             args += ["-I %s" % i for i in self.deps_cpp_info["OpenSSL"].include_paths]
             libs = self.deps_cpp_info["OpenSSL"].libs
             lib_paths = self.deps_cpp_info["OpenSSL"].lib_paths
-            os.environ["OPENSSL_LIBS"] = " ".join(["-L"+i for i in lib_paths] + ["-l"+i for i in libs])
-        
+            os.environ["OPENSSL_LIBS"] = " ".join(["-L" + i for i in lib_paths] + ["-l" + i for i in libs])
+
         if self.settings.os == "Linux":
             if self.options.GUI:
                 args.append("-qt-xcb")
@@ -286,19 +302,21 @@ class QtConan(ConanFile):
                                            "mips64": "mips64"}.get(str(self.settings.arch))]
             # args += ["-android-toolchain-version %s" % self.settings.compiler.version]
 
-        xplatform_val = self.xplatform()
+        xplatform_val = self._xplatform()
         if xplatform_val:
             args += ["-xplatform %s" % xplatform_val]
         else:
-            self.output.warn("host not supported: %s %s %s %s" % (self.settings.os, self.settings.compiler, self.settings.compiler.version, self.settings.arch))
+            self.output.warn("host not supported: %s %s %s %s" %
+                             (self.settings.os, self.settings.compiler,
+                              self.settings.compiler.version, self.settings.arch))
 
         if self.options.config:
             args.append(str(self.options.config))
 
         args.append("-qt-zlib")
 
-        def _build(self, make, args):
-            with tools.environment_append({"MAKEFLAGS":"j%d" % tools.cpu_count()}):
+        def _build(make):
+            with tools.environment_append({"MAKEFLAGS": "j%d" % tools.cpu_count()}):
                 self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
                 self.run(make)
                 self.run("%s install" % make)
@@ -306,7 +324,7 @@ class QtConan(ConanFile):
         if tools.os_info.is_windows:
             if self.settings.compiler == "Visual Studio":
                 with tools.vcvars(self.settings):
-                    _build(self, "jom", args)
+                    _build("jom")
             else:
                 # Workaround for configure using clang first if in the path
                 new_path = []
@@ -315,11 +333,11 @@ class QtConan(ConanFile):
                         new_path.append(item)
                 os.environ['PATH'] = ';'.join(new_path)
                 # end workaround
-                _build(self, "mingw32-make", args)
+                _build("mingw32-make")
         else:
-            _build(self, "make", args)
-            
-        with open('qtbase/bin/qt.conf', 'w') as f: 
+            _build("make")
+
+        with open('qtbase/bin/qt.conf', 'w') as f:
             f.write('[Paths]\nPrefix = ..')
 
     def package(self):

@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
-from conans import ConanFile, CMake, tools
 import os
 import shutil
+
+from conans import ConanFile, CMake, tools
 
 
 class TestPackageConan(ConanFile):
@@ -15,11 +16,12 @@ class TestPackageConan(ConanFile):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
             self.build_requires("jom_installer/1.1.2@bincrafters/stable")
 
-    def build_with_qmake(self):
+    def _build_with_qmake(self):
         tools.mkdir("qmake_folder")
         with tools.chdir("qmake_folder"):
             self.output.info("Building with qmake")
-            def qmakeBuild(self):
+
+            def _qmakebuild():
                 self.run("qmake %s" % self.source_folder, run_environment=True)
                 if tools.os_info.is_windows:
                     if self.settings.compiler == "Visual Studio":
@@ -31,13 +33,14 @@ class TestPackageConan(ConanFile):
 
             if self.settings.compiler == "Visual Studio":
                 with tools.vcvars(self.settings):
-                    qmakeBuild(self)
+                    _qmakebuild()
             else:
-                qmakeBuild(self)
+                _qmakebuild()
 
-    def build_with_cmake(self):
+    def _build_with_cmake(self):
         if not self.options["Qt"].shared:
-            self.output.info("disabled cmake test with static Qt, because of https://bugreports.qt.io/browse/QTBUG-38913")
+            self.output.info(
+                "disabled cmake test with static Qt, because of https://bugreports.qt.io/browse/QTBUG-38913")
         else:
             self.output.info("Building with CMake")
             cmake = CMake(self)
@@ -45,10 +48,10 @@ class TestPackageConan(ConanFile):
             cmake.build()
 
     def build(self):
-        self.build_with_qmake()
-        self.build_with_cmake()
+        self._build_with_qmake()
+        self._build_with_cmake()
 
-    def test_with_qmake(self):
+    def _test_with_qmake(self):
         self.output.info("Testing qmake")
         if tools.os_info.is_windows:
             bin_path = str(self.settings.build_type).lower()
@@ -60,14 +63,15 @@ class TestPackageConan(ConanFile):
         shutil.copy("qt.conf", bin_path)
         self.run(os.path.join(bin_path, "test_package"))
 
-    def test_with_cmake(self):
+    def _test_with_cmake(self):
         if not self.options["Qt"].shared:
-            self.output.info("disabled cmake test with static Qt, because of https://bugreports.qt.io/browse/QTBUG-38913")
+            self.output.info(
+                "disabled cmake test with static Qt, because of https://bugreports.qt.io/browse/QTBUG-38913")
         else:
             self.output.info("Testing CMake")
             self.run(os.path.join("bin", "test_package"))
 
     def test(self):
         if not tools.cross_building(self.settings):
-            self.test_with_qmake()
-            self.test_with_cmake()
+            self._test_with_qmake()
+            self._test_with_cmake()
