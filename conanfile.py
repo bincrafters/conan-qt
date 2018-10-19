@@ -310,6 +310,11 @@ class QtConan(ConanFile):
                              (self.settings.os, self.settings.compiler,
                               self.settings.compiler.version, self.settings.arch))
 
+        for var in ['CC', 'CXX']:
+            value = os.getenv(var)
+            if value:
+                args.append('QMAKE_%s=%s' % (var, value))
+                
         if self.options.config:
             args.append(str(self.options.config))
 
