@@ -44,7 +44,7 @@ class QtConan(ConanFile):
     _submodules = _getsubmodules()
 
     name = "Qt"
-    version = "5.9.6"
+    version = "5.9.7"
     description = "Conan.io package for Qt library."
     url = "https://github.com/bincrafters/conan-qt"
     homepage = "https://www.qt.io/"
@@ -162,7 +162,7 @@ class QtConan(ConanFile):
             self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
         shutil.move("qt-everywhere-opensource-src-%s" % self.version, "qt5")
 
-        for patch in ["8dd78e8564d8c4249e85653a8119c1dd1a03d659.diff", "cc04651dea4c4678c626cb31b3ec8394426e2b25.diff"]:
+        for patch in ["cc04651dea4c4678c626cb31b3ec8394426e2b25.diff"]:
             tools.patch("qt5/qtbase", patch)
 
     def _xplatform(self):
