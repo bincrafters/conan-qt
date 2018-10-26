@@ -22,7 +22,20 @@ class TestPackageConan(ConanFile):
             self.output.info("Building with qmake")
 
             def _qmakebuild():
-                self.run("qmake %s" % self.source_folder, run_environment=True)
+                args = [self.source_folder]
+                value = os.getenv('CC')
+                if value:
+                    args += ['QMAKE_CC=' + value,
+                             'QMAKE_LINK_C=' + value,
+                             'QMAKE_LINK_C_SHLIB=' + value]
+
+                value = os.getenv('CXX')
+                if value:
+                    args += ['QMAKE_CXX=' + value,
+                             'QMAKE_LINK=' + value,
+                             'QMAKE_LINK_SHLIB=' + value]
+                             
+                self.run("qmake %s" % " ".join(args), run_environment=True)
                 if tools.os_info.is_windows:
                     if self.settings.compiler == "Visual Studio":
                         self.run("jom")

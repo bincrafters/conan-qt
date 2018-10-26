@@ -7,8 +7,8 @@ import sys
 
 import configparser
 from conans import ConanFile, tools
-from conans.model import Generator
 from conans.errors import ConanInvalidConfiguration
+from conans.model import Generator
 
 
 class qt(Generator):
@@ -310,11 +310,18 @@ class QtConan(ConanFile):
                              (self.settings.os, self.settings.compiler,
                               self.settings.compiler.version, self.settings.arch))
 
-        for var in ['CC', 'CXX']:
-            value = os.getenv(var)
-            if value:
-                args.append('QMAKE_%s=%s' % (var, value))
-                
+        value = os.getenv('CC')
+        if value:
+            args += ['QMAKE_CC=' + value,
+                     'QMAKE_LINK_C=' + value,
+                     'QMAKE_LINK_C_SHLIB=' + value]
+
+        value = os.getenv('CXX')
+        if value:
+            args += ['QMAKE_CXX=' + value,
+                     'QMAKE_LINK=' + value,
+                     'QMAKE_LINK_SHLIB=' + value]
+
         if self.options.config:
             args.append(str(self.options.config))
 
