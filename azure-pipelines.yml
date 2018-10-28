@@ -1,0 +1,309 @@
+jobs:
+- job: Linux
+  pool:
+    vmImage: 'Ubuntu 16.04'
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.7'
+  - script: |
+      pip install --upgrade pip
+      chmod +x .ci/install.sh
+      ./.ci/install.sh
+      chmod +x .ci/run.sh
+      ./.ci/run.sh
+  strategy:
+    matrix:
+      GCC4.9_PAGE1:
+        CONAN_GCC_VERSIONS: 4.9
+        CONAN_DOCKER_IMAGE: conanio/gcc49
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 1
+      GCC4.9_PAGE2:
+        CONAN_GCC_VERSIONS: 4.9
+        CONAN_DOCKER_IMAGE: conanio/gcc49
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 2
+      GCC4.9_PAGE3:
+        CONAN_GCC_VERSIONS: 4.9
+        CONAN_DOCKER_IMAGE: conanio/gcc49
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 3
+      GCC4.9_PAGE4:
+        CONAN_GCC_VERSIONS: 4.9
+        CONAN_DOCKER_IMAGE: conanio/gcc49
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 4
+      GCC5_PAGE1:
+        CONAN_GCC_VERSIONS: 5
+        CONAN_DOCKER_IMAGE: conanio/gcc5
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 1
+      GCC5_PAGE2:
+        CONAN_GCC_VERSIONS: 5
+        CONAN_DOCKER_IMAGE: conanio/gcc5
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 2
+      GCC5_PAGE3:
+        CONAN_GCC_VERSIONS: 5
+        CONAN_DOCKER_IMAGE: conanio/gcc5
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 3
+      GCC5_PAGE4:
+        CONAN_GCC_VERSIONS: 5
+        CONAN_DOCKER_IMAGE: conanio/gcc5
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 4
+      GCC6_PAGE1:
+        CONAN_GCC_VERSIONS: 6
+        CONAN_DOCKER_IMAGE: conanio/gcc6
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 1
+      GCC6_PAGE2:
+        CONAN_GCC_VERSIONS: 6
+        CONAN_DOCKER_IMAGE: conanio/gcc6
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 2
+      GCC6_PAGE3:
+        CONAN_GCC_VERSIONS: 6
+        CONAN_DOCKER_IMAGE: conanio/gcc6
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 3
+      GCC6_PAGE4:
+        CONAN_GCC_VERSIONS: 6
+        CONAN_DOCKER_IMAGE: conanio/gcc6
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 4
+      GCC7_PAGE1:
+        CONAN_GCC_VERSIONS: 7
+        CONAN_DOCKER_IMAGE: conanio/gcc7
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 1
+      GCC7_PAGE2:
+        CONAN_GCC_VERSIONS: 7
+        CONAN_DOCKER_IMAGE: conanio/gcc7
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 2
+      GCC7_PAGE3:
+        CONAN_GCC_VERSIONS: 7
+        CONAN_DOCKER_IMAGE: conanio/gcc7
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 3
+      GCC7_PAGE4:
+        CONAN_GCC_VERSIONS: 7
+        CONAN_DOCKER_IMAGE: conanio/gcc7
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 4
+      GCC8_PAGE1:
+        CONAN_GCC_VERSIONS: 8
+        CONAN_DOCKER_IMAGE: conanio/gcc8
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 1
+      GCC8_PAGE2:
+        CONAN_GCC_VERSIONS: 8
+        CONAN_DOCKER_IMAGE: conanio/gcc8
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 2
+      GCC8_PAGE3:
+        CONAN_GCC_VERSIONS: 8
+        CONAN_DOCKER_IMAGE: conanio/gcc8
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 3
+      GCC8_PAGE4:
+        CONAN_GCC_VERSIONS: 8
+        CONAN_DOCKER_IMAGE: conanio/gcc8
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 4
+      CLANG39_PAGE1:
+        CONAN_CLANG_VERSIONS: 3.9
+        CONAN_DOCKER_IMAGE: conanio/clang39
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 1
+      CLANG39_PAGE2:
+        CONAN_CLANG_VERSIONS: 3.9
+        CONAN_DOCKER_IMAGE: conanio/clang39
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 2
+      CLANG39_PAGE3:
+        CONAN_CLANG_VERSIONS: 3.9
+        CONAN_DOCKER_IMAGE: conanio/clang39
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 3
+      CLANG39_PAGE4:
+        CONAN_CLANG_VERSIONS: 3.9
+        CONAN_DOCKER_IMAGE: conanio/clang39
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 4
+      CLANG40_PAGE1:
+        CONAN_CLANG_VERSIONS: 4.0
+        CONAN_DOCKER_IMAGE: conanio/clang40
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 1
+      CLANG40_PAGE2:
+        CONAN_CLANG_VERSIONS: 4.0
+        CONAN_DOCKER_IMAGE: conanio/clang40
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 2
+      CLANG40_PAGE3:
+        CONAN_CLANG_VERSIONS: 4.0
+        CONAN_DOCKER_IMAGE: conanio/clang40
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 3
+      CLANG40_PAGE4:
+        CONAN_CLANG_VERSIONS: 4.0
+        CONAN_DOCKER_IMAGE: conanio/clang40
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 4
+      CLANG50_PAGE1:
+        CONAN_CLANG_VERSIONS: 5.0
+        CONAN_DOCKER_IMAGE: conanio/clang50
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 1
+      CLANG50_PAGE2:
+        CONAN_CLANG_VERSIONS: 5.0
+        CONAN_DOCKER_IMAGE: conanio/clang50
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 2
+      CLANG50_PAGE3:
+        CONAN_CLANG_VERSIONS: 5.0
+        CONAN_DOCKER_IMAGE: conanio/clang50
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 3
+      CLANG50_PAGE4:
+        CONAN_CLANG_VERSIONS: 5.0
+        CONAN_DOCKER_IMAGE: conanio/clang50
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 4
+      CLANG60_PAGE1:
+        CONAN_CLANG_VERSIONS: 6.0
+        CONAN_DOCKER_IMAGE: conanio/clang60
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 1
+      CLANG60_PAGE2:
+        CONAN_CLANG_VERSIONS: 6.0
+        CONAN_DOCKER_IMAGE: conanio/clang60
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 2
+      CLANG60_PAGE3:
+        CONAN_CLANG_VERSIONS: 6.0
+        CONAN_DOCKER_IMAGE: conanio/clang60
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 3
+      CLANG60_PAGE4:
+        CONAN_CLANG_VERSIONS: 6.0
+        CONAN_DOCKER_IMAGE: conanio/clang60
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 4
+      CLANG70_PAGE1:
+        CONAN_CLANG_VERSIONS: 7.0
+        CONAN_DOCKER_IMAGE: conanio/clang7
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 1
+      CLANG70_PAGE2:
+        CONAN_CLANG_VERSIONS: 7.0
+        CONAN_DOCKER_IMAGE: conanio/clang7
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 2
+      CLANG70_PAGE3:
+        CONAN_CLANG_VERSIONS: 7.0
+        CONAN_DOCKER_IMAGE: conanio/clang7
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 3
+      CLANG70_PAGE4:
+        CONAN_CLANG_VERSIONS: 7.0
+        CONAN_DOCKER_IMAGE: conanio/clang7
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 4
+- job: macOS
+  pool:
+    vmImage: 'macOS-10.13'
+  steps:
+  - script: |
+      /bin/bash -c "sudo xcode-select -s /Applications/Xcode_$(XCODE_VERSION).app/Contents/Developer"
+      pip install --upgrade pip
+      chmod +x .ci/install.sh
+      ./.ci/install.sh
+      chmod +x .ci/run.sh
+      ./.ci/run.sh
+  strategy:
+    matrix:
+      CLANG8.1_PAGE1:
+        CONAN_APPLE_CLANG_VERSIONS: 8.1
+        XCODE_VERSION: 8.3.3
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 1
+      CLANG8.1_PAGE2:
+        CONAN_APPLE_CLANG_VERSIONS: 8.1
+        XCODE_VERSION: 8.3.3
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 2
+      CLANG8.1_PAGE3:
+        CONAN_APPLE_CLANG_VERSIONS: 8.1
+        XCODE_VERSION: 8.3.3
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 3
+      CLANG8.1_PAGE4:
+        CONAN_APPLE_CLANG_VERSIONS: 8.1
+        XCODE_VERSION: 8.3.3
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 4
+      CLANG9.0_PAGE1:
+        CONAN_APPLE_CLANG_VERSIONS: 9.0
+        XCODE_VERSION: 9.2
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 1
+      CLANG9.0_PAGE2:
+        CONAN_APPLE_CLANG_VERSIONS: 9.0
+        XCODE_VERSION: 9.2
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 2
+      CLANG9.0_PAGE3:
+        CONAN_APPLE_CLANG_VERSIONS: 9.0
+        XCODE_VERSION: 9.2
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 3
+      CLANG9.0_PAGE4:
+        CONAN_APPLE_CLANG_VERSIONS: 9.0
+        XCODE_VERSION: 9.2
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 4
+      CLANG9.1_PAGE1:
+        CONAN_APPLE_CLANG_VERSIONS: 9.1
+        XCODE_VERSION: 9.4.1
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 1
+      CLANG9.1_PAGE2:
+        CONAN_APPLE_CLANG_VERSIONS: 9.1
+        XCODE_VERSION: 9.4.1
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 2
+      CLANG9.1_PAGE3:
+        CONAN_APPLE_CLANG_VERSIONS: 9.1
+        XCODE_VERSION: 9.4.1
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 3
+      CLANG9.1_PAGE4:
+        CONAN_APPLE_CLANG_VERSIONS: 9.1
+        XCODE_VERSION: 9.4.1
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 4
+      CLANG10.0_PAGE1:
+        CONAN_APPLE_CLANG_VERSIONS: 10.0
+        XCODE_VERSION: 10.0
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 1
+      CLANG10.0_PAGE2:
+        CONAN_APPLE_CLANG_VERSIONS: 10.0
+        XCODE_VERSION: 10.0
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 2
+      CLANG10.0_PAGE3:
+        CONAN_APPLE_CLANG_VERSIONS: 10.0
+        XCODE_VERSION: 10.0
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 3
+      CLANG10.0_PAGE4:
+        CONAN_APPLE_CLANG_VERSIONS: 10.0
+        XCODE_VERSION: 10.0
+        CONAN_TOTAL_PAGES: 4
+        CONAN_CURRENT_PAGE: 4
