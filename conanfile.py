@@ -180,6 +180,7 @@ class QtConan(ConanFile):
 
         elif self.settings.os == "Macos":
             return {"clang": "macx-clang",
+                    "apple-clang": "macx-clang",
                     "gcc": "macx-g++"}.get(str(self.settings.compiler))
 
         elif self.settings.os == "iOS":
