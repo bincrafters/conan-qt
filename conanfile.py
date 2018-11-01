@@ -45,7 +45,7 @@ class QtConan(ConanFile):
 
     name = "Qt"
     version = "5.11.2"
-    description = "Conan package for Qt library."
+    description = "Qt is a cross-platform framework for graphical user interfaces."
     topics = ("conan", "qt", "ui")
     url = "https://github.com/bincrafters/conan-qt"
     homepage = "https://www.qt.io"
