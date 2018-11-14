@@ -49,7 +49,7 @@ class QtConan(ConanFile):
     topics = ("conan", "qt", "ui")
     url = "https://github.com/bincrafters/conan-qt"
     homepage = "https://www.qt.io"
-    license = "http://doc.qt.io/qt-5/lgpl.html"
+    license = "LGPL-3.0-only"
     author = "Bincrafters <bincrafters@gmail.com>"
     exports = ["LICENSE.md", "qtmodules.conf", "*.diff"]
     settings = "os", "arch", "compiler", "build_type"
