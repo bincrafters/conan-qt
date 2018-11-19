@@ -61,6 +61,8 @@ class QtConan(ConanFile):
         "openssl": [True, False],
         "GUI": [True, False],
         "widgets": [True, False],
+        "device": "ANY",
+        "cross_compile": "ANY",
         "config": "ANY",
     }, **{module: [True, False] for module in _submodules}
     )
@@ -72,6 +74,8 @@ class QtConan(ConanFile):
         "openssl": False,
         "GUI": True,
         "widgets": True,
+        "device": None,
+        "cross_compile": None,
         "config": None,
     }, **{module: False for module in _submodules}
     )
@@ -84,6 +88,12 @@ class QtConan(ConanFile):
                 return ':i386'
             elif self.settings.arch == "x86_64":
                 return ':amd64'
+            elif self.settings.arch == "armv6" or self.settings.arch == "armv7":
+                return ':armel'
+            elif self.settings.arch == "armv7hf":
+                return ':armhf'
+            elif self.settings.arch == "armv8":
+                return ':arm64'
 
         if tools.os_info.with_yum:
             if self.settings.arch == "x86":
@@ -176,6 +186,7 @@ class QtConan(ConanFile):
                 return {"x86": "linux-g++-32",
                         "armv6": "linux-arm-gnueabi-g++",
                         "armv7": "linux-arm-gnueabi-g++",
+                        "armv7hf": "linux-arm-gnueabi-g++",
                         "armv8": "linux-aarch64-gnu-g++"}.get(str(self.settings.arch), "linux-g++")
             elif self.settings.compiler == "clang":
                 if self.settings.arch == "x86":
@@ -309,13 +320,18 @@ class QtConan(ConanFile):
                                            "mips64": "mips64"}.get(str(self.settings.arch))]
             # args += ["-android-toolchain-version %s" % self.settings.compiler.version]
 
-        xplatform_val = self._xplatform()
-        if xplatform_val:
-            args += ["-xplatform %s" % xplatform_val]
+        if self.options.device:
+            args += ["-device %s" % self.options.device]
+            if self.options.cross_compile:
+                args += ["-device-option CROSS_COMPILE=%s" % self.options.cross_compile]
         else:
-            self.output.warn("host not supported: %s %s %s %s" %
-                             (self.settings.os, self.settings.compiler,
-                              self.settings.compiler.version, self.settings.arch))
+            xplatform_val = self._xplatform()
+            if xplatform_val:
+                args += ["-xplatform %s" % xplatform_val]
+            else:
+                self.output.warn("host not supported: %s %s %s %s" %
+                                 (self.settings.os, self.settings.compiler,
+                                  self.settings.compiler.version, self.settings.arch))
 
         def _getenvpath(var):
             val = os.getenv(var)
