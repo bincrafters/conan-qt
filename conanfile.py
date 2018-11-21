@@ -101,7 +101,8 @@ class QtConan(ConanFile):
 
             if pack_names:
                 installer = tools.SystemPackageTool()
-                installer.install(" ".join([item + self._system_package_architecture() for item in pack_names]))
+                for item in pack_names:
+                    installer.install(item + self._system_package_architecture())
 
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
             self.build_requires("jom_installer/1.1.2@bincrafters/stable")
@@ -137,6 +138,8 @@ class QtConan(ConanFile):
                     pack_names = ["libxcb1", "libx11-6"]
                     if self.options.opengl == "desktop":
                         pack_names.append("libgl1-mesa-dev")
+                    elif self.options.opengl == "es2":
+                        pack_names.append("libgles2-mesa-dev")
                 else:
                     if not tools.os_info.linux_distro.startswith("opensuse"):
                         pack_names = ["libxcb"]
@@ -149,7 +152,8 @@ class QtConan(ConanFile):
 
             if pack_names:
                 installer = tools.SystemPackageTool()
-                installer.install(" ".join([item + self._system_package_architecture() for item in pack_names]))
+                for item in pack_names:
+                    installer.install(item + self._system_package_architecture())
 
     def source(self):
         url = "http://download.qt.io/official_releases/qt/{0}/{1}/single/qt-everywhere-src-{1}" \
