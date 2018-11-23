@@ -262,8 +262,7 @@ class QtConan(ConanFile):
         elif self.settings.build_type == "MinSizeRel":
             args.append("-release")
             args.append("-optimize-size")
-        else:
-            args.append("-release")
+            
         for module in QtConan._submodules:
             if not getattr(self.options, module) \
                     and os.path.isdir(os.path.join(self.source_folder, 'qt5', QtConan._submodules[module]['path'])):
