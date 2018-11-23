@@ -311,13 +311,20 @@ class QtConan(ConanFile):
                              (self.settings.os, self.settings.compiler,
                               self.settings.compiler.version, self.settings.arch))
 
-        value = os.getenv('CC')
+        def _getenvpath(var):
+            val = os.getenv(var)
+            if val and tools.os_info.is_windows:
+                val = val.replace("\\", "/")
+                os.environ[var] = val
+            return val
+
+        value = _getenvpath('CC')
         if value:
             args += ['QMAKE_CC=' + value,
                      'QMAKE_LINK_C=' + value,
                      'QMAKE_LINK_C_SHLIB=' + value]
 
-        value = os.getenv('CXX')
+        value = _getenvpath('CXX')
         if value:
             args += ['QMAKE_CXX=' + value,
                      'QMAKE_LINK=' + value,
