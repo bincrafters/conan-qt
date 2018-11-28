@@ -18,7 +18,7 @@ class qt(Generator):
 
     @property
     def content(self):
-        return "[Paths]\nPrefix = %s" % self.conanfile.deps_cpp_info["Qt"].rootpath.replace("\\", "/")
+        return "[Paths]\nPrefix = %s" % self.conanfile.deps_cpp_info["qt"].rootpath.replace("\\", "/")
 
 
 class QtConan(ConanFile):
@@ -43,13 +43,13 @@ class QtConan(ConanFile):
 
     _submodules = _getsubmodules()
 
-    name = "Qt"
+    name = "qt"
     version = "5.11.2"
     description = "Qt is a cross-platform framework for graphical user interfaces."
     topics = ("conan", "qt", "ui")
     url = "https://github.com/bincrafters/conan-qt"
     homepage = "https://www.qt.io"
-    license = "http://doc.qt.io/qt-5/lgpl.html"
+    license = "LGPL-3.0-only"
     author = "Bincrafters <bincrafters@gmail.com>"
     exports = ["LICENSE.md", "qtmodules.conf", "*.diff"]
     settings = "os", "arch", "compiler", "build_type"
@@ -102,7 +102,8 @@ class QtConan(ConanFile):
 
             if pack_names:
                 installer = tools.SystemPackageTool()
-                installer.install(" ".join([item + self._system_package_architecture() for item in pack_names]))
+                for item in pack_names:
+                    installer.install(item + self._system_package_architecture())
 
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
             self.build_requires("jom_installer/1.1.2@bincrafters/stable")
@@ -138,6 +139,8 @@ class QtConan(ConanFile):
                     pack_names = ["libxcb1", "libx11-6"]
                     if self.options.opengl == "desktop":
                         pack_names.append("libgl1-mesa-dev")
+                    elif self.options.opengl == "es2":
+                        pack_names.append("libgles2-mesa-dev")
                 else:
                     if not tools.os_info.linux_distro.startswith("opensuse"):
                         pack_names = ["libxcb"]
@@ -150,7 +153,8 @@ class QtConan(ConanFile):
 
             if pack_names:
                 installer = tools.SystemPackageTool()
-                installer.install(" ".join([item + self._system_package_architecture() for item in pack_names]))
+                for item in pack_names:
+                    installer.install(item + self._system_package_architecture())
 
     def source(self):
         url = "http://download.qt.io/official_releases/qt/{0}/{1}/single/qt-everywhere-src-{1}" \
@@ -316,13 +320,20 @@ class QtConan(ConanFile):
                              (self.settings.os, self.settings.compiler,
                               self.settings.compiler.version, self.settings.arch))
 
-        value = os.getenv('CC')
+        def _getenvpath(var):
+            val = os.getenv(var)
+            if val and tools.os_info.is_windows:
+                val = val.replace("\\", "/")
+                os.environ[var] = val
+            return val
+
+        value = _getenvpath('CC')
         if value:
             args += ['QMAKE_CC=' + value,
                      'QMAKE_LINK_C=' + value,
                      'QMAKE_LINK_C_SHLIB=' + value]
 
-        value = os.getenv('CXX')
+        value = _getenvpath('CXX')
         if value:
             args += ['QMAKE_CXX=' + value,
                      'QMAKE_LINK=' + value,
