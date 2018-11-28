@@ -1,12 +1,12 @@
-[![Download](https://api.bintray.com/packages/bincrafters/public-conan/Qt%3Abincrafters/images/download.svg) ](https://bintray.com/bincrafters/public-conan/Qt%3Abincrafters/_latestVersion)
+[![Download](https://api.bintray.com/packages/bincrafters/public-conan/qt%3Abincrafters/images/download.svg) ](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/_latestVersion)
 [![Build Status Azure](https://dev.azure.com/bincrafters/packages/_apis/build/status/bincrafters.conan-qt?branchName=stable%2F5.11.2)](https://dev.azure.com/bincrafters/packages/_build)
-[![Build Status AppVeyor](https://ci.appveyor.com/api/projects/status/github/bincrafters/conan-Qt?branch=stable%2F5.11.2&svg=true)](https://ci.appveyor.com/project/bincrafters/conan-Qt)
+[![Build Status AppVeyor](https://ci.appveyor.com/api/projects/status/github/bincrafters/conan-qt?branch=stable%2F5.11.2&svg=true)](https://ci.appveyor.com/project/bincrafters/conan-qt)
 
-## Conan package recipe for [*Qt*](https://www.qt.io)
+## Conan package recipe for [*qt*](https://www.qt.io)
 
 Qt is a cross-platform framework for graphical user interfaces.
 
-The packages generated with this **conanfile** can be found on [Bintray](https://bintray.com/bincrafters/public-conan/Qt%3Abincrafters).
+The packages generated with this **conanfile** can be found on [Bintray](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters).
 
 
 ## Issues
@@ -20,14 +20,14 @@ If you wish to report an issue or make a request for a Bincrafters package, plea
 
 ### Basic setup
 
-    $ conan install Qt/5.11.2@bincrafters/stable
+    $ conan install qt/5.11.2@bincrafters/stable
 
 ### Project setup
 
 If you handle multiple dependencies in your project is better to add a *conanfile.txt*
 
     [requires]
-    Qt/5.11.2@bincrafters/stable
+    qt/5.11.2@bincrafters/stable
 
     [generators]
     txt
@@ -107,7 +107,7 @@ The following command both runs all the steps of the conan file, and publishes t
 
 ## Conan Recipe License
 
-NOTE: The conan recipe license applies only to the files of this recipe, which can be used to build and package Qt.
+NOTE: The conan recipe license applies only to the files of this recipe, which can be used to build and package qt.
 It does *not* in any way apply or is related to the actual software being packaged.
 
 [MIT](https://github.com/bincrafters/conan-qt/blob/stable/5.11.2/LICENSE.md)
