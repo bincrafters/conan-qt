@@ -8,7 +8,6 @@ Qt is a cross-platform framework for graphical user interfaces.
 
 The packages generated with this **conanfile** can be found on [Bintray](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters).
 
-
 ## Issues
 
 If you wish to report an issue or make a request for a Bincrafters package, please do so here:
@@ -108,6 +107,7 @@ The following command both runs all the steps of the conan file, and publishes t
 ## Conan Recipe License
 
 NOTE: The conan recipe license applies only to the files of this recipe, which can be used to build and package qt.
+
 It does *not* in any way apply or is related to the actual software being packaged.
 
 [MIT](https://github.com/bincrafters/conan-qt/blob/stable/5.11.2/LICENSE.md)

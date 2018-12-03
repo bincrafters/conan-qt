@@ -258,14 +258,15 @@ class QtConan(ConanFile):
             args.insert(0, "-shared")
         if self.settings.build_type == "Debug":
             args.append("-debug")
+        elif self.settings.build_type == "Release":
+            args.append("-release")
         elif self.settings.build_type == "RelWithDebInfo":
             args.append("-release")
             args.append("-force-debug-info")
         elif self.settings.build_type == "MinSizeRel":
             args.append("-release")
             args.append("-optimize-size")
-        else:
-            args.append("-release")
+            
         for module in QtConan._submodules:
             if not getattr(self.options, module) \
                     and os.path.isdir(os.path.join(self.source_folder, 'qt5', QtConan._submodules[module]['path'])):
