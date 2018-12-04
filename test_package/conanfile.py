@@ -38,7 +38,7 @@ class TestPackageConan(ConanFile):
                 _qmakebuild()
 
     def _build_with_cmake(self):
-        if not self.options["Qt"].shared:
+        if not self.options["qt"].shared:
             self.output.info(
                 "disabled cmake test with static Qt, because of https://bugreports.qt.io/browse/QTBUG-38913")
         else:
@@ -64,7 +64,7 @@ class TestPackageConan(ConanFile):
         self.run(os.path.join(bin_path, "test_package"))
 
     def _test_with_cmake(self):
-        if not self.options["Qt"].shared:
+        if not self.options["qt"].shared:
             self.output.info(
                 "disabled cmake test with static Qt, because of https://bugreports.qt.io/browse/QTBUG-38913")
         else:
