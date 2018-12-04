@@ -1,19 +1,13 @@
-Conan package for Qt
------------------------------------
+[![Download](https://api.bintray.com/packages/bincrafters/public-conan/qt%3Abincrafters/images/download.svg) ](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/_latestVersion)
+[![Build Status Travis](https://travis-ci.org/bincrafters/conan-qt.svg?branch=stable%2F5.11.3)](https://travis-ci.org/bincrafters/conan-qt)
+[![Build Status AppVeyor](https://ci.appveyor.com/api/projects/status/github/bincrafters/conan-qt?branch=stable%2F5.11.3&svg=true)](https://ci.appveyor.com/project/bincrafters/conan-qt)
 
-## Package Status
+## Conan package recipe for [*qt*](https://www.qt.io)
 
-| Bintray | Windows | Linux & macOS |
-|:--------:|:---------:|:-----------------:|
-|[ ![Download](https://api.bintray.com/packages/bincrafters/public-conan/Qt%3Abincrafters/images/download.svg?version=5.11.2%3Astable) ](https://bintray.com/bincrafters/public-conan/Qt%3Abincrafters/5.11.2%3Astable/link)|[![Build status](https://ci.appveyor.com/api/projects/status/5pyart7x1kb9rg8u/branch/stable/5.11.2?svg=true)](https://ci.appveyor.com/project/BinCrafters/conan-qt/branch/stable/5.11.2)|[![Build Status](https://travis-ci.org/bincrafters/conan-qt.svg?branch=stable%2F5.11.2)](https://travis-ci.org/bincrafters/conan-qt)|
+Qt is a cross-platform framework for graphical user interfaces.
 
-## Conan.io Information
+The packages generated with this **conanfile** can be found on [Bintray](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters).
 
-Bincrafters packages can be found in the following public Conan repository:
-
-[Bincrafters Public Conan Repository on Bintray](https://bintray.com/bincrafters/public-conan)
-
-*Note: You can click the "Set Me Up" button on the Bintray page above for instructions on using packages from this repository.*
 
 ## Issues
 
@@ -21,28 +15,101 @@ If you wish to report an issue or make a request for a Bincrafters package, plea
 
 [Bincrafters Community Issues](https://github.com/bincrafters/community/issues)
 
-## General Information
 
-This GIT repository is managed by the Bincrafters team and holds files related to Conan.io.  For detailed information about Bincrafters and Conan.io, please visit the following resources:
+## For Users
 
-[Bincrafters Wiki - Common README](https://github.com/bincrafters/community/wiki/Common-README.md)
+### Basic setup
 
-[Bincrafters Technical Documentation](http://bincrafters.readthedocs.io/en/latest/)
+    $ conan install qt/5.11.3@bincrafters/stable
 
-[Bincrafters Blog](https://bincrafters.github.io)
+### Project setup
 
-## License Information
+If you handle multiple dependencies in your project is better to add a *conanfile.txt*
 
-Bincrafters packages are hosted on [Bintray](https://bintray.com) and contain Open-Source software which is licensed by the software's maintainers and NOT Bincrafters.  For each Open-Source package published by Bincrafters, the packaging process obtains the required license files along with the original source files from the maintainer, and includes these license files in the generated Conan packages.
+    [requires]
+    qt/5.11.3@bincrafters/stable
 
-The contents of this GIT repository are completely separate from the software being packaged and therefor licensed separately.  The license for all files contained in this GIT repository are defined in the [LICENSE.md](LICENSE.md) file in this repository.  The licenses included with all Conan packages published by Bincrafters can be found in the Conan package directories in the following locations, relative to the Conan Cache root (`~/.conan` by default):
+    [generators]
+    txt
 
-### License(s) for packaged software:
+Complete the installation of requirements for your project running:
 
-    ~/.conan/data/<pkg_name>/<pkg_version>/bincrafters/package/<random_package_id>/license/<LICENSE_FILES_HERE>
+    $ mkdir build && cd build && conan install ..
 
-*Note :   The most common filenames for OSS licenses are `LICENSE` AND `COPYING` without file extensions.*
+Note: It is recommended that you run conan install from a build directory and not the root of the project directory.  This is because conan generates *conanbuildinfo* files specific to a single build configuration which by default comes from an autodetected default profile located in ~/.conan/profiles/default .  If you pass different build configuration options to conan install, it will generate different *conanbuildinfo* files.  Thus, they should not be added to the root of the project, nor committed to git.
 
-### License for Bincrafters recipe:
 
-    ~/.conan/data/<pkg_name>/<pkg_version>/bincrafters/export/LICENSE.md
+## Build and package
+
+The following command both runs all the steps of the conan file, and publishes the package to the local system cache.  This includes downloading dependencies from "build_requires" and "requires" , and then running the build() method.
+
+    $ conan create . bincrafters/stable
+
+
+### Available Options
+| Option        | Default | Possible Values  |
+| ------------- |:----------------- |:------------:|
+| shared      | True |  [True, False] |
+| commercial      | False |  [True, False] |
+| opengl      | desktop |  ['no', 'es2', 'desktop', 'dynamic'] |
+| openssl      | False |  [True, False] |
+| GUI      | True |  [True, False] |
+| widgets      | True |  [True, False] |
+| device      |  |  ANY |
+| cross_compile      |  |  ANY |
+| config      |  |  ANY |
+| qtbase      | False |  [True, False] |
+| qtsvg      | False |  [True, False] |
+| qtdeclarative      | False |  [True, False] |
+| qtactiveqt      | False |  [True, False] |
+| qtscript      | False |  [True, False] |
+| qtmultimedia      | False |  [True, False] |
+| qttools      | False |  [True, False] |
+| qtxmlpatterns      | False |  [True, False] |
+| qttranslations      | False |  [True, False] |
+| qtdoc      | False |  [True, False] |
+| qtrepotools      | False |  [True, False] |
+| qtqa      | False |  [True, False] |
+| qtlocation      | False |  [True, False] |
+| qtsensors      | False |  [True, False] |
+| qtconnectivity      | False |  [True, False] |
+| qtwayland      | False |  [True, False] |
+| qt3d      | False |  [True, False] |
+| qtimageformats      | False |  [True, False] |
+| qtgraphicaleffects      | False |  [True, False] |
+| qtquickcontrols      | False |  [True, False] |
+| qtserialbus      | False |  [True, False] |
+| qtserialport      | False |  [True, False] |
+| qtx11extras      | False |  [True, False] |
+| qtmacextras      | False |  [True, False] |
+| qtwinextras      | False |  [True, False] |
+| qtandroidextras      | False |  [True, False] |
+| qtwebsockets      | False |  [True, False] |
+| qtwebchannel      | False |  [True, False] |
+| qtwebengine      | False |  [True, False] |
+| qtcanvas3d      | False |  [True, False] |
+| qtwebview      | False |  [True, False] |
+| qtquickcontrols2      | False |  [True, False] |
+| qtpurchasing      | False |  [True, False] |
+| qtcharts      | False |  [True, False] |
+| qtdatavis3d      | False |  [True, False] |
+| qtvirtualkeyboard      | False |  [True, False] |
+| qtgamepad      | False |  [True, False] |
+| qtscxml      | False |  [True, False] |
+| qtspeech      | False |  [True, False] |
+| qtnetworkauth      | False |  [True, False] |
+| qtremoteobjects      | False |  [True, False] |
+| qtwebglplugin      | False |  [True, False] |
+
+
+## Add Remote
+
+    $ conan remote add bincrafters "https://api.bintray.com/conan/bincrafters/public-conan"
+
+
+## Conan Recipe License
+
+NOTE: The conan recipe license applies only to the files of this recipe, which can be used to build and package qt.
+It does *not* in any way apply or is related to the actual software being packaged.
+
+[MIT](https://github.com/bincrafters/conan-qt/blob/stable/5.11.3/LICENSE.md)
