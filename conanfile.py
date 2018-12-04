@@ -45,10 +45,11 @@ class QtConan(ConanFile):
 
     name = "qt"
     version = "5.11.2"
-    description = "Conan.io package for Qt library."
+    description = "Qt is a cross-platform framework for graphical user interfaces."
+    topics = ("conan", "qt", "ui")
     url = "https://github.com/bincrafters/conan-qt"
-    homepage = "https://www.qt.io/"
-    license = "http://doc.qt.io/qt-5/lgpl.html"
+    homepage = "https://www.qt.io"
+    license = "LGPL-3.0-only"
     author = "Bincrafters <bincrafters@gmail.com>"
     exports = ["LICENSE.md", "qtmodules.conf", "*.diff"]
     settings = "os", "arch", "compiler", "build_type"
