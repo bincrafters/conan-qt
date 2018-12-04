@@ -18,7 +18,7 @@ class qt(Generator):
 
     @property
     def content(self):
-        return "[Paths]\nPrefix = %s" % self.conanfile.deps_cpp_info["Qt"].rootpath.replace("\\", "/")
+        return "[Paths]\nPrefix = %s" % self.conanfile.deps_cpp_info["qt"].rootpath.replace("\\", "/")
 
 
 class QtConan(ConanFile):
@@ -43,7 +43,7 @@ class QtConan(ConanFile):
 
     _submodules = _getsubmodules()
 
-    name = "Qt"
+    name = "qt"
     version = "5.11.2"
     description = "Conan.io package for Qt library."
     url = "https://github.com/bincrafters/conan-qt"
