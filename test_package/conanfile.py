@@ -9,8 +9,8 @@ from conans import ConanFile, CMake, tools
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "qt"
+    settings = "os", "compiler", "build_type", "arch", "os_build", "arch_build"
+    generators = "qt"
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
@@ -90,9 +90,14 @@ class TestPackageConan(ConanFile):
                 "disabled cmake test with static Qt, because of https://bugreports.qt.io/browse/QTBUG-38913")
         else:
             self.output.info("Testing CMake")
-            self.run(os.path.join("bin", "test_package"))
+            if self.settings.compiler == "Visual Studio":
+                bin_path = str(self.settings.build_type)
+            else:
+                bin_path = self.build_folder
+            self.run(os.path.join(bin_path, "test_package"))
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if (not tools.cross_building(self.settings)) or\
+                (self.settings.os_build == self.settings.os and self.settings.arch_build == "x86_64" and self.settings.arch == "x86"):
             self._test_with_qmake()
             self._test_with_cmake()
