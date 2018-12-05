@@ -1,6 +1,6 @@
 [![Download](https://api.bintray.com/packages/bincrafters/public-conan/qt%3Abincrafters/images/download.svg) ](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/_latestVersion)
-[![Build Status Travis](https://travis-ci.org/bincrafters/conan-qt.svg?branch=stable%2F5.11.3)](https://travis-ci.org/bincrafters/conan-qt)
-[![Build Status AppVeyor](https://ci.appveyor.com/api/projects/status/github/bincrafters/conan-qt?branch=stable%2F5.11.3&svg=true)](https://ci.appveyor.com/project/bincrafters/conan-qt)
+[![Build Status Travis](https://travis-ci.org/bincrafters/conan-qt.svg?branch=stable%2F5.12.0)](https://travis-ci.org/bincrafters/conan-qt)
+[![Build Status AppVeyor](https://ci.appveyor.com/api/projects/status/github/bincrafters/conan-qt?branch=stable%2F5.12.0&svg=true)](https://ci.appveyor.com/project/bincrafters/conan-qt)
 
 ## Conan package recipe for [*qt*](https://www.qt.io)
 
@@ -20,14 +20,14 @@ If you wish to report an issue or make a request for a Bincrafters package, plea
 
 ### Basic setup
 
-    $ conan install qt/5.11.3@bincrafters/stable
+    $ conan install qt/5.12.0@bincrafters/stable
 
 ### Project setup
 
 If you handle multiple dependencies in your project is better to add a *conanfile.txt*
 
     [requires]
-    qt/5.11.3@bincrafters/stable
+    qt/5.12.0@bincrafters/stable
 
     [generators]
     txt
@@ -112,4 +112,4 @@ The following command both runs all the steps of the conan file, and publishes t
 NOTE: The conan recipe license applies only to the files of this recipe, which can be used to build and package qt.
 It does *not* in any way apply or is related to the actual software being packaged.
 
-[MIT](https://github.com/bincrafters/conan-qt/blob/stable/5.11.3/LICENSE.md)
+[MIT](https://github.com/bincrafters/conan-qt/blob/stable/5.12.0/LICENSE.md)

@@ -44,7 +44,7 @@ class QtConan(ConanFile):
     _submodules = _getsubmodules()
 
     name = "qt"
-    version = "5.11.3"
+    version = "5.12.0"
     description = "Qt is a cross-platform framework for graphical user interfaces."
     topics = ("conan", "qt", "ui")
     url = "https://github.com/bincrafters/conan-qt"
@@ -170,9 +170,9 @@ class QtConan(ConanFile):
         url = "http://download.qt.io/official_releases/qt/{0}/{1}/single/qt-everywhere-src-{1}" \
             .format(self.version[:self.version.rfind('.')], self.version)
         if tools.os_info.is_windows:
-            tools.get("%s.zip" % url, md5='9a57b251658d985c26acb6de18b69328')
+            tools.get("%s.zip" % url, md5='66eaa8f2ad1b8a1867458187a31d0a88')
         elif sys.version_info.major >= 3:
-            tools.get("%s.tar.xz" % url, md5='02b353bfe7a40a8dc4274e1d17226d2b')
+            tools.get("%s.tar.xz" % url, md5='af569de3eb42da4457b0897e5759dc91')
         else:  # python 2 cannot deal with .xz archives
             self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
         shutil.move("qt-everywhere-src-%s" % self.version, "qt5")
@@ -351,6 +351,9 @@ class QtConan(ConanFile):
             args += ['QMAKE_CXX=' + value,
                      'QMAKE_LINK=' + value,
                      'QMAKE_LINK_SHLIB=' + value]
+
+        if tools.os_info.is_linux and self.settings.compiler == "clang":
+            args +=['QMAKE_CXXFLAGS+="-ftemplate-depth=1024"']
 
         if self.options.config:
             args.append(str(self.options.config))
