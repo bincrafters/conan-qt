@@ -316,6 +316,9 @@ class QtConan(ConanFile):
                              (self.settings.os, self.settings.compiler,
                               self.settings.compiler.version, self.settings.arch))
 
+        if self.settings.os == "Linux" and self.settings.compiler == "clang":
+            args += ["-no-use-gold-linker"]
+
         value = os.getenv('CC')
         if value:
             args += ['QMAKE_CC=' + value,
