@@ -83,6 +83,7 @@ class QtConan(ConanFile):
         "device": "ANY",
         "cross_compile": "ANY",
         "config": "ANY",
+        "multiconfiguration": [True, False],
     }, **{module: [True, False] for module in _submodules if module != 'qtbase'}
     )
     no_copy_source = True
@@ -114,6 +115,7 @@ class QtConan(ConanFile):
         "device": None,
         "cross_compile": None,
         "config": None,
+        "multiconfiguration": False,
     }, **{module: False for module in _submodules if module != 'qtbase'}
     )
     requires = "zlib/1.2.11@conan/stable"
@@ -195,6 +197,9 @@ class QtConan(ConanFile):
         if self.settings.os == "Macos":
             del self.settings.os.version
 
+        if self.options.multiconfiguration:
+            del self.settings.build_type
+
         # assert QtConan.version == QtConan._submodules['qtbase']['branch']
 
         def _enablemodule(mod):
@@ -219,23 +224,23 @@ class QtConan(ConanFile):
             self.options["glib"].shared = True
         # if self.options.with_libiconv:
         #     self.requires("libiconv/1.15@bincrafters/stable")
-        if self.options.with_doubleconversion:
+        if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.1.1@bincrafters/stable")
-        if self.options.with_freetype:
+        if self.options.with_freetype and not self.options.multiconfiguration:
             self.requires("freetype/2.9.0@bincrafters/stable")
             self.options["freetype"].with_png = self.options.with_libpng
             self.options["freetype"].with_zlib = True
         # if self.options.with_icu:
         #     self.requires("icu/63.1@bincrafters/stable")
         #     self.options["icu"].shared = self.options.shared
-        if self.options.with_harfbuzz:
+        if self.options.with_harfbuzz and not self.options.multiconfiguration:
             self.requires("harfbuzz/2.3.0@bincrafters/stable")
             self.options["harbuzz"].with_freetype = self.options.with_freetype
-        if self.options.with_libjpeg:
+        if self.options.with_libjpeg and not self.options.multiconfiguration:
             self.requires("libjpeg/9c@bincrafters/stable")
-        if self.options.with_libpng:
+        if self.options.with_libpng and not self.options.multiconfiguration:
             self.requires("libpng/1.6.34@bincrafters/stable")
-        if self.options.with_sqlite3:
+        if self.options.with_sqlite3 and not self.options.multiconfiguration:
             self.requires("sqlite3/3.28.0@bincrafters/stable")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.with_mysql:
@@ -380,7 +385,9 @@ class QtConan(ConanFile):
                     args.append("-static-runtime")
         else:
             args.insert(0, "-shared")
-        if self.settings.build_type == "Debug":
+        if self.options.multiconfiguration:
+            args.append("-debug-and-release")
+        elif self.settings.build_type == "Debug":
             args.append("-debug")
         elif self.settings.build_type == "Release":
             args.append("-release")
@@ -433,7 +440,10 @@ class QtConan(ConanFile):
                               ("with_libpng", "libpng"),
                               ("with_sqlite3", "sqlite")]:
             if getattr(self.options, opt):
-                args += ["-system-" + conf_arg]
+                if self.options.multiconfiguration:
+                    args += ["-qt-" + conf_arg]
+                else:
+                    args += ["-system-" + conf_arg]
             else:
                 args += ["-no-" + conf_arg]
 
