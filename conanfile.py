@@ -44,12 +44,12 @@ class QtConan(ConanFile):
     _submodules = _getsubmodules()
 
     name = "qt"
-    version = "5.9.7"
+    version = "5.9.8"
     description = "Qt is a cross-platform framework for graphical user interfaces."
     topics = ("conan", "qt", "ui")
     url = "https://github.com/bincrafters/conan-qt"
     homepage = "https://www.qt.io"
-    license = "LGPL-3.0-only"
+    license = "LGPL-3.0"
     author = "Bincrafters <bincrafters@gmail.com>"
     exports = ["LICENSE.md", "qtmodules.conf", "*.diff"]
     settings = "os", "arch", "compiler", "build_type"
@@ -170,9 +170,9 @@ class QtConan(ConanFile):
         url = "http://download.qt.io/official_releases/qt/{0}/{1}/single/qt-everywhere-opensource-src-{1}" \
             .format(self.version[:self.version.rfind('.')], self.version)
         if tools.os_info.is_windows:
-            tools.get("%s.zip" % url)
+            tools.get("%s.zip" % url, sha256='23586136fb8cb108d7c63288d8c1b34f648ef3c9b73610a62ca2d4d77d18c7de')
         elif sys.version_info.major >= 3:
-            tools.get("%s.tar.xz" % url)
+            tools.get("%s.tar.xz" % url, sha256='86aca7dc37f161fc730a9d4f6bddf684962ca560327682e282ff61bf8b859c36')
         else:  # python 2 cannot deal with .xz archives
             self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
         shutil.move("qt-everywhere-opensource-src-%s" % self.version, "qt5")
