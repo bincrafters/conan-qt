@@ -17,6 +17,7 @@ jobs:
       CONAN_LOGIN_USERNAME: $(CONAN_LOGIN_USERNAME)
       CONAN_PASSWORD: $(CONAN_PASSWORD)
       CONAN_DOCKER_32_IMAGES: True
+      CONAN_BUILD_POLICY: missing
   strategy:
     matrix:
       Gcc 4.9 x86:
@@ -106,6 +107,7 @@ jobs:
     env:
       CONAN_LOGIN_USERNAME: $(CONAN_LOGIN_USERNAME)
       CONAN_PASSWORD: $(CONAN_PASSWORD)
+      CONAN_BUILD_POLICY: missing
   strategy:
     matrix:
       Clang 8.1:

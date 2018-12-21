@@ -2,13 +2,13 @@ build: false
 
 environment:
     PYTHON: "C:\\Python37"
+    CONAN_BUILD_POLICY: "missing"
 
     CONAN_TOTAL_PAGES: 6
 
     matrix:
         - MINGW_CONFIGURATIONS: '4.9@x86@dwarf2@posix'
         - MINGW_CONFIGURATIONS: '4.9@x86_64@seh@posix'
-        - MINGW_CONFIGURATIONS: '4.9@x86_64@sjlj@posix'
         - MINGW_CONFIGURATIONS: '6@x86@dwarf2@posix'
         - MINGW_CONFIGURATIONS: '6@x86_64@seh@posix'
         - MINGW_CONFIGURATIONS: '7@x86@dwarf2@posix'

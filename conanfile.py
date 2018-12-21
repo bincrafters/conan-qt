@@ -57,10 +57,25 @@ class QtConan(ConanFile):
     options = dict({
         "shared": [True, False],
         "commercial": [True, False],
+
         "opengl": ["no", "es2", "desktop", "dynamic"],
         "openssl": [True, False],
+        "with_pcre2": [True, False],
+        # "with_glib": [True, False],  # Qt relies on pkg-config for consuming glib
+        # "with_libiconv": [True, False],  # Qt tests failure "invalid conversion from const char** to char**"
+        "with_doubleconversion": [True, False],
+        "with_freetype": [True, False],
+        # "with_icu": [True, False], # waiting for 64.1 or 63.2
+        "with_harfbuzz": [True, False],
+        "with_libjpeg": [True, False],
+        "with_libpng": [True, False],
+        "with_sqlite3": [True, False],
+        "with_pq": [True, False],
+        "with_odbc": [True, False],
+
         "GUI": [True, False],
         "widgets": [True, False],
+
         "device": "ANY",
         "cross_compile": "ANY",
         "config": "ANY",
@@ -71,9 +86,23 @@ class QtConan(ConanFile):
         "shared": True,
         "commercial": False,
         "opengl": "desktop",
-        "openssl": False,
+        "openssl": True,
+        "with_pcre2": True,
+        # "with_glib": True,
+        # "with_libiconv": True,
+        "with_doubleconversion": True,
+        "with_freetype": True,
+        # "with_icu": True,
+        "with_harfbuzz": True,
+        "with_libjpeg": True,
+        "with_libpng": True,
+        "with_sqlite3": True,
+        "with_pq": True,
+        "with_odbc": True,
+
         "GUI": True,
         "widgets": True,
+
         "device": None,
         "cross_compile": None,
         "config": None,
@@ -119,13 +148,21 @@ class QtConan(ConanFile):
             self.build_requires("jom_installer/1.1.2@bincrafters/stable")
 
     def configure(self):
-        if self.options.openssl:
-            self.requires("OpenSSL/1.1.0g@conan/stable")
-            self.options["OpenSSL"].no_zlib = True
+        # if self.settings.os != 'Linux':
+        #     self.options.with_glib = False
+        #     self.options.with_libiconv = False
+        if self.settings.os == "Windows":
+            self.options.with_pq = False
+
         if self.options.widgets:
             self.options.GUI = True
         if not self.options.GUI:
             self.options.opengl = "no"
+            self.options.with_freetype = False
+            self.options.with_harfbuzz = False
+            self.options.with_libjpeg = False
+            self.options.with_libpng = False
+
         if self.settings.os == "Android" and self.options.opengl == "desktop":
             raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
 
@@ -140,6 +177,45 @@ class QtConan(ConanFile):
         for module in QtConan._submodules:
             if getattr(self.options, module):
                 _enablemodule(module)
+
+    def requirements(self):
+        if self.options.openssl:
+            self.requires("OpenSSL/1.1.1a@conan/stable")
+            self.options["OpenSSL"].no_zlib = False
+        self.requires("zlib/1.2.11@conan/stable")
+        if self.options.with_pcre2:
+            self.requires("pcre2/10.32@bincrafters/stable")
+
+        # if self.options.with_glib:
+        #     self.requires("glib/2.57.1@bincrafters/stable")
+        # if self.options.with_libiconv:
+        #     self.requires("libiconv/1.15@bincrafters/stable")
+        if self.options.with_doubleconversion:
+            self.requires("double-conversion/3.1.1@bincrafters/stable")
+        if self.options.with_freetype:
+            self.requires("freetype/2.9.0@bincrafters/stable")
+            self.options["freetype"].with_png = self.options.with_libpng
+            self.options["freetype"].with_zlib = True
+        # if self.options.with_icu:
+        #     self.requires("icu/63.1@bincrafters/stable")
+        #     self.options["icu"].shared = self.options.shared
+        if self.options.with_harfbuzz:
+            self.requires("harfbuzz/2.3.0@bincrafters/stable")
+            self.options["harbuzz"].with_freetype = self.options.with_freetype
+        if self.options.with_libjpeg:
+            self.requires("libjpeg/9c@bincrafters/stable")
+        if self.options.with_libpng:
+            self.requires("libpng/1.6.34@bincrafters/stable")
+        if self.options.with_sqlite3:
+            self.requires("sqlite3/3.26.0@bincrafters/stable")
+            self.options["sqlite3"].enable_column_metadata = True
+        if self.options.with_pq:
+            self.requires("libpq/9.6.9@bincrafters/stable")
+            self.options["libpq"].with_zlib = True
+            self.options["libpq"].with_openssl = False
+        if self.options.with_odbc:
+            self.requires("odbc/2.3.7@bincrafters/stable")
+            self.options["odbc"].shared = (self.settings.os == "Windows")
 
     def system_requirements(self):
         if self.options.GUI:
@@ -177,7 +253,7 @@ class QtConan(ConanFile):
             self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
         shutil.move("qt-everywhere-src-%s" % self.version, "qt5")
 
-        for patch in ["cc04651dea4c4678c626cb31b3ec8394426e2b25.diff"]:
+        for patch in ["cc04651dea4c4678c626cb31b3ec8394426e2b25.diff", "fffe5d622549f85968ea0be9717b90cbc020be71.diff"]:
             tools.patch("qt5/qtbase", patch)
 
     def _xplatform(self):
@@ -299,10 +375,58 @@ class QtConan(ConanFile):
                 args += ["-openssl-linked"]
             else:
                 args += ["-openssl"]
-            args += ["-I %s" % i for i in self.deps_cpp_info["OpenSSL"].include_paths]
-            libs = self.deps_cpp_info["OpenSSL"].libs
-            lib_paths = self.deps_cpp_info["OpenSSL"].lib_paths
-            os.environ["OPENSSL_LIBS"] = " ".join(["-L" + i for i in lib_paths] + ["-l" + i for i in libs])
+
+        # args.append("--iconv=" + ("gnu" if self.options.with_libiconv else "no"))
+
+        # args.append("--glib=" + ("yes" if self.options.with_glib else "no")
+        args.append("--pcre=" + ("system" if self.options.with_pcre2 else "qt"))
+        # args.append("--icu=" + ("yes" if self.options.with_icu else "no"))
+        args.append("--sql-psql=" + ("yes" if self.options.with_pq else "no"))
+        args.append("--sql-odbc=" + ("yes" if self.options.with_odbc else "no"))
+
+        for opt, conf_arg in [
+                              ("with_doubleconversion", "doubleconversion"),
+                              ("with_freetype", "freetype"),
+                              ("with_harfbuzz", "harfbuzz"),
+                              ("with_libjpeg", "libjpeg"),
+                              ("with_libpng", "libpng"),
+                              ("with_sqlite3", "sqlite")]:
+            if getattr(self.options, opt):
+                args += ["-system-" + conf_arg]
+            else:
+                args += ["-no-" + conf_arg]
+
+        libmap = [("zlib", "ZLIB"),
+                  ("OpenSSL", "OPENSSL"),
+                  ("pcre2", "PCRE2"),
+                  # ("glib", "GLIB"),
+                  # ("libiconv", "ICONV"),
+                  ("double-conversion", "DOUBLECONVERSION"),
+                  ("freetype", "FREETYPE"),
+                  # ("icu", "ICU"),
+                  ("harfbuzz", "HARFBUZZ"),
+                  ("libjpeg", "LIBJPEG"),
+                  ("libpng", "LIBPNG"),
+                  ("sqlite3", "SQLITE"),
+                  ("libpq", "PSQL"),
+                  ("odbc", "ODBC")]
+        for package, var in libmap:
+            if package in self.deps_cpp_info.deps:
+                if self.deps_cpp_info[package].include_paths:
+                    args.append("\"%s_INCDIR=%s\"" % (var, self.deps_cpp_info[package].include_paths[-1]))
+                for lib_path in self.deps_cpp_info[package].lib_paths:
+                    args.append("\"%s_LIBDIR=%s\"" % (var, lib_path))
+                    break
+                args += ["-D " + s for s in self.deps_cpp_info[package].defines]
+
+                def _gather_libs(p):
+                    libs = ["-l" + i for i in self.deps_cpp_info[p].libs]
+                    libs += self.deps_cpp_info[p].sharedlinkflags
+                    for dep in self.deps_cpp_info[p].public_deps:
+                        libs += ["-L" + lpath for lpath in self.deps_cpp_info[dep].lib_paths]
+                        libs += _gather_libs(dep)
+                    return libs
+                args.append("\"%s_LIBS=%s\"" % (var, " ".join(_gather_libs(package))))
 
         if self.settings.os == "Linux":
             if self.options.GUI:
@@ -358,12 +482,13 @@ class QtConan(ConanFile):
         if self.options.config:
             args.append(str(self.options.config))
 
-        args.append("-qt-zlib")
-
         def _build(make):
             with tools.environment_append({"MAKEFLAGS": "j%d" % tools.cpu_count()}):
-                self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
-                self.run(make)
+                try:
+                    self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
+                finally:
+                    self.output.info(open('config.log', 'r').read())
+                self.run(make, run_environment=True)
                 self.run("%s install" % make)
 
         if tools.os_info.is_windows:
