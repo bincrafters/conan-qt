@@ -1,5 +1,5 @@
 [![Download](https://api.bintray.com/packages/bincrafters/public-conan/qt%3Abincrafters/images/download.svg) ](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/_latestVersion)
-[![Build Status Travis](https://travis-ci.org/bincrafters/conan-qt.svg?branch=stable%2F5.12.0)](https://travis-ci.org/bincrafters/conan-qt)
+[![Build Status Travis](https://travis-ci.com/bincrafters/conan-qt.svg?branch=stable%2F5.12.0)](https://travis-ci.com/bincrafters/conan-qt)
 [![Build Status AppVeyor](https://ci.appveyor.com/api/projects/status/github/bincrafters/conan-qt?branch=stable%2F5.12.0&svg=true)](https://ci.appveyor.com/project/bincrafters/conan-qt)
 
 ## Conan package recipe for [*qt*](https://www.qt.io)
@@ -11,9 +11,9 @@ The packages generated with this **conanfile** can be found on [Bintray](https:/
 
 ## Issues
 
-If you wish to report an issue or make a request for a Bincrafters package, please do so here:
+If you wish to report an issue or make a request for a package, please do so here:
 
-[Bincrafters Community Issues](https://github.com/bincrafters/community/issues)
+[Issues Tracker](https://github.com/bincrafters/community/issues)
 
 
 ## For Users
@@ -52,7 +52,16 @@ The following command both runs all the steps of the conan file, and publishes t
 | shared      | True |  [True, False] |
 | commercial      | False |  [True, False] |
 | opengl      | desktop |  ['no', 'es2', 'desktop', 'dynamic'] |
-| openssl      | False |  [True, False] |
+| openssl      | True |  [True, False] |
+| with_pcre2      | True |  [True, False] |
+| with_doubleconversion      | True |  [True, False] |
+| with_freetype      | True |  [True, False] |
+| with_harfbuzz      | True |  [True, False] |
+| with_libjpeg      | True |  [True, False] |
+| with_libpng      | True |  [True, False] |
+| with_sqlite3      | True |  [True, False] |
+| with_pq      | True |  [True, False] |
+| with_odbc      | True |  [True, False] |
 | GUI      | True |  [True, False] |
 | widgets      | True |  [True, False] |
 | device      |  |  ANY |

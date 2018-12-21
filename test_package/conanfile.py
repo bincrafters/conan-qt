@@ -46,11 +46,11 @@ class TestPackageConan(ConanFile):
                 self.run("qmake %s" % " ".join(args), run_environment=True)
                 if tools.os_info.is_windows:
                     if self.settings.compiler == "Visual Studio":
-                        self.run("jom")
+                        self.run("jom", run_environment=True)
                     else:
-                        self.run("mingw32-make")
+                        self.run("mingw32-make", run_environment=True)
                 else:
-                    self.run("make")
+                    self.run("make", run_environment=True)
 
             if self.settings.compiler == "Visual Studio":
                 with tools.vcvars(self.settings):
@@ -82,7 +82,7 @@ class TestPackageConan(ConanFile):
             bin_path = os.path.join("test_package.app", "Contents", "MacOS")
         bin_path = os.path.join("qmake_folder", bin_path)
         shutil.copy("qt.conf", bin_path)
-        self.run(os.path.join(bin_path, "test_package"))
+        self.run(os.path.join(bin_path, "test_package"), run_environment=True)
 
     def _test_with_cmake(self):
         if not self.options["qt"].shared:
@@ -94,7 +94,7 @@ class TestPackageConan(ConanFile):
                 bin_path = str(self.settings.build_type)
             else:
                 bin_path = self.build_folder
-            self.run(os.path.join(bin_path, "test_package"))
+            self.run(os.path.join(bin_path, "test_package"), run_environment=True)
 
     def test(self):
         if (not tools.cross_building(self.settings)) or\
