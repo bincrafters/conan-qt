@@ -342,18 +342,18 @@ class QtConan(ConanFile):
 
         value = _getenvpath('CC')
         if value:
-            args += ['QMAKE_CC=' + value,
-                     'QMAKE_LINK_C=' + value,
-                     'QMAKE_LINK_C_SHLIB=' + value]
+            args += ['QMAKE_CC="' + value + '"',
+                     'QMAKE_LINK_C="' + value + '"',
+                     'QMAKE_LINK_C_SHLIB="' + value + '"']
 
         value = _getenvpath('CXX')
         if value:
-            args += ['QMAKE_CXX=' + value,
-                     'QMAKE_LINK=' + value,
-                     'QMAKE_LINK_SHLIB=' + value]
+            args += ['QMAKE_CXX="' + value + '"',
+                     'QMAKE_LINK="' + value + '"',
+                     'QMAKE_LINK_SHLIB="' + value + '"']
 
         if tools.os_info.is_linux and self.settings.compiler == "clang":
-            args +=['QMAKE_CXXFLAGS+="-ftemplate-depth=1024"']
+            args += ['QMAKE_CXXFLAGS+="-ftemplate-depth=1024"']
 
         if self.options.config:
             args.append(str(self.options.config))
