@@ -321,15 +321,15 @@ class QtConan(ConanFile):
 
         value = os.getenv('CC')
         if value:
-            args += ['QMAKE_CC=' + value,
-                     'QMAKE_LINK_C=' + value,
-                     'QMAKE_LINK_C_SHLIB=' + value]
+            args += ['QMAKE_CC="' + value + '"',
+                     'QMAKE_LINK_C="' + value + '"',
+                     'QMAKE_LINK_C_SHLIB="' + value + '"']
 
         value = os.getenv('CXX')
         if value:
-            args += ['QMAKE_CXX=' + value,
-                     'QMAKE_LINK=' + value,
-                     'QMAKE_LINK_SHLIB=' + value]
+            args += ['QMAKE_CXX="' + value + '"',
+                     'QMAKE_LINK="' + value + '"',
+                     'QMAKE_LINK_SHLIB="' + value + '"']
 
         if self.options.config:
             args.append(str(self.options.config))
