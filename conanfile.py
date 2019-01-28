@@ -5,7 +5,6 @@ import os
 import shutil
 import sys
 
-import configparser
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.model import Generator
@@ -21,27 +20,58 @@ class qt(Generator):
         return "[Paths]\nPrefix = %s" % self.conanfile.deps_cpp_info["qt"].rootpath.replace("\\", "/")
 
 
+def _getsubmodules():
+    import configparser
+    import json
+    config = configparser.ConfigParser()
+    config.read('qt/qtmodules.conf')
+    res = {}
+    assert config.sections()
+    for s in config.sections():
+        section = str(s)
+        assert section.startswith("submodule ")
+        assert section.count('"') == 2
+        modulename = section[section.find('"') + 1: section.rfind('"')]
+        status = str(config.get(section, "status"))
+        if status != "obsolete" and status != "ignore":
+            res[modulename] = {"branch": str(config.get(section, "branch")), "status": status,
+                               "path": str(config.get(section, "path")), "depends": []}
+            if config.has_option(section, "depends"):
+                res[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
+
+            res[modulename]["features"] = {}
+
+            def _parseconfig(path, features):
+                configfile = os.path.join('qt', res[modulename]['path'], path, 'configure.json')
+                if not os.path.isfile(configfile):
+                    return
+                with open(configfile) as json_data:
+                    d = json.load(json_data, strict=False)
+                if 'features' in d:
+                    for f, feature in d['features'].items():
+                        if 'purpose' in feature and 'section' in feature:
+                            features[f] = feature
+                if 'subconfigs' in d:
+                    for subconfig in d['subconfigs']:
+                        _parseconfig(subconfig, features)
+
+            _parseconfig('', res[modulename]["features"])
+    return res
+
+
+_submodules = _getsubmodules()
+
+
+def _getadditionaloptions(modulevalue, featurevalue):
+    res = {}
+    for module in _submodules:
+        res[module] = modulevalue
+        for feature in _submodules[module]['features']:
+            res[module + '_' + feature] = featurevalue
+    return res
+
+
 class QtConan(ConanFile):
-
-    def _getsubmodules():
-        config = configparser.ConfigParser()
-        config.read('qtmodules.conf')
-        res = {}
-        assert config.sections()
-        for s in config.sections():
-            section = str(s)
-            assert section.startswith("submodule ")
-            assert section.count('"') == 2
-            modulename = section[section.find('"') + 1: section.rfind('"')]
-            status = str(config.get(section, "status"))
-            if status != "obsolete" and status != "ignore":
-                res[modulename] = {"branch": str(config.get(section, "branch")), "status": status,
-                                   "path": str(config.get(section, "path")), "depends": []}
-                if config.has_option(section, "depends"):
-                    res[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
-        return res
-
-    _submodules = _getsubmodules()
 
     name = "qt"
     version = "5.12.0"
@@ -51,7 +81,7 @@ class QtConan(ConanFile):
     homepage = "https://www.qt.io"
     license = "LGPL-3.0"
     author = "Bincrafters <bincrafters@gmail.com>"
-    exports = ["LICENSE.md", "qtmodules.conf", "*.diff"]
+    exports = ["LICENSE.md", "qt/*", "*.diff"]
     settings = "os", "arch", "compiler", "build_type"
 
     options = dict({
@@ -79,7 +109,7 @@ class QtConan(ConanFile):
         "device": "ANY",
         "cross_compile": "ANY",
         "config": "ANY",
-    }, **{module: [True, False] for module in _submodules}
+    }, **_getadditionaloptions([True, False], [True, False])
     )
     no_copy_source = True
     default_options = dict({
@@ -106,7 +136,7 @@ class QtConan(ConanFile):
         "device": None,
         "cross_compile": None,
         "config": None,
-    }, **{module: False for module in _submodules}
+    }, **_getadditionaloptions(False, True)
     )
     requires = "zlib/1.2.11@conan/stable"
     short_paths = True
@@ -167,17 +197,21 @@ class QtConan(ConanFile):
         if self.settings.os == "Android" and self.options.opengl == "desktop":
             raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
 
-        assert QtConan.version == QtConan._submodules['qtbase']['branch']
+        assert QtConan.version == _submodules['qtbase']['branch']
 
         def _enablemodule(mod):
             setattr(self.options, mod, True)
-            for req in QtConan._submodules[mod]["depends"]:
+            for req in _submodules[mod]["depends"]:
                 _enablemodule(req)
 
         self.options.qtbase = True
-        for module in QtConan._submodules:
+        for module in _submodules:
             if getattr(self.options, module):
                 _enablemodule(module)
+        for module in _submodules:
+            if not getattr(self.options, module):
+                for feature in _submodules[module]['features']:
+                    setattr(self.options, module + '_' + feature, False)
 
     def requirements(self):
         if self.options.openssl:
@@ -351,10 +385,14 @@ class QtConan(ConanFile):
             args.append("-release")
             args.append("-optimize-size")
             
-        for module in QtConan._submodules:
+        for module in _submodules:
             if not getattr(self.options, module) \
-                    and os.path.isdir(os.path.join(self.source_folder, 'qt5', QtConan._submodules[module]['path'])):
+                    and os.path.isdir(os.path.join(self.source_folder, 'qt5', _submodules[module]['path'])):
                 args.append("-skip " + module)
+            else:
+                for feature in _submodules[module]['features']:
+                    if not getattr(self.options, module + '_' + feature):
+                        args.append("-no-feature-" + feature)
 
         # openGL
         if self.options.opengl == "no":
