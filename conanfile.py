@@ -102,6 +102,9 @@ class QtConan(ConanFile):
         "with_sqlite3": [True, False],
         "with_pq": [True, False],
         "with_odbc": [True, False],
+        "with_sdl2": [True, False],
+        "with_libalsa": [True, False],
+        "with_openal": [True, False],
 
         "GUI": [True, False],
         "widgets": [True, False],
@@ -129,6 +132,9 @@ class QtConan(ConanFile):
         "with_sqlite3": True,
         "with_pq": True,
         "with_odbc": True,
+        "with_sdl2": True,
+        "with_libalsa": True,
+        "with_openal": True,
 
         "GUI": True,
         "widgets": True,
@@ -194,6 +200,16 @@ class QtConan(ConanFile):
             self.options.with_libjpeg = False
             self.options.with_libpng = False
 
+        if not self.options.qtgamepad:
+            self.options.with_sdl2 = False
+
+        if not self.options.qtmultimedia:
+            self.options.with_libalsa = False
+            self.options.with_openal = False
+
+        if self.settings.os != "Linux":
+            self.options.with_libalsa = False
+
         if self.settings.os == "Android" and self.options.opengl == "desktop":
             raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
 
@@ -250,6 +266,12 @@ class QtConan(ConanFile):
         if self.options.with_odbc:
             self.requires("odbc/2.3.7@bincrafters/stable")
             self.options["odbc"].shared = (self.settings.os == "Windows")
+        if self.options.with_sdl2:
+            self.requires("sdl2/2.0.9@bincrafters/stable")
+        if self.options.with_openal:
+            self.requires("openal/1.19.0@bincrafters/stable")
+        if self.options.with_libalsa:
+            self.requires("libalsa/1.1.5@conan/stable")
 
     def system_requirements(self):
         if self.options.GUI:
@@ -447,7 +469,10 @@ class QtConan(ConanFile):
                   ("libpng", "LIBPNG"),
                   ("sqlite3", "SQLITE"),
                   ("libpq", "PSQL"),
-                  ("odbc", "ODBC")]
+                  ("odbc", "ODBC"),
+                  ("sdl2", "SDL2"),
+                  ("openal", "OPENAL"),
+                  ("libalsa", "ALSA")]
         for package, var in libmap:
             if package in self.deps_cpp_info.deps:
                 if self.deps_cpp_info[package].include_paths:
