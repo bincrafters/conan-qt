@@ -16,6 +16,7 @@ jobs:
     env:
       CONAN_LOGIN_USERNAME: $(CONAN_LOGIN_USERNAME)
       CONAN_PASSWORD: $(CONAN_PASSWORD)
+      CONAN_DOCKER_32_IMAGES: True
   strategy:
     matrix:
       Gcc 4.9 x86:

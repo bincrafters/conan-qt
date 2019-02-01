@@ -1,5 +1,6 @@
 [![Download](https://api.bintray.com/packages/bincrafters/public-conan/qt%3Abincrafters/images/download.svg) ](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/_latestVersion)
 [![Build Status Travis](https://travis-ci.com/bincrafters/conan-qt.svg?branch=stable%2F5.12.0)](https://travis-ci.com/bincrafters/conan-qt)
+[![Build Status Azure](https://dev.azure.com/bincrafters/packages/_apis/build/status/bincrafters.conan-qt?branchName=stable%2F5.12.0)](https://dev.azure.com/bincrafters/packages/_build)
 [![Build Status AppVeyor](https://ci.appveyor.com/api/projects/status/github/bincrafters/conan-qt?branch=stable%2F5.12.0&svg=true)](https://ci.appveyor.com/project/bincrafters/conan-qt)
 
 ## Conan package recipe for [*qt*](https://www.qt.io)
@@ -62,6 +63,9 @@ The following command both runs all the steps of the conan file, and publishes t
 | with_sqlite3      | True |  [True, False] |
 | with_pq      | True |  [True, False] |
 | with_odbc      | True |  [True, False] |
+| with_sdl2      | True |  [True, False] |
+| with_libalsa      | True |  [True, False] |
+| with_openal      | True |  [True, False] |
 | GUI      | True |  [True, False] |
 | widgets      | True |  [True, False] |
 | device      |  |  ANY |

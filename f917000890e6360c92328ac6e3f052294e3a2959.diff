@@ -1,0 +1,30 @@
+From 8b9c9187f61d62e2065faef3cd4bf1fc98831d98 Mon Sep 17 00:00:00 2001
+From: Eric Lemanissier <eric.lemanissier@gmail.com>
+Date: Sun, 3 Feb 2019 14:42:27 +0100
+Subject: [PATCH] configure: use proper separator for mingw libraries
+
+Change-Id: Ic328691fe2f08e918c1bb67910521d85b274a8fd
+Fixes: QTBUG-73466
+---
+ mkspecs/features/toolchain.prf | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/mkspecs/features/toolchain.prf b/mkspecs/features/toolchain.prf
+index 2a7cbabc54..9c3a64aa8b 100644
+--- a/mkspecs/features/toolchain.prf
++++ b/mkspecs/features/toolchain.prf
+@@ -229,7 +229,10 @@ isEmpty($${target_prefix}.INCDIRS) {
+                 line ~= s/^[ \\t]*//  # remove leading spaces
+                 contains(line, "LIBRARY_PATH=.*") {
+                     line ~= s/^LIBRARY_PATH=//  # remove leading LIBRARY_PATH=
+-                    paths = $$split(line, $$QMAKE_DIRLIST_SEP)
++                    equals(QMAKE_HOST.os, Windows): \
++                        paths = $$split(line, ;)
++                    else: \
++                        paths = $$split(line, $$QMAKE_DIRLIST_SEP)
+                     for (path, paths): \
+                         QMAKE_DEFAULT_LIBDIRS += $$clean_path($$path)
+                 } else: contains(line, "Library search paths:") {
+-- 
+2.17.1.windows.2
+

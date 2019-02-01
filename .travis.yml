@@ -1,6 +1,7 @@
 env:
    global:
-     - CONAN_TOTAL_PAGES: 8
+     - CONAN_TOTAL_PAGES=8
+     - CONAN_DOCKER_32_IMAGES=True
 linux: &linux
    os: linux
    dist: xenial

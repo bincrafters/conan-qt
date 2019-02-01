@@ -44,7 +44,7 @@ class QtConan(ConanFile):
     _submodules = _getsubmodules()
 
     name = "qt"
-    version = "5.12.0"
+    version = "5.12.1"
     description = "Qt is a cross-platform framework for graphical user interfaces."
     topics = ("conan", "qt", "ui")
     url = "https://github.com/bincrafters/conan-qt"
@@ -52,7 +52,7 @@ class QtConan(ConanFile):
     license = "LGPL-3.0"
     author = "Bincrafters <bincrafters@gmail.com>"
     exports = ["LICENSE.md", "qtmodules.conf", "*.diff"]
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "arch", "compiler", "build_type", "os_build", "arch_build"
 
     options = dict({
         "shared": [True, False],
@@ -238,6 +238,9 @@ class QtConan(ConanFile):
             self.requires("openal/1.19.0@bincrafters/stable")
         if self.options.with_libalsa:
             self.requires("libalsa/1.1.5@conan/stable")
+        if self.options.GUI:
+            if self.settings.os == "Linux":
+                self.requires("xkbcommon/0.8.3@bincrafters/stable")
 
     def system_requirements(self):
         if self.options.GUI:
@@ -268,14 +271,14 @@ class QtConan(ConanFile):
         url = "http://download.qt.io/official_releases/qt/{0}/{1}/single/qt-everywhere-src-{1}" \
             .format(self.version[:self.version.rfind('.')], self.version)
         if tools.os_info.is_windows:
-            tools.get("%s.zip" % url, sha256='a60a82069d2180a2905913b6e8a901cbcbb74e6a749d25de3a892dc97151b31d')
+            tools.get("%s.zip" % url, sha256='18ebf2ea0f15a255512fe425abc00e6be0fc6960fd4eaa1189e85f81df650ce9')
         elif sys.version_info.major >= 3:
-            tools.get("%s.tar.xz" % url, sha256='356f42d9087718f22f03d13d0c2cdfb308f91dc3cf0c6318bed33f2094cd9d6c')
+            tools.get("%s.tar.xz" % url, sha256='caffbd625c7bc10ff8c5c7a27dbc7d84fa4de146975c0e1ffe904b514ccd6da4')
         else:  # python 2 cannot deal with .xz archives
             self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
         shutil.move("qt-everywhere-src-%s" % self.version, "qt5")
 
-        for patch in ["cc04651dea4c4678c626cb31b3ec8394426e2b25.diff", "fffe5d622549f85968ea0be9717b90cbc020be71.diff"]:
+        for patch in ["cc04651dea4c4678c626cb31b3ec8394426e2b25.diff", "fffe5d622549f85968ea0be9717b90cbc020be71.diff", "f917000890e6360c92328ac6e3f052294e3a2959.diff"]:
             tools.patch("qt5/qtbase", patch)
 
     def _xplatform(self):
@@ -476,7 +479,12 @@ class QtConan(ConanFile):
         else:
             xplatform_val = self._xplatform()
             if xplatform_val:
-                args += ["-xplatform %s" % xplatform_val]
+                if (not tools.cross_building(self.settings)) or\
+                        (self.settings.os_build == self.settings.os and\
+                         self.settings.arch_build == "x86_64" and self.settings.arch == "x86"):
+                    args += ["-platform %s" % xplatform_val]
+                else:
+                    args += ["-xplatform %s" % xplatform_val]
             else:
                 self.output.warn("host not supported: %s %s %s %s" %
                                  (self.settings.os, self.settings.compiler,
@@ -508,7 +516,16 @@ class QtConan(ConanFile):
             args.append(str(self.options.config))
 
         def _build(make):
-            with tools.environment_append({"MAKEFLAGS": "j%d" % tools.cpu_count()}):
+            for package in ['xkbcommon' ]:
+                if package in self.deps_cpp_info.deps:
+                    lib_path = self.deps_cpp_info[package].rootpath
+                    for dirpath, dirnames, filenames in os.walk(lib_path):
+                        for filename in filenames:
+                            if filename.endswith('.pc'):
+                                shutil.copyfile(os.path.join(dirpath, filename), filename)
+                                tools.replace_prefix_in_pc_file(filename, lib_path)
+
+            with tools.environment_append({"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": os.getcwd()}):
                 try:
                     self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
                 finally:
