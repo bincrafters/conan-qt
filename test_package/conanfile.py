@@ -64,7 +64,7 @@ class TestPackageConan(ConanFile):
                 "disabled cmake test with static Qt, because of https://bugreports.qt.io/browse/QTBUG-38913")
         else:
             self.output.info("Building with CMake")
-            cmake = CMake(self)
+            cmake = CMake(self, set_cmake_flags=True)
             cmake.configure()
             cmake.build()
 
