@@ -61,7 +61,7 @@ class QtConan(ConanFile):
         "opengl": ["no", "es2", "desktop", "dynamic"],
         "openssl": [True, False],
         "with_pcre2": [True, False],
-        # "with_glib": [True, False],  # Qt relies on pkg-config for consuming glib
+        "with_glib": [True, False],
         # "with_libiconv": [True, False],  # Qt tests failure "invalid conversion from const char** to char**"
         "with_doubleconversion": [True, False],
         "with_freetype": [True, False],
@@ -91,7 +91,7 @@ class QtConan(ConanFile):
         "opengl": "desktop",
         "openssl": True,
         "with_pcre2": True,
-        # "with_glib": True,
+        "with_glib": True,
         # "with_libiconv": True,
         "with_doubleconversion": True,
         "with_freetype": True,
@@ -155,8 +155,8 @@ class QtConan(ConanFile):
             self.build_requires("jom_installer/1.1.2@bincrafters/stable")
 
     def configure(self):
-        # if self.settings.os != 'Linux':
-        #     self.options.with_glib = False
+        if self.settings.os != 'Linux':
+            self.options.with_glib = False
         #     self.options.with_libiconv = False
         if self.settings.os == "Windows":
             self.options.with_pq = False
@@ -202,8 +202,9 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.32@bincrafters/stable")
 
-        # if self.options.with_glib:
-        #     self.requires("glib/2.57.1@bincrafters/stable")
+        if self.options.with_glib:
+            self.requires("glib/2.56.1@bincrafters/stable")
+            self.options["glib"].shared = True
         # if self.options.with_libiconv:
         #     self.requires("libiconv/1.15@bincrafters/stable")
         if self.options.with_doubleconversion:
@@ -403,7 +404,7 @@ class QtConan(ConanFile):
 
         # args.append("--iconv=" + ("gnu" if self.options.with_libiconv else "no"))
 
-        # args.append("--glib=" + ("yes" if self.options.with_glib else "no")
+        args.append("--glib=" + ("yes" if self.options.with_glib else "no"))
         args.append("--pcre=" + ("system" if self.options.with_pcre2 else "qt"))
         # args.append("--icu=" + ("yes" if self.options.with_icu else "no"))
         args.append("--sql-psql=" + ("yes" if self.options.with_pq else "no"))
@@ -424,7 +425,7 @@ class QtConan(ConanFile):
         libmap = [("zlib", "ZLIB"),
                   ("OpenSSL", "OPENSSL"),
                   ("pcre2", "PCRE2"),
-                  # ("glib", "GLIB"),
+                  ("glib", "GLIB"),
                   # ("libiconv", "ICONV"),
                   ("double-conversion", "DOUBLECONVERSION"),
                   ("freetype", "FREETYPE"),
@@ -516,7 +517,7 @@ class QtConan(ConanFile):
             args.append(str(self.options.config))
 
         def _build(make):
-            for package in ['xkbcommon' ]:
+            for package in ['xkbcommon', 'glib']:
                 if package in self.deps_cpp_info.deps:
                     lib_path = self.deps_cpp_info[package].rootpath
                     for dirpath, dirnames, filenames in os.walk(lib_path):
