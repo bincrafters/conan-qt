@@ -52,7 +52,7 @@ class QtConan(ConanFile):
     license = "LGPL-3.0"
     author = "Bincrafters <bincrafters@gmail.com>"
     exports = ["LICENSE.md", "qtmodules.conf", "*.diff"]
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "arch", "compiler", "build_type", "os_build", "arch_build"
 
     options = dict({
         "shared": [True, False],
@@ -327,7 +327,12 @@ class QtConan(ConanFile):
         else:
             xplatform_val = self._xplatform()
             if xplatform_val:
-                args += ["-xplatform %s" % xplatform_val]
+                if (not tools.cross_building(self.settings)) or\
+                        (self.settings.os_build == self.settings.os and\
+                         self.settings.arch_build == "x86_64" and self.settings.arch == "x86"):
+                    args += ["-platform %s" % xplatform_val]
+                else:
+                    args += ["-xplatform %s" % xplatform_val]
             else:
                 self.output.warn("host not supported: %s %s %s %s" %
                                  (self.settings.os, self.settings.compiler,
@@ -364,13 +369,6 @@ class QtConan(ConanFile):
                 with tools.vcvars(self.settings):
                     _build("jom")
             else:
-                # Workaround for configure using clang first if in the path
-                new_path = []
-                for item in os.environ['PATH'].split(';'):
-                    if item != 'C:\\Program Files\\LLVM\\bin':
-                        new_path.append(item)
-                os.environ['PATH'] = ';'.join(new_path)
-                # end workaround
                 _build("mingw32-make")
         else:
             _build("make")
