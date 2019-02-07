@@ -539,13 +539,6 @@ class QtConan(ConanFile):
                 with tools.vcvars(self.settings):
                     _build("jom")
             else:
-                # Workaround for configure using clang first if in the path
-                new_path = []
-                for item in os.environ['PATH'].split(';'):
-                    if item != 'C:\\Program Files\\LLVM\\bin':
-                        new_path.append(item)
-                os.environ['PATH'] = ';'.join(new_path)
-                # end workaround
                 _build("mingw32-make")
         else:
             _build("make")
