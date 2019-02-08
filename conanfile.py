@@ -70,6 +70,7 @@ class QtConan(ConanFile):
         "with_libjpeg": [True, False],
         "with_libpng": [True, False],
         "with_sqlite3": [True, False],
+        "with_mysql": [True, False],
         "with_pq": [True, False],
         "with_odbc": [True, False],
         "with_sdl2": [True, False],
@@ -100,6 +101,7 @@ class QtConan(ConanFile):
         "with_libjpeg": True,
         "with_libpng": True,
         "with_sqlite3": True,
+        "with_mysql": True,
         "with_pq": True,
         "with_odbc": True,
         "with_sdl2": True,
@@ -160,6 +162,8 @@ class QtConan(ConanFile):
         #     self.options.with_libiconv = False
         if self.settings.os == "Windows":
             self.options.with_pq = False
+            if self.settings.compiler == "gcc":
+                self.options.with_mysql = False
 
         if self.options.widgets:
             self.options.GUI = True
@@ -226,6 +230,11 @@ class QtConan(ConanFile):
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.26.0@bincrafters/stable")
             self.options["sqlite3"].enable_column_metadata = True
+        if self.options.with_mysql:
+            self.requires("mysql-connector-c/6.1.11@bincrafters/stable")
+            self.options["mysql-connector-c"].with_zlib = True
+            self.options["mysql-connector-c"].with_ssl = False
+            self.options["mysql-connector-c"].shared = True
         if self.options.with_pq:
             self.requires("libpq/9.6.9@bincrafters/stable")
             self.options["libpq"].with_zlib = True
@@ -407,6 +416,7 @@ class QtConan(ConanFile):
         args.append("--glib=" + ("yes" if self.options.with_glib else "no"))
         args.append("--pcre=" + ("system" if self.options.with_pcre2 else "qt"))
         # args.append("--icu=" + ("yes" if self.options.with_icu else "no"))
+        args.append("--sql-mysql=" + ("yes" if self.options.with_mysql else "no"))
         args.append("--sql-psql=" + ("yes" if self.options.with_pq else "no"))
         args.append("--sql-odbc=" + ("yes" if self.options.with_odbc else "no"))
 
@@ -434,6 +444,7 @@ class QtConan(ConanFile):
                   ("libjpeg", "LIBJPEG"),
                   ("libpng", "LIBPNG"),
                   ("sqlite3", "SQLITE"),
+                  ("mysql-connector-c", "MYSQL"),
                   ("libpq", "PSQL"),
                   ("odbc", "ODBC"),
                   ("sdl2", "SDL2"),
@@ -457,6 +468,8 @@ class QtConan(ConanFile):
                     return libs
                 args.append("\"%s_LIBS=%s\"" % (var, " ".join(_gather_libs(package))))
 
+        if 'mysql-connector-c' in self.deps_cpp_info.deps:
+            args.append("-mysql_config " + os.path.join(self.deps_cpp_info['mysql-connector-c'].rootpath, "bin", "mysql_config"))
         if self.settings.os == "Linux":
             if self.options.GUI:
                 args.append("-qt-xcb")
