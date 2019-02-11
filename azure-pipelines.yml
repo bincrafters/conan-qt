@@ -8,6 +8,8 @@ jobs:
     inputs:
       versionSpec: "3.7"
   - script: |
+      env | printenv | set
+      exit (-1)
       pip install --upgrade pip
       chmod +x .ci/install.sh
       ./.ci/install.sh
