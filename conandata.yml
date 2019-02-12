@@ -97,3 +97,5 @@ patches:
       base_path: "qt5/qtwebengine/src/3rdparty"
     - patch_file: "patches/f830b86.diff"
       base_path: "qt5/qtwebengine/src/3rdparty"
+    - patch_file: "patches/0435cb0b99d919d8ad17f4c6feed8236d7e6177e.diff"
+      base_path: "qt5/qtbase"

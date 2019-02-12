@@ -384,7 +384,7 @@ class QtConan(ConanFile):
                 return {"x86": "linux-g++-32",
                         "armv6": "linux-arm-gnueabi-g++",
                         "armv7": "linux-arm-gnueabi-g++",
-                        "armv7hf": "linux-arm-gnueabi-g++",
+                        "armv7hf": "linux-arm-gnueabihf-g++",
                         "armv8": "linux-aarch64-gnu-g++"}.get(str(self.settings.arch), "linux-g++")
             elif self.settings.compiler == "clang":
                 if self.settings.arch == "x86":
@@ -503,7 +503,7 @@ class QtConan(ConanFile):
             args += ["-opengl desktop"]
         elif self.options.opengl == "dynamic":
             args += ["-opengl dynamic"]
-        
+
         if self.options.with_vulkan:
             args.append("-vulkan")
         else:
@@ -654,11 +654,11 @@ class QtConan(ConanFile):
                 "PKG_CONFIG_PATH": [os.getcwd()]}
             if self.settings.os == "Windows":
                 build_env["PATH"] = [os.path.join(self.source_folder, "qt5", "gnuwin32", "bin")]
-                
+
             if tools.os_info.is_macos:
                open(self.build_folder + "/.qmake.stash" , 'w').close()
                open(self.build_folder + "/.qmake.super" , 'w').close()
-                
+
             with tools.environment_append(build_env):
                 self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)), run_environment=True)
                 if tools.os_info.is_macos:
