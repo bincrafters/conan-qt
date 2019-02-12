@@ -140,11 +140,18 @@ class QtConan(ConanFile):
                 return '.x86_64'
         return ""
 
+    def _truely_cross_building(self):
+        return tools.cross_building(self.settings) and \
+                (self.settings.os_build != self.settings.os or
+                 self.settings.arch_build != "x86_64" or self.settings.arch != "x86")
+
     def build_requirements(self):
         if self.options.GUI:
             pack_names = []
             if tools.os_info.with_apt:
                 pack_names = ["libxcb1-dev", "libx11-dev", "libc6-dev"]
+                if self._truely_cross_building():
+                    pack_names.append('libxkbcommon-dev')
             elif tools.os_info.is_linux and not tools.os_info.with_pacman:
                 pack_names = ["libxcb-devel", "libX11-devel", "glibc-devel"]
 
@@ -164,6 +171,9 @@ class QtConan(ConanFile):
             self.options.with_pq = False
             if self.settings.compiler == "gcc":
                 self.options.with_mysql = False
+        if self._truely_cross_building():
+            self.options.with_mysql = False
+            self.options.with_glib = False
 
         if self.options.widgets:
             self.options.GUI = True
@@ -254,7 +264,8 @@ class QtConan(ConanFile):
             self.requires("libalsa/1.1.5@conan/stable")
         if self.options.GUI:
             if self.settings.os == "Linux":
-                self.requires("xkbcommon/0.8.3@bincrafters/stable")
+                if not self._truely_cross_building():
+                    self.requires("xkbcommon/0.8.3@bincrafters/stable")
 
     def system_requirements(self):
         if self.options.GUI:
@@ -262,6 +273,8 @@ class QtConan(ConanFile):
             if tools.os_info.is_linux:
                 if tools.os_info.with_apt:
                     pack_names = ["libxcb1", "libx11-6"]
+                    if self._truely_cross_building():
+                        pack_names.append('libxkbcommon0')
                     if self.options.opengl == "desktop":
                         pack_names.append("libgl1-mesa-dev")
                     elif self.options.opengl == "es2":
@@ -292,7 +305,10 @@ class QtConan(ConanFile):
             self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
         shutil.move("qt-everywhere-src-%s" % self.version, "qt5")
 
-        for patch in ["cc04651dea4c4678c626cb31b3ec8394426e2b25.diff", "fffe5d622549f85968ea0be9717b90cbc020be71.diff", "f917000890e6360c92328ac6e3f052294e3a2959.diff"]:
+        for patch in ["cc04651dea4c4678c626cb31b3ec8394426e2b25.diff",
+                      "fffe5d622549f85968ea0be9717b90cbc020be71.diff",
+                      "f917000890e6360c92328ac6e3f052294e3a2959.diff",
+                      "0435cb0b99d919d8ad17f4c6feed8236d7e6177e.diff"]:
             tools.patch("qt5/qtbase", patch)
 
     def _xplatform(self):
@@ -301,7 +317,7 @@ class QtConan(ConanFile):
                 return {"x86": "linux-g++-32",
                         "armv6": "linux-arm-gnueabi-g++",
                         "armv7": "linux-arm-gnueabi-g++",
-                        "armv7hf": "linux-arm-gnueabi-g++",
+                        "armv7hf": "linux-arm-gnueabihf-g++",
                         "armv8": "linux-aarch64-gnu-g++"}.get(str(self.settings.arch), "linux-g++")
             elif self.settings.compiler == "clang":
                 if self.settings.arch == "x86":
@@ -497,9 +513,7 @@ class QtConan(ConanFile):
         else:
             xplatform_val = self._xplatform()
             if xplatform_val:
-                if (not tools.cross_building(self.settings)) or\
-                        (self.settings.os_build == self.settings.os and\
-                         self.settings.arch_build == "x86_64" and self.settings.arch == "x86"):
+                if not self._truely_cross_building():
                     args += ["-platform %s" % xplatform_val]
                 else:
                     args += ["-xplatform %s" % xplatform_val]
