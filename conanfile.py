@@ -289,7 +289,7 @@ class QtConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         shutil.move("qt-everywhere-src-%s" % self.version, "qt5")
 
-        for patch in ["cc04651dea4c4678c626cb31b3ec8394426e2b25.diff"]:
+        for patch in ["cc04651dea4c4678c626cb31b3ec8394426e2b25.diff", "0435cb0b99d919d8ad17f4c6feed8236d7e6177e.diff"]:
             tools.patch("qt5/qtbase", patch)
         for patch in ["a9cc8aa.diff"]:
             tools.patch("qt5/qtmultimedia", patch)
@@ -300,7 +300,7 @@ class QtConan(ConanFile):
                 return {"x86": "linux-g++-32",
                         "armv6": "linux-arm-gnueabi-g++",
                         "armv7": "linux-arm-gnueabi-g++",
-                        "armv7hf": "linux-arm-gnueabi-g++",
+                        "armv7hf": "linux-arm-gnueabihf-g++",
                         "armv8": "linux-aarch64-gnu-g++"}.get(str(self.settings.arch), "linux-g++")
             elif self.settings.compiler == "clang":
                 if self.settings.arch == "x86":
