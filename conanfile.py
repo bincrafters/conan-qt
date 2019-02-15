@@ -118,7 +118,6 @@ class QtConan(ConanFile):
     )
     requires = "zlib/1.2.11@conan/stable"
     short_paths = True
-    build_policy = "missing"
 
     def _system_package_architecture(self):
         if tools.os_info.with_apt:
