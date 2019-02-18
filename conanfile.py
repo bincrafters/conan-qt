@@ -44,7 +44,7 @@ class QtConan(ConanFile):
     _submodules = _getsubmodules()
 
     name = "qt"
-    version = "5.12.1"
+    version = "5.13.0-alpha"
     description = "Qt is a cross-platform framework for graphical user interfaces."
     topics = ("conan", "qt", "ui")
     url = "https://github.com/bincrafters/conan-qt"
@@ -189,7 +189,7 @@ class QtConan(ConanFile):
         if self.settings.os == "Android" and self.options.opengl == "desktop":
             raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
 
-        assert QtConan.version == QtConan._submodules['qtbase']['branch']
+        # assert QtConan.version == QtConan._submodules['qtbase']['branch']
 
         def _enablemodule(mod):
             setattr(self.options, mod, True)
@@ -280,17 +280,17 @@ class QtConan(ConanFile):
                     installer.install(item + self._system_package_architecture())
 
     def source(self):
-        url = "http://download.qt.io/official_releases/qt/{0}/{1}/single/qt-everywhere-src-{1}" \
+        url = "http://download.qt.io/development_releases/qt/{0}/{1}/single/qt-everywhere-src-{1}" \
             .format(self.version[:self.version.rfind('.')], self.version)
         if tools.os_info.is_windows:
-            tools.get("%s.zip" % url, sha256='18ebf2ea0f15a255512fe425abc00e6be0fc6960fd4eaa1189e85f81df650ce9')
+            tools.get("%s.zip" % url, sha256='465bd175c48abd04effafe35a523a787b5007479eaff8a48860520fdc1f12124')
         elif sys.version_info.major >= 3:
-            tools.get("%s.tar.xz" % url, sha256='caffbd625c7bc10ff8c5c7a27dbc7d84fa4de146975c0e1ffe904b514ccd6da4')
+            tools.get("%s.tar.xz" % url, sha256='4ae8923bde97d661ed74b0a0f6ab0ea869e7ff639c1b307e2c06e63ecaedb983')
         else:  # python 2 cannot deal with .xz archives
             self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
         shutil.move("qt-everywhere-src-%s" % self.version, "qt5")
 
-        for patch in ["cc04651dea4c4678c626cb31b3ec8394426e2b25.diff", "fffe5d622549f85968ea0be9717b90cbc020be71.diff", "f917000890e6360c92328ac6e3f052294e3a2959.diff"]:
+        for patch in ["f917000890e6360c92328ac6e3f052294e3a2959.diff"]:
             tools.patch("qt5/qtbase", patch)
 
     def _xplatform(self):
