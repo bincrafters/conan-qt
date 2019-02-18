@@ -73,7 +73,6 @@ The following command both runs all the steps of the conan file, and publishes t
 | device      |  |  ANY |
 | cross_compile      |  |  ANY |
 | config      |  |  ANY |
-| qtbase      | False |  [True, False] |
 | qtsvg      | False |  [True, False] |
 | qtdeclarative      | False |  [True, False] |
 | qtactiveqt      | False |  [True, False] |

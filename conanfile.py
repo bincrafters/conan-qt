@@ -83,7 +83,7 @@ class QtConan(ConanFile):
         "device": "ANY",
         "cross_compile": "ANY",
         "config": "ANY",
-    }, **{module: [True, False] for module in _submodules}
+    }, **{module: [True, False] for module in _submodules if module != 'qtbase'}
     )
     no_copy_source = True
     default_options = dict({
@@ -114,7 +114,7 @@ class QtConan(ConanFile):
         "device": None,
         "cross_compile": None,
         "config": None,
-    }, **{module: False for module in _submodules}
+    }, **{module: False for module in _submodules if module != 'qtbase'}
     )
     requires = "zlib/1.2.11@conan/stable"
     short_paths = True
@@ -192,13 +192,13 @@ class QtConan(ConanFile):
         assert QtConan.version == QtConan._submodules['qtbase']['branch']
 
         def _enablemodule(mod):
-            setattr(self.options, mod, True)
+            if mod != 'qtbase':
+                setattr(self.options, mod, True)
             for req in QtConan._submodules[mod]["depends"]:
                 _enablemodule(req)
 
-        self.options.qtbase = True
         for module in QtConan._submodules:
-            if getattr(self.options, module):
+            if module != 'qtbase' and getattr(self.options, module):
                 _enablemodule(module)
 
     def requirements(self):
@@ -280,7 +280,7 @@ class QtConan(ConanFile):
                     installer.install(item + self._system_package_architecture())
 
     def source(self):
-        url = "http://download.qt.io/official_releases/qt/{0}/{1}/single/qt-everywhere-src-{1}" \
+        url = "https://download.qt.io/official_releases/qt/{0}/{1}/single/qt-everywhere-src-{1}" \
             .format(self.version[:self.version.rfind('.')], self.version)
         if tools.os_info.is_windows:
             tools.get("%s.zip" % url, sha256='1036bd65d067f70ba1384458d7a2daf574ceed36fa9321dcb3871d9810ef89e1')
@@ -389,7 +389,7 @@ class QtConan(ConanFile):
             args.append("-optimize-size")
             
         for module in QtConan._submodules:
-            if not getattr(self.options, module) \
+            if module != 'qtbase' and not getattr(self.options, module) \
                     and os.path.isdir(os.path.join(self.source_folder, 'qt5', QtConan._submodules[module]['path'])):
                 args.append("-skip " + module)
 
