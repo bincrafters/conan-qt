@@ -74,14 +74,10 @@ class TestPackageConan(ConanFile):
                 meson.build()
 
     def _build_with_cmake(self):
-        if not self.options["qt"].shared:
-            self.output.info(
-                "disabled cmake test with static Qt, because of https://bugreports.qt.io/browse/QTBUG-38913")
-        else:
-            self.output.info("Building with CMake")
-            cmake = CMake(self, set_cmake_flags=True)
-            cmake.configure(build_folder="cmake_folder")
-            cmake.build()
+        self.output.info("Building with CMake")
+        cmake = CMake(self, set_cmake_flags=True)
+        cmake.configure(build_folder="cmake_folder")
+        cmake.build()
 
     def build(self):
         self._build_with_qmake()
@@ -107,13 +103,9 @@ class TestPackageConan(ConanFile):
             self.run(os.path.join("meson_folder", "test_package"), run_environment=True)
 
     def _test_with_cmake(self):
-        if not self.options["qt"].shared:
-            self.output.info(
-                "disabled cmake test with static Qt, because of https://bugreports.qt.io/browse/QTBUG-38913")
-        else:
-            self.output.info("Testing CMake")
-            shutil.copy("qt.conf", "cmake_folder")
-            self.run(os.path.join("cmake_folder", "test_package"), run_environment=True)
+        self.output.info("Testing CMake")
+        shutil.copy("qt.conf", "cmake_folder")
+        self.run(os.path.join("cmake_folder", "test_package"), run_environment=True)
 
     def test(self):
         if (not tools.cross_building(self.settings)) or\
