@@ -1,0 +1,32 @@
+From e34cbfff4711abf8b56822b6658074dced69eee3 Mon Sep 17 00:00:00 2001
+From: Eric Lemanissier <eric.lemanissier@gmail.com>
+Date: Tue, 19 Feb 2019 10:32:55 +0100
+Subject: [PATCH] Feature 'ocsp' - fix a broken win-32 build
+
+Change-Id: I0fcec3a555a8c5ff5b5faff3cff16b173e9b9950
+Fixes: QTBUG-73322
+---
+ src/network/ssl/qocsp_p.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/network/ssl/qocsp_p.h b/src/network/ssl/qocsp_p.h
+index 94c1c9b445..71f59da0b4 100644
+--- a/src/network/ssl/qocsp_p.h
++++ b/src/network/ssl/qocsp_p.h
+@@ -63,11 +63,11 @@
+ 
+ QT_REQUIRE_CONFIG(ocsp);
+ 
+-#ifdef Q_OS_WIN64
++#ifdef Q_OS_WIN
+ #undef X509_NAME
+ #undef OCSP_REQUEST
+ #undef OCSP_RESPONSE
+-#endif // Q_OS_WIN64
++#endif // Q_OS_WIN
+ 
+ #include <openssl/ocsp.h>
+ 
+-- 
+2.18.0.windows.1
+
