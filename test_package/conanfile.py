@@ -22,7 +22,7 @@ class TestPackageConan(ConanFile):
             self.output.info("Building with qmake")
 
             def _qmakebuild():
-                args = [self.source_folder]
+                args = [self.source_folder, "DESTDIR=bin"]
 
                 def _getenvpath(var):
                     val = os.getenv(var)
@@ -65,7 +65,7 @@ class TestPackageConan(ConanFile):
         else:
             self.output.info("Building with CMake")
             cmake = CMake(self, set_cmake_flags=True)
-            cmake.configure()
+            cmake.configure(build_folder="cmake_folder")
             cmake.build()
 
     def build(self):
@@ -74,13 +74,9 @@ class TestPackageConan(ConanFile):
 
     def _test_with_qmake(self):
         self.output.info("Testing qmake")
-        if tools.os_info.is_windows:
-            bin_path = str(self.settings.build_type).lower()
-        elif tools.os_info.is_linux:
-            bin_path = "."
-        else:
-            bin_path = os.path.join("test_package.app", "Contents", "MacOS")
-        bin_path = os.path.join("qmake_folder", bin_path)
+        bin_path = os.path.join("qmake_folder", "bin")
+        if tools.os_info.is_macos:
+            bin_path = os.path.join(bin_path, "test_package.app", "Contents", "MacOS")
         shutil.copy("qt.conf", bin_path)
         self.run(os.path.join(bin_path, "test_package"), run_environment=True)
 
@@ -90,11 +86,12 @@ class TestPackageConan(ConanFile):
                 "disabled cmake test with static Qt, because of https://bugreports.qt.io/browse/QTBUG-38913")
         else:
             self.output.info("Testing CMake")
+            shutil.copy("qt.conf", "cmake_folder")
             if self.settings.compiler == "Visual Studio":
                 bin_path = str(self.settings.build_type)
             else:
-                bin_path = self.build_folder
-            self.run(os.path.join(bin_path, "test_package"), run_environment=True)
+                bin_path = ""
+            self.run(os.path.join("cmake_folder", bin_path, "test_package"), run_environment=True)
 
     def test(self):
         if (not tools.cross_building(self.settings)) or\
