@@ -25,7 +25,7 @@ class TestPackageConan(ConanFile):
             self.output.info("Building with qmake")
 
             def _qmakebuild():
-                args = [self.source_folder]
+                args = [self.source_folder, "DESTDIR=bin"]
 
                 def _getenvpath(var):
                     val = os.getenv(var)
@@ -87,13 +87,9 @@ class TestPackageConan(ConanFile):
 
     def _test_with_qmake(self):
         self.output.info("Testing qmake")
-        if tools.os_info.is_windows:
-            bin_path = str(self.settings.build_type).lower()
-        elif tools.os_info.is_linux:
-            bin_path = ""
-        else:
-            bin_path = os.path.join("test_package.app", "Contents", "MacOS")
-        bin_path = os.path.join("qmake_folder", bin_path)
+        bin_path = os.path.join("qmake_folder", "bin")
+        if tools.os_info.is_macos:
+            bin_path = os.path.join(bin_path, "test_package.app", "Contents", "MacOS")
         shutil.copy("qt.conf", bin_path)
         self.run(os.path.join(bin_path, "test_package"), run_environment=True)
 
