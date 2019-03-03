@@ -5,7 +5,7 @@
 import os
 import shutil
 
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake, tools, Meson, RunEnvironment
 
 
 class TestPackageConan(ConanFile):
@@ -15,6 +15,8 @@ class TestPackageConan(ConanFile):
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
             self.build_requires("jom_installer/1.1.2@bincrafters/stable")
+        if not tools.which("meson"):
+            self.build_requires("meson_installer/0.50.0@bincrafters/stable")
 
     def _build_with_qmake(self):
         tools.mkdir("qmake_folder")
@@ -58,6 +60,15 @@ class TestPackageConan(ConanFile):
             else:
                 _qmakebuild()
 
+    def _build_with_meson(self):
+        if self.options["qt"].shared and not tools.cross_building(self.settings):
+            self.output.info("Building with Meson")
+            tools.mkdir("meson_folder")
+            with tools.environment_append(RunEnvironment(self).vars):
+                meson = Meson(self)
+                meson.configure(build_folder="meson_folder", defs={"cpp_std": "c++11"})
+                meson.build()
+
     def _build_with_cmake(self):
         if not self.options["qt"].shared:
             self.output.info(
@@ -65,11 +76,12 @@ class TestPackageConan(ConanFile):
         else:
             self.output.info("Building with CMake")
             cmake = CMake(self, set_cmake_flags=True)
-            cmake.configure()
+            cmake.configure(build_folder="cmake_folder")
             cmake.build()
 
     def build(self):
         self._build_with_qmake()
+        self._build_with_meson()
         self._build_with_cmake()
 
     def _test_with_qmake(self):
@@ -77,12 +89,18 @@ class TestPackageConan(ConanFile):
         if tools.os_info.is_windows:
             bin_path = str(self.settings.build_type).lower()
         elif tools.os_info.is_linux:
-            bin_path = "."
+            bin_path = ""
         else:
             bin_path = os.path.join("test_package.app", "Contents", "MacOS")
         bin_path = os.path.join("qmake_folder", bin_path)
         shutil.copy("qt.conf", bin_path)
         self.run(os.path.join(bin_path, "test_package"), run_environment=True)
+        
+    def _test_with_meson(self):
+        if self.options["qt"].shared and not tools.cross_building(self.settings):
+            self.output.info("Testing Meson")
+            shutil.copy("qt.conf", "meson_folder")
+            self.run(os.path.join("meson_folder", "test_package"), run_environment=True)
 
     def _test_with_cmake(self):
         if not self.options["qt"].shared:
@@ -90,14 +108,12 @@ class TestPackageConan(ConanFile):
                 "disabled cmake test with static Qt, because of https://bugreports.qt.io/browse/QTBUG-38913")
         else:
             self.output.info("Testing CMake")
-            if self.settings.compiler == "Visual Studio":
-                bin_path = str(self.settings.build_type)
-            else:
-                bin_path = self.build_folder
-            self.run(os.path.join(bin_path, "test_package"), run_environment=True)
+            shutil.copy("qt.conf", "cmake_folder")
+            self.run(os.path.join("cmake_folder", "test_package"), run_environment=True)
 
     def test(self):
         if (not tools.cross_building(self.settings)) or\
                 (self.settings.os_build == self.settings.os and self.settings.arch_build == "x86_64" and self.settings.arch == "x86"):
             self._test_with_qmake()
+            self._test_with_meson()
             self._test_with_cmake()

@@ -18,7 +18,7 @@ class qt(Generator):
 
     @property
     def content(self):
-        return "[Paths]\nPrefix = %s" % self.conanfile.deps_cpp_info["qt"].rootpath.replace("\\", "/")
+        return "[Paths]\nPrefix = %s\n" % self.conanfile.deps_cpp_info["qt"].rootpath.replace("\\", "/")
 
 
 class QtConan(ConanFile):
