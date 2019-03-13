@@ -186,6 +186,9 @@ class QtConan(ConanFile):
         if self.settings.os == "Android" and self.options.opengl == "desktop":
             raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
 
+        if self.settings.os == "Macos":
+            del self.settings.os.version
+
         assert QtConan.version == QtConan._submodules['qtbase']['branch']
 
         def _enablemodule(mod):

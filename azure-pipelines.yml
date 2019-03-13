@@ -108,15 +108,6 @@ jobs:
       CONAN_PASSWORD: $(CONAN_PASSWORD)
   strategy:
     matrix:
-      Clang 8.1:
-        CONAN_APPLE_CLANG_VERSIONS: 8.1
-        XCODE_VERSION: 8.3.3
-      Clang 9.0:
-        CONAN_APPLE_CLANG_VERSIONS: 9.0
-        XCODE_VERSION: 9.2
-      Clang 9.1:
-        CONAN_APPLE_CLANG_VERSIONS: 9.1
-        XCODE_VERSION: 9.4.1
       Clang 10.0:
         CONAN_APPLE_CLANG_VERSIONS: 10.0
         XCODE_VERSION: 10
