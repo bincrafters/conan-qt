@@ -6,7 +6,7 @@ import os
 import shutil
 
 from conans import ConanFile, CMake, tools, Meson, RunEnvironment
-
+from conans.errors import ConanException
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch", "os_build", "arch_build"
@@ -16,7 +16,7 @@ class TestPackageConan(ConanFile):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
             self.build_requires("jom_installer/1.1.2@bincrafters/stable")
         if not tools.which("meson"):
-            self.build_requires("meson_installer/0.50.0@bincrafters/stable")
+            self.build_requires("meson_installer/0.50.0@ericlemanissier/stable")
 
     def _build_with_qmake(self):
         tools.mkdir("qmake_folder")
@@ -66,7 +66,11 @@ class TestPackageConan(ConanFile):
             tools.mkdir("meson_folder")
             with tools.environment_append(RunEnvironment(self).vars):
                 meson = Meson(self)
-                meson.configure(build_folder="meson_folder", defs={"cpp_std": "c++11"})
+                try:
+                    meson.configure(build_folder="meson_folder", defs={"cpp_std": "c++11"})
+                except ConanException:
+                    self.output.info(open("meson_folder/meson-logs/meson-log.txt", 'r').read())
+                    raise
                 meson.build()
 
     def _build_with_cmake(self):
