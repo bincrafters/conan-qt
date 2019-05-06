@@ -265,11 +265,11 @@ class QtConan(ConanFile):
                     elif self.options.opengl == "es2":
                         pack_names.append("libgles2-mesa-dev")
                 else:
-                    if not tools.os_info.linux_distro.startswith("opensuse"):
+                    if not tools.os_info.linux_distro.startswith("opensuse") and not tools.os_info.linux_distro.startswith("sles"):
                         pack_names = ["libxcb"]
                     if not tools.os_info.with_pacman:
                         if self.options.opengl == "desktop":
-                            if tools.os_info.linux_distro.startswith("opensuse"):
+                            if tools.os_info.linux_distro.startswith("opensuse") or tools.os_info.linux_distro.startswith("sles"):
                                 pack_names.append("Mesa-libGL-devel")
                             else:
                                 pack_names.append("mesa-libGL-devel")
