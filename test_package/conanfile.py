@@ -8,6 +8,7 @@ import shutil
 from conans import ConanFile, CMake, tools, Meson, RunEnvironment
 from conans.errors import ConanException
 
+
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch", "os_build", "arch_build"
     generators = "qt"
@@ -44,7 +45,7 @@ class TestPackageConan(ConanFile):
                     args += ['QMAKE_CXX=' + value,
                              'QMAKE_LINK=' + value,
                              'QMAKE_LINK_SHLIB=' + value]
-                             
+
                 self.run("qmake %s" % " ".join(args), run_environment=True)
                 if tools.os_info.is_windows:
                     if self.settings.compiler == "Visual Studio":
@@ -95,7 +96,7 @@ class TestPackageConan(ConanFile):
         bin_path = os.path.join("qmake_folder", bin_path)
         shutil.copy("qt.conf", bin_path)
         self.run(os.path.join(bin_path, "test_package"), run_environment=True)
-        
+
     def _test_with_meson(self):
         if self.options["qt"].shared and not tools.cross_building(self.settings):
             self.output.info("Testing Meson")
