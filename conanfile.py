@@ -233,7 +233,7 @@ class QtConan(ConanFile):
         if self.options.with_libpng:
             self.requires("libpng/1.6.34@bincrafters/stable")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.26.0@bincrafters/stable")
+            self.requires("sqlite3/3.28.0@bincrafters/stable")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.with_mysql:
             self.requires("mysql-connector-c/6.1.11@bincrafters/stable")
@@ -268,11 +268,11 @@ class QtConan(ConanFile):
                     elif self.options.opengl == "es2":
                         pack_names.append("libgles2-mesa-dev")
                 else:
-                    if not tools.os_info.linux_distro.startswith("opensuse") and not tools.os_info.linux_distro.startswith("sles"):
+                    if not tools.os_info.linux_distro.startswith(("opensuse", "sles")):
                         pack_names = ["libxcb"]
                     if not tools.os_info.with_pacman:
                         if self.options.opengl == "desktop":
-                            if tools.os_info.linux_distro.startswith("opensuse") or tools.os_info.linux_distro.startswith("sles"):
+                            if tools.os_info.linux_distro.startswith(("opensuse", "sles")):
                                 pack_names.append("Mesa-libGL-devel")
                             else:
                                 pack_names.append("mesa-libGL-devel")
