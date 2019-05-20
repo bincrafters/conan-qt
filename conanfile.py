@@ -163,6 +163,9 @@ class QtConan(ConanFile):
             self.options.with_pq = False
             if self.settings.compiler == "gcc":
                 self.options.with_mysql = False
+            if self.settings.compiler == "Visual Studio":
+                if self.settings.compiler.runtime == "MT" or self.settings.compiler.runtime == "MTd":
+                    self.options.with_mysql = False
 
         if self.options.widgets:
             self.options.GUI = True
