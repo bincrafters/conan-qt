@@ -238,12 +238,12 @@ class QtConan(ConanFile):
         if self.options.with_mysql:
             self.requires("mysql-connector-c/6.1.11@bincrafters/stable")
             self.options["mysql-connector-c"].with_zlib = True
-            self.options["mysql-connector-c"].with_ssl = False
+            self.options["mysql-connector-c"].with_ssl = self.options.openssl
             self.options["mysql-connector-c"].shared = True
         if self.options.with_pq:
             self.requires("libpq/9.6.9@bincrafters/stable")
             self.options["libpq"].with_zlib = True
-            self.options["libpq"].with_openssl = False
+            self.options["libpq"].with_openssl = self.options.openssl
         if self.options.with_odbc:
             self.requires("odbc/2.3.7@bincrafters/stable")
             self.options["odbc"].shared = (self.settings.os == "Windows")
