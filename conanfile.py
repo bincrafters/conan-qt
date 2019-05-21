@@ -65,7 +65,7 @@ class QtConan(ConanFile):
         # "with_libiconv": [True, False],  # Qt tests failure "invalid conversion from const char** to char**"
         "with_doubleconversion": [True, False],
         "with_freetype": [True, False],
-        # "with_icu": [True, False], # waiting for 64.1 or 63.2
+        "with_icu": [True, False],
         "with_harfbuzz": [True, False],
         "with_libjpeg": [True, False],
         "with_libpng": [True, False],
@@ -96,7 +96,7 @@ class QtConan(ConanFile):
         # "with_libiconv": True,
         "with_doubleconversion": True,
         "with_freetype": True,
-        # "with_icu": True,
+        "with_icu": True,
         "with_harfbuzz": True,
         "with_libjpeg": True,
         "with_libpng": True,
@@ -222,11 +222,11 @@ class QtConan(ConanFile):
             self.requires("freetype/2.9.0@bincrafters/stable")
             self.options["freetype"].with_png = self.options.with_libpng
             self.options["freetype"].with_zlib = True
-        # if self.options.with_icu:
-        #     self.requires("icu/63.1@bincrafters/stable")
-        #     self.options["icu"].shared = self.options.shared
+        if self.options.with_icu:
+            self.requires("icu/64.2@jmarrec/testing")
+            self.options["icu"].shared = self.options.shared
         if self.options.with_harfbuzz:
-            self.requires("harfbuzz/2.3.0@bincrafters/stable")
+            self.requires("harfbuzz/2.4.0@bincrafters/stable")
             self.options["harbuzz"].with_freetype = self.options.with_freetype
         if self.options.with_libjpeg:
             self.requires("libjpeg/9c@bincrafters/stable")
@@ -390,7 +390,7 @@ class QtConan(ConanFile):
         elif self.settings.build_type == "MinSizeRel":
             args.append("-release")
             args.append("-optimize-size")
-            
+
         for module in QtConan._submodules:
             if module != 'qtbase' and not getattr(self.options, module) \
                     and os.path.isdir(os.path.join(self.source_folder, 'qt5', QtConan._submodules[module]['path'])):
