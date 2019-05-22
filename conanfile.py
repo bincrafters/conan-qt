@@ -420,7 +420,7 @@ class QtConan(ConanFile):
 
         args.append("--glib=" + ("yes" if self.options.with_glib else "no"))
         args.append("--pcre=" + ("system" if self.options.with_pcre2 else "qt"))
-        # args.append("--icu=" + ("yes" if self.options.with_icu else "no"))
+        args.append("--icu=" + ("yes" if self.options.with_icu else "no"))
         args.append("--sql-mysql=" + ("yes" if self.options.with_mysql else "no"))
         args.append("--sql-psql=" + ("yes" if self.options.with_pq else "no"))
         args.append("--sql-odbc=" + ("yes" if self.options.with_odbc else "no"))
