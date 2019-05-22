@@ -206,7 +206,7 @@ class QtConan(ConanFile):
 
     def requirements(self):
         if self.options.openssl:
-            self.requires("OpenSSL/1.1.1a@conan/stable")
+            self.requires("OpenSSL/1.1.1b@conan/stable")
             self.options["OpenSSL"].no_zlib = False
         if self.options.with_pcre2:
             self.requires("pcre2/10.32@bincrafters/stable")
@@ -236,7 +236,7 @@ class QtConan(ConanFile):
             self.requires("sqlite3/3.28.0@bincrafters/stable")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.with_mysql:
-            self.requires("mysql-connector-c/6.1.11@bincrafters/stable")
+            self.requires("mysql-connector-c/6.1.11@jmarrec/stable")
             self.options["mysql-connector-c"].with_zlib = True
             self.options["mysql-connector-c"].with_ssl = self.options.openssl
             self.options["mysql-connector-c"].shared = True
