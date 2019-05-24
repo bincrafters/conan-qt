@@ -598,6 +598,79 @@ jobs:
       - CONAN_DOCKER_32_IMAGES: 1
     <<: *conan-steps
 
+  clang-60-page-1:
+    docker:
+      - image: conanio/clang60
+    environment:
+      - CONAN_CLANG_VERSIONS: "6.0"
+      - CONAN_CURRENT_PAGE: 1
+      - CONAN_TOTAL_PAGES: 8
+      - CONAN_DOCKER_32_IMAGES: 1
+    <<: *conan-steps
+  clang-60-page-2:
+    docker:
+      - image: conanio/clang60
+    environment:
+      - CONAN_CLANG_VERSIONS: "6.0"
+      - CONAN_CURRENT_PAGE: 2
+      - CONAN_TOTAL_PAGES: 8
+      - CONAN_DOCKER_32_IMAGES: 1
+    <<: *conan-steps
+  clang-60-page-3:
+    docker:
+      - image: conanio/clang60
+    environment:
+      - CONAN_CLANG_VERSIONS: "6.0"
+      - CONAN_CURRENT_PAGE: 3
+      - CONAN_TOTAL_PAGES: 8
+      - CONAN_DOCKER_32_IMAGES: 1
+    <<: *conan-steps
+  clang-60-page-4:
+    docker:
+      - image: conanio/clang60
+    environment:
+      - CONAN_CLANG_VERSIONS: "6.0"
+      - CONAN_CURRENT_PAGE: 4
+      - CONAN_TOTAL_PAGES: 8
+      - CONAN_DOCKER_32_IMAGES: 1
+    <<: *conan-steps
+  clang-60-page-5:
+    docker:
+      - image: conanio/clang60
+    environment:
+      - CONAN_CLANG_VERSIONS: "6.0"
+      - CONAN_CURRENT_PAGE: 5
+      - CONAN_TOTAL_PAGES: 8
+      - CONAN_DOCKER_32_IMAGES: 1
+    <<: *conan-steps
+  clang-60-page-6:
+    docker:
+      - image: conanio/clang60
+    environment:
+      - CONAN_CLANG_VERSIONS: "6.0"
+      - CONAN_CURRENT_PAGE: 6
+      - CONAN_TOTAL_PAGES: 8
+      - CONAN_DOCKER_32_IMAGES: 1
+    <<: *conan-steps
+  clang-60-page-7:
+    docker:
+      - image: conanio/clang60
+    environment:
+      - CONAN_CLANG_VERSIONS: "6.0"
+      - CONAN_CURRENT_PAGE: 7
+      - CONAN_TOTAL_PAGES: 8
+      - CONAN_DOCKER_32_IMAGES: 1
+    <<: *conan-steps
+  clang-60-page-8:
+    docker:
+      - image: conanio/clang60
+    environment:
+      - CONAN_CLANG_VERSIONS: "6.0"
+      - CONAN_CURRENT_PAGE: 8
+      - CONAN_TOTAL_PAGES: 8
+      - CONAN_DOCKER_32_IMAGES: 1
+    <<: *conan-steps
+
 
 workflows:
   version: 2
