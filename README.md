@@ -2,6 +2,7 @@
 [![Build Status Travis](https://travis-ci.com/bincrafters/conan-qt.svg?branch=stable%2F5.13.0-beta4)](https://travis-ci.com/bincrafters/conan-qt)
 [![Build Status Azure](https://dev.azure.com/bincrafters/packages/_apis/build/status/bincrafters.conan-qt?branchName=stable%2F5.13.0-beta4)](https://dev.azure.com/bincrafters/packages/_build)
 [![Build Status AppVeyor](https://ci.appveyor.com/api/projects/status/github/bincrafters/conan-qt?branch=stable%2F5.13.0-beta4&svg=true)](https://ci.appveyor.com/project/bincrafters/conan-qt)
+[![CircleCI](https://circleci.com/gh/bincrafters/conan-qt.svg?style=svg)](https://circleci.com/gh/bincrafters/conan-qt)
 
 ## Conan package recipe for [*qt*](https://www.qt.io)
 
