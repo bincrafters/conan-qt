@@ -211,6 +211,7 @@ class QtConan(ConanFile):
         if self.options.with_glib:
             self.requires("glib/2.58.3@bincrafters/stable")
             self.options["glib"].shared = True
+            self.options["glib"].with_pcre = False
         # if self.options.with_libiconv:
         #     self.requires("libiconv/1.15@bincrafters/stable")
         if self.options.with_doubleconversion:
