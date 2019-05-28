@@ -5,7 +5,7 @@
 import os
 import shutil
 
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake, tools, RunEnvironment
 
 
 class TestPackageConan(ConanFile):
@@ -64,9 +64,11 @@ class TestPackageConan(ConanFile):
                 "disabled cmake test with static Qt, because of https://bugreports.qt.io/browse/QTBUG-38913")
         else:
             self.output.info("Building with CMake")
-            cmake = CMake(self, set_cmake_flags=True)
-            cmake.configure(build_folder="cmake_folder")
-            cmake.build()
+            env_build = RunEnvironment(self)
+            with tools.environment_append(env_build.vars):
+                cmake = CMake(self, set_cmake_flags=True)
+                cmake.configure(build_folder="cmake_folder")
+                cmake.build()
 
     def build(self):
         self._build_with_qmake()
