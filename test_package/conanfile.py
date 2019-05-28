@@ -76,9 +76,11 @@ class TestPackageConan(ConanFile):
 
     def _build_with_cmake(self):
         self.output.info("Building with CMake")
-        cmake = CMake(self, set_cmake_flags=True)
-        cmake.configure(build_folder="cmake_folder")
-        cmake.build()
+        env_build = RunEnvironment(self)
+        with tools.environment_append(env_build.vars):
+            cmake = CMake(self, set_cmake_flags=True)
+            cmake.configure(build_folder="cmake_folder")
+            cmake.build()
 
     def build(self):
         self._build_with_qmake()
