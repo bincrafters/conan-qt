@@ -122,9 +122,6 @@ class QtConan(ConanFile):
     short_paths = True
 
     def _system_package_architecture(self):
-        if not tools.cross_building(self.settings):
-            return ""
-
         if tools.os_info.with_apt:
             if self.settings.arch == "x86":
                 return ':i386'

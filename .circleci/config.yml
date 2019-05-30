@@ -22,7 +22,6 @@ jobs:
       - image: conanio/gcc49
     environment:
       - CONAN_GCC_VERSIONS: "4.9"
-      - CONAN_DOCKER_32_IMAGES: 1
     <<: *conan-steps
 
   gcc-5:
@@ -30,7 +29,6 @@ jobs:
       - image: conanio/gcc5
     environment:
       - CONAN_GCC_VERSIONS: "5"
-      - CONAN_DOCKER_32_IMAGES: 1
     <<: *conan-steps
 
   gcc-6:
@@ -38,7 +36,6 @@ jobs:
       - image: conanio/gcc6
     environment:
       - CONAN_GCC_VERSIONS: "6"
-      - CONAN_DOCKER_32_IMAGES: 1
     <<: *conan-steps
 
   gcc-7:
@@ -46,7 +43,6 @@ jobs:
       - image: conanio/gcc7
     environment:
       - CONAN_GCC_VERSIONS: "7"
-      - CONAN_DOCKER_32_IMAGES: 1
     <<: *conan-steps
 
   gcc-8:
@@ -54,7 +50,6 @@ jobs:
       - image: conanio/gcc8
     environment:
       - CONAN_GCC_VERSIONS: "8"
-      - CONAN_DOCKER_32_IMAGES: 1
     <<: *conan-steps
 
   clang-39:
@@ -62,7 +57,6 @@ jobs:
       - image: conanio/clang39
     environment:
       - CONAN_CLANG_VERSIONS: "3.9"
-      - CONAN_DOCKER_32_IMAGES: 1
     <<: *conan-steps
 
   clang-40:
@@ -70,7 +64,6 @@ jobs:
       - image: conanio/clang40
     environment:
       - CONAN_CLANG_VERSIONS: "4.0"
-      - CONAN_DOCKER_32_IMAGES: 1
     <<: *conan-steps
 
   clang-50:
@@ -78,7 +71,6 @@ jobs:
       - image: conanio/clang50
     environment:
       - CONAN_CLANG_VERSIONS: "5.0"
-      - CONAN_DOCKER_32_IMAGES: 1
     <<: *conan-steps
 
   clang-60:
@@ -86,7 +78,6 @@ jobs:
       - image: conanio/clang60
     environment:
       - CONAN_CLANG_VERSIONS: "6.0"
-      - CONAN_DOCKER_32_IMAGES: 1
     <<: *conan-steps
 
 
