@@ -1,0 +1,105 @@
+version: 2
+.conan-steps: &conan-steps
+  parallelism: 4
+  steps:
+    - checkout
+    - run:
+        name: Update Conan package
+        command: |
+          chmod +x .ci/install.sh
+          .ci/install.sh
+    - run:
+        name: Build recipe
+        command: |
+          export CONAN_CURRENT_PAGE=$((${CIRCLE_NODE_INDEX}+1))
+          export CONAN_TOTAL_PAGES=${CIRCLE_NODE_TOTAL}
+          chmod +x .ci/run.sh
+          .ci/run.sh
+
+jobs:
+  gcc-49:
+    docker:
+      - image: conanio/gcc49
+    environment:
+      - CONAN_GCC_VERSIONS: "4.9"
+      - CONAN_DOCKER_32_IMAGES: 1
+    <<: *conan-steps
+
+  gcc-5:
+    docker:
+      - image: conanio/gcc5
+    environment:
+      - CONAN_GCC_VERSIONS: "5"
+      - CONAN_DOCKER_32_IMAGES: 1
+    <<: *conan-steps
+
+  gcc-6:
+    docker:
+      - image: conanio/gcc6
+    environment:
+      - CONAN_GCC_VERSIONS: "6"
+      - CONAN_DOCKER_32_IMAGES: 1
+    <<: *conan-steps
+
+  gcc-7:
+    docker:
+      - image: conanio/gcc7
+    environment:
+      - CONAN_GCC_VERSIONS: "7"
+      - CONAN_DOCKER_32_IMAGES: 1
+    <<: *conan-steps
+
+  gcc-8:
+    docker:
+      - image: conanio/gcc8
+    environment:
+      - CONAN_GCC_VERSIONS: "8"
+      - CONAN_DOCKER_32_IMAGES: 1
+    <<: *conan-steps
+
+  clang-39:
+    docker:
+      - image: conanio/clang39
+    environment:
+      - CONAN_CLANG_VERSIONS: "3.9"
+      - CONAN_DOCKER_32_IMAGES: 1
+    <<: *conan-steps
+
+  clang-40:
+    docker:
+      - image: conanio/clang40
+    environment:
+      - CONAN_CLANG_VERSIONS: "4.0"
+      - CONAN_DOCKER_32_IMAGES: 1
+    <<: *conan-steps
+
+  clang-50:
+    docker:
+      - image: conanio/clang50
+    environment:
+      - CONAN_CLANG_VERSIONS: "5.0"
+      - CONAN_DOCKER_32_IMAGES: 1
+    <<: *conan-steps
+
+  clang-60:
+    docker:
+      - image: conanio/clang60
+    environment:
+      - CONAN_CLANG_VERSIONS: "6.0"
+      - CONAN_DOCKER_32_IMAGES: 1
+    <<: *conan-steps
+
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - gcc-49
+      - gcc-5
+      - gcc-6
+      - gcc-7
+      - gcc-8
+      - clang-39
+      - clang-40
+      - clang-50
+      - clang-60
