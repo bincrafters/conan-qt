@@ -166,40 +166,37 @@ class QtConan(ConanFile):
                 # Fall back on regular python
                 python_exe = tools.which("python")
 
-            if python_exe is not None:
-                # In any case, check its actual version for compatibility
-                from six import StringIO  # Python 2 and 3 compatible
-                from packaging.version import parse as parse_version
-                mybuf = StringIO()
-                cmd_v = "{} --version".format(python_exe)
-                self.run(cmd_v, output=mybuf)
-                version = parse_version(mybuf.getvalue().strip()
-                                             .split('Python ')[1])
-                # >= 2.7.5 & < 3
-                v_min = parse_version("2.7.5")
-                v_max = parse_version("3.0.0")
-                if ((version >= v_min) and (version < v_max)):
-                    msg = ("Found valid Python2 required for QtWebengine:"
-                           " version={}, path={}".format(version, python_exe))
-                    self.output.success(msg)
-                    raise msg
-                else:
-                    msg = ("Found python2 in path, but with invalid version {}"
-                           " (QtWebEngine requires >= 2.7.5 & "
-                           "< 3)".format(version))
-                    raise ConanInvalidConfiguration(msg)
-            else:
-                # Check version
+            if not python_exe:
                 msg = ("Python2 must be available in PATH "
                        "in order to build Qt WebEngine")
+                raise ConanInvalidConfiguration(msg)
+            # In any case, check its actual version for compatibility
+            from six import StringIO  # Python 2 and 3 compatible
+            from packaging.version import parse as parse_version
+            mybuf = StringIO()
+            cmd_v = "{} --version".format(python_exe)
+            self.run(cmd_v, output=mybuf)
+            version = parse_version(mybuf.getvalue().strip()
+                                         .split('Python ')[1])
+            # >= 2.7.5 & < 3
+            v_min = parse_version("2.7.5")
+            v_max = parse_version("3.0.0")
+            if (version >= v_min) and (version < v_max):
+                msg = ("Found valid Python2 required for QtWebengine:"
+                       " version={}, path={}".format(version, python_exe))
+                self.output.success(msg)
+            else:
+                msg = ("Found python2 in path, but with invalid version {}"
+                       " (QtWebEngine requires >= {} & < "
+                       "{})".format(version, v_min, v_max))
                 raise ConanInvalidConfiguration(msg)
 
         if pack_names:
             installer = tools.SystemPackageTool()
             for item in pack_names:
                 installer.install(item + self._system_package_architecture())
-        if (tools.os_info.is_windows
-            and self.settings.compiler == "Visual Studio"):
+        if (tools.os_info.is_windows and
+            (self.settings.compiler == "Visual Studio")):
             self.build_requires("jom_installer/1.1.2@bincrafters/stable")
 
     def configure(self):
