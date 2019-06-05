@@ -278,8 +278,8 @@ class QtConan(ConanFile):
             self.options["freetype"].with_png = self.options.with_libpng
             self.options["freetype"].with_zlib = True
         # if self.options.with_icu:
-            # self.requires("icu/64.2@bincrafters/testing")
-            # self.options["icu"].shared = self.options.shared
+        #     self.requires("icu/64.2@bincrafters/testing")
+        #     self.options["icu"].shared = self.options.shared
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
             self.requires("harfbuzz/2.3.0@bincrafters/stable")
             self.options["harbuzz"].with_freetype = self.options.with_freetype
