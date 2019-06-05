@@ -7,7 +7,7 @@ import sys
 
 import configparser
 from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanInvalidConfiguration, ConanException
 from conans.model import Generator
 
 
@@ -160,9 +160,39 @@ class QtConan(ConanFile):
                 self.build_requires("flex_installer/2.6.4@bincrafters/stable")
 
             # Check if python2 is available in PATH or it will fail
-            import distutils.spawn
-            if not(distutils.spawn.find_executable("python2") or
-                   distutils.spawn.find_executable("python2.exe")):
+
+            # Start by checking if python2 can be found
+            python_exe = tools.which("python2")
+            if not python_exe:
+                # Fall back on regular python
+                python_exe = tools.which("python")
+
+            # In any case, check its actual version for compatibility
+            found_python2 = False
+            version = None
+            from six import StringIO  # Python 2 and 3 compatible
+            from packaging.version import parse as parse_version
+            mybuf = StringIO()
+            cmd_v = "{} --version".format(python_exe)
+            try:
+                self.run(cmd_v, output=mybuf)
+                version = parse_version(mybuf.getvalue().strip()
+                                             .split('Python ')[1])
+                # >= 2.7.5 & < 3
+                v_min = parse_version("2.7.5")
+                v_max = parse_version("3.0.0")
+                if ((version >= v_min) and (version < v_max)):
+                    found_python2 = True
+            except ConanException:
+                self.output.error("Error running command: {}".format(cmd_v))
+                found_python2 = False
+
+            if found_python2:
+                self.output.success("Found valid Python2 required for QtWebengine:"
+                                    " version={}, path={}".format(version,
+                                                                  python_exe))
+            else:
+                # Check version
                 msg = ("Python2 must be available in PATH "
                        "in order to build Qt WebEngine")
                 raise ConanInvalidConfiguration(msg)
@@ -267,7 +297,7 @@ class QtConan(ConanFile):
             self.requires("sqlite3/3.28.0@bincrafters/stable")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.with_mysql:
-            self.requires("mysql-connector-c/6.1.11@jmarrec/stable")
+            self.requires("mysql-connector-c/6.1.11@jmarrec/testing")
             self.options["mysql-connector-c"].with_zlib = True
             self.options["mysql-connector-c"].with_ssl = self.options.openssl
             self.options["mysql-connector-c"].shared = True
