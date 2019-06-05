@@ -207,7 +207,7 @@ class QtConan(ConanFile):
         if self.settings.os != "Linux":
             self.options.with_libalsa = False
 
-        if (not self.settings.shared) and self.options["qtwebengine"]:
+        if (not self.options.shared) and self.options.qtwebengine:
             msg = "Static builds of Qt Webengine are not supported"
             raise ConanInvalidConfiguration(msg)
 
