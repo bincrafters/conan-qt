@@ -152,14 +152,20 @@ class QtConan(ConanFile):
 
         if self.options.qtwebengine:
             # gperf, bison, flex, python >= 2.7.5 & < 3
-            # TODO: Find Python 2!
-            pack_names += ["bison", "gperf", "flex"]
             if not tools.which("bison"):
                 self.build_requires("bison_installer/3.3.2@bincrafters/stable")
             if not tools.which("gperf"):
                 self.build_requires("gperf_installer/3.1@conan/stable")
             if not tools.which("flex"):
                 self.build_requires("flex_installer/2.6.4@bincrafters/stable")
+
+            # Check if python2 is available in PATH or it will fail
+            import distutils.spawn
+            if not(distutils.spawn.find_executable("python2") or
+                   distutils.spawn.find_executable("python2.exe")):
+                msg = ("Python2 must be available in PATH "
+                       "in order to build Qt WebEngine")
+                raise ConanInvalidConfiguration(msg)
 
         if pack_names:
             installer = tools.SystemPackageTool()
