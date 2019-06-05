@@ -160,8 +160,6 @@ class QtConan(ConanFile):
                 self.build_requires("flex_installer/2.6.4@bincrafters/stable")
 
             # Check if a valid python2 is available in PATH or it will fail
-            found_valid_python2 = False
-
             # Start by checking if python2 can be found
             python_exe = tools.which("python2")
             if not python_exe:
@@ -170,7 +168,6 @@ class QtConan(ConanFile):
 
             if python_exe is not None:
                 # In any case, check its actual version for compatibility
-                version = None
                 from six import StringIO  # Python 2 and 3 compatible
                 from packaging.version import parse as parse_version
                 mybuf = StringIO()
@@ -182,12 +179,15 @@ class QtConan(ConanFile):
                 v_min = parse_version("2.7.5")
                 v_max = parse_version("3.0.0")
                 if ((version >= v_min) and (version < v_max)):
-                    found_valid_python2 = True
-
-            if found_valid_python2:
-                msg = ("Found valid Python2 required for QtWebengine:"
-                       " version={}, path={}".format(version, python_exe))
-                self.output.success(msg)
+                    msg = ("Found valid Python2 required for QtWebengine:"
+                           " version={}, path={}".format(version, python_exe))
+                    self.output.success(msg)
+                    raise msg
+                else:
+                    msg = ("Found python2 in path, but with invalid version {}"
+                           " (QtWebEngine requires >= 2.7.5 & "
+                           "< 3)".format(version))
+                    raise ConanInvalidConfiguration(msg)
             else:
                 # Check version
                 msg = ("Python2 must be available in PATH "
