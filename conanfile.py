@@ -159,7 +159,8 @@ class QtConan(ConanFile):
             if not tools.which("flex"):
                 self.build_requires("flex_installer/2.6.4@bincrafters/stable")
 
-            # Check if python2 is available in PATH or it will fail
+            # Check if a valid python2 is available in PATH or it will fail
+            found_valid_python2 = False
 
             # Start by checking if python2 can be found
             python_exe = tools.which("python2")
@@ -167,14 +168,13 @@ class QtConan(ConanFile):
                 # Fall back on regular python
                 python_exe = tools.which("python")
 
-            # In any case, check its actual version for compatibility
-            found_python2 = False
-            version = None
-            from six import StringIO  # Python 2 and 3 compatible
-            from packaging.version import parse as parse_version
-            mybuf = StringIO()
-            cmd_v = "{} --version".format(python_exe)
-            try:
+            if python_exe is not None:
+                # In any case, check its actual version for compatibility
+                version = None
+                from six import StringIO  # Python 2 and 3 compatible
+                from packaging.version import parse as parse_version
+                mybuf = StringIO()
+                cmd_v = "{} --version".format(python_exe)
                 self.run(cmd_v, output=mybuf)
                 version = parse_version(mybuf.getvalue().strip()
                                              .split('Python ')[1])
@@ -182,15 +182,12 @@ class QtConan(ConanFile):
                 v_min = parse_version("2.7.5")
                 v_max = parse_version("3.0.0")
                 if ((version >= v_min) and (version < v_max)):
-                    found_python2 = True
-            except ConanException:
-                self.output.error("Error running command: {}".format(cmd_v))
-                found_python2 = False
+                    found_valid_python2 = True
 
-            if found_python2:
-                self.output.success("Found valid Python2 required for QtWebengine:"
-                                    " version={}, path={}".format(version,
-                                                                  python_exe))
+            if found_valid_python2:
+                msg = ("Found valid Python2 required for QtWebengine:"
+                       " version={}, path={}".format(version, python_exe))
+                self.output.success(msg)
             else:
                 # Check version
                 msg = ("Python2 must be available in PATH "
