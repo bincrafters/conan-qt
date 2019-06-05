@@ -142,19 +142,29 @@ class QtConan(ConanFile):
         return ""
 
     def build_requirements(self):
+        pack_names = []
+
         if self.options.GUI:
-            pack_names = []
             if tools.os_info.with_apt:
                 pack_names = ["libxcb1-dev", "libx11-dev", "libc6-dev"]
             elif tools.os_info.is_linux and not tools.os_info.with_pacman:
                 pack_names = ["libxcb-devel", "libX11-devel", "glibc-devel"]
 
-            if pack_names:
-                installer = tools.SystemPackageTool()
-                for item in pack_names:
-                    installer.install(item + self._system_package_architecture())
+        if self.options.qtwebengine:
+            # gperf, bison, flex, python >= 2.7.5 & < 3
+            # Should we rely on conan packages for these? I think not, since
+            # these are common build tools that user might have and there's no
+            # need to duplicate them.
+            # https://github.com/bincrafters/conan-winflexbison
+            # https://github.com/conan-community/conan-gperf_installer
+            pack_names += ["bison", "gperf", "flex"]
 
-        if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
+        if pack_names:
+            installer = tools.SystemPackageTool()
+            for item in pack_names:
+                installer.install(item + self._system_package_architecture())
+        if (tools.os_info.is_windows
+            and self.settings.compiler == "Visual Studio"):
             self.build_requires("jom_installer/1.1.2@bincrafters/stable")
 
     def configure(self):
@@ -166,7 +176,8 @@ class QtConan(ConanFile):
             if self.settings.compiler == "gcc":
                 self.options.with_mysql = False
             if self.settings.compiler == "Visual Studio":
-                if self.settings.compiler.runtime == "MT" or self.settings.compiler.runtime == "MTd":
+                if (self.settings.compiler.runtime == "MT" or
+                    self.settings.compiler.runtime == "MTd"):
                     self.options.with_mysql = False
 
         if self.options.widgets:
@@ -188,8 +199,14 @@ class QtConan(ConanFile):
         if self.settings.os != "Linux":
             self.options.with_libalsa = False
 
+        if (not self.settings.shared) and self.settings.qtwebengine:
+            msg = "Static builds of Qt Webengine are not supported"
+            raise ConanInvalidConfiguration(msg)
+
         if self.settings.os == "Android" and self.options.opengl == "desktop":
-            raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
+            msg = ("OpenGL desktop is not supported on Android. "
+                   "Consider using OpenGL es2")
+            raise ConanInvalidConfiguration(msg)
 
         if self.settings.os == "Macos":
             del self.settings.os.version
@@ -264,8 +281,9 @@ class QtConan(ConanFile):
                 self.requires("xkbcommon/0.8.3@bincrafters/stable")
 
     def system_requirements(self):
+        pack_names = []
+
         if self.options.GUI:
-            pack_names = []
             if tools.os_info.is_linux:
                 if tools.os_info.with_apt:
                     pack_names = ["libxcb1", "libx11-6"]
@@ -283,10 +301,17 @@ class QtConan(ConanFile):
                             else:
                                 pack_names.append("mesa-libGL-devel")
 
-            if pack_names:
-                installer = tools.SystemPackageTool()
-                for item in pack_names:
-                    installer.install(item + self._system_package_architecture())
+        if self.options.qtwebengine:
+            if tools.os_info.is_linux:
+                if tools.os_info.with_apt:
+                    # Actually a ton more:
+                    # https://wiki.qt.io/QtWebEngine/How_to_Try
+                    pack_names += ["libnss3-dev"]
+
+        if pack_names:
+            installer = tools.SystemPackageTool()
+            for item in pack_names:
+                installer.install(item + self._system_package_architecture())
 
     def source(self):
         url = "https://download.qt.io/official_releases/qt/{0}/{1}/single/qt-everywhere-src-{1}" \
