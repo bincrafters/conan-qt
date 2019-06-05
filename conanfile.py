@@ -152,12 +152,14 @@ class QtConan(ConanFile):
 
         if self.options.qtwebengine:
             # gperf, bison, flex, python >= 2.7.5 & < 3
-            # Should we rely on conan packages for these? I think not, since
-            # these are common build tools that user might have and there's no
-            # need to duplicate them.
-            # https://github.com/bincrafters/conan-winflexbison
-            # https://github.com/conan-community/conan-gperf_installer
+            # TODO: Find Python 2!
             pack_names += ["bison", "gperf", "flex"]
+            if not tools.which("bison"):
+                self.build_requires("bison_installer/3.3.2@bincrafters/stable")
+            if not tools.which("gperf"):
+                self.build_requires("gperf_installer/3.1@conan/stable")
+            if not tools.which("flex"):
+                self.build_requires("flex_installer/2.6.4@bincrafters/stable")
 
         if pack_names:
             installer = tools.SystemPackageTool()
@@ -199,7 +201,7 @@ class QtConan(ConanFile):
         if self.settings.os != "Linux":
             self.options.with_libalsa = False
 
-        if (not self.settings.shared) and self.settings.qtwebengine:
+        if (not self.settings.shared) and self.options["qtwebengine"]:
             msg = "Static builds of Qt Webengine are not supported"
             raise ConanInvalidConfiguration(msg)
 
