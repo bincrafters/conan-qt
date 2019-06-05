@@ -65,7 +65,7 @@ class QtConan(ConanFile):
         # "with_libiconv": [True, False],  # Qt tests failure "invalid conversion from const char** to char**"
         "with_doubleconversion": [True, False],
         "with_freetype": [True, False],
-        "with_icu": [True, False],
+        # "with_icu": [True, False], # waiting for 64.1 or 63.2
         "with_harfbuzz": [True, False],
         "with_libjpeg": [True, False],
         "with_libpng": [True, False],
@@ -97,7 +97,7 @@ class QtConan(ConanFile):
         # "with_libiconv": True,
         "with_doubleconversion": True,
         "with_freetype": True,
-        "with_icu": True,
+        # "with_icu": True,
         "with_harfbuzz": True,
         "with_libjpeg": True,
         "with_libpng": True,
@@ -277,11 +277,11 @@ class QtConan(ConanFile):
             self.requires("freetype/2.9.0@bincrafters/stable")
             self.options["freetype"].with_png = self.options.with_libpng
             self.options["freetype"].with_zlib = True
-        if self.options.with_icu:
-            self.requires("icu/64.2@jmarrec/testing")
-            self.options["icu"].shared = self.options.shared
+        # if self.options.with_icu:
+            # self.requires("icu/64.2@bincrafters/testing")
+            # self.options["icu"].shared = self.options.shared
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
-            self.requires("harfbuzz/2.4.0@bincrafters/stable")
+            self.requires("harfbuzz/2.3.0@bincrafters/stable")
             self.options["harbuzz"].with_freetype = self.options.with_freetype
         if self.options.with_libjpeg and not self.options.multiconfiguration:
             self.requires("libjpeg/9c@bincrafters/stable")
@@ -291,7 +291,7 @@ class QtConan(ConanFile):
             self.requires("sqlite3/3.28.0@bincrafters/stable")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.with_mysql:
-            self.requires("mysql-connector-c/6.1.11@jmarrec/testing")
+            self.requires("mysql-connector-c/6.1.11@bincrafters/stable")
             self.options["mysql-connector-c"].with_zlib = True
             self.options["mysql-connector-c"].with_ssl = self.options.openssl
             self.options["mysql-connector-c"].shared = True
@@ -485,7 +485,7 @@ class QtConan(ConanFile):
 
         args.append("--glib=" + ("yes" if self.options.with_glib else "no"))
         args.append("--pcre=" + ("system" if self.options.with_pcre2 else "qt"))
-        args.append("--icu=" + ("yes" if self.options.with_icu else "no"))
+        # args.append("--icu=" + ("yes" if self.options.with_icu else "no"))
         args.append("--sql-mysql=" + ("yes" if self.options.with_mysql else "no"))
         args.append("--sql-psql=" + ("yes" if self.options.with_pq else "no"))
         args.append("--sql-odbc=" + ("yes" if self.options.with_odbc else "no"))
