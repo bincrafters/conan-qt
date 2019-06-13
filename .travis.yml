@@ -5,21 +5,29 @@ env:
 osx: &osx
    os: osx
    language: generic
+addons:
+  apt:
+    packages:
+      python3
+      python3-pip
+android_config: &android_config
+    language: android
+    dist: trusty
+    android:
+      components:
+        - build-tools 26.0.2
+        - android-25
 matrix:
    include:
-      - <<: *osx
-        osx_image: xcode10.1
-        env: CONAN_APPLE_CLANG_VERSIONS=10.0 CONAN_CURRENT_PAGE=1
-      - <<: *osx
-        osx_image: xcode10.1
-        env: CONAN_APPLE_CLANG_VERSIONS=10.0 CONAN_CURRENT_PAGE=2
-      - <<: *osx
-        osx_image: xcode10.1
-        env: CONAN_APPLE_CLANG_VERSIONS=10.0 CONAN_CURRENT_PAGE=3
-      - <<: *osx
-        osx_image: xcode10.1
-        env: CONAN_APPLE_CLANG_VERSIONS=10.0 CONAN_CURRENT_PAGE=4
+      - <<: *android_config
+        env: CONAN_BUILD_REQUIRES=android_ndk_installer/r20@bincrafters/stable CONAN_ARCHS="x86_64,x86" CONAN_CLANG_VERSIONS=8
+      - <<: *android_config
+        env: CONAN_BUILD_REQUIRES=android_ndk_installer/r20@bincrafters/stable CONAN_ARCHS="armv6,armv7" CONAN_CLANG_VERSIONS=8
 install:
+  - sudo apt purge python-pip
+  - sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 2
+  - sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 3
+  - sudo update-alternatives  --set python /usr/bin/python3
   - chmod +x .ci/install.sh
   - ./.ci/install.sh
 script:

@@ -26,25 +26,25 @@ class TestPackageConan(ConanFile):
 
             def _qmakebuild():
                 args = [self.source_folder, "DESTDIR=bin"]
+                if self.settings.os != "Android":
+                    def _getenvpath(var):
+                        val = os.getenv(var)
+                        if val and tools.os_info.is_windows:
+                            val = val.replace("\\", "/")
+                            os.environ[var] = val
+                        return val
 
-                def _getenvpath(var):
-                    val = os.getenv(var)
-                    if val and tools.os_info.is_windows:
-                        val = val.replace("\\", "/")
-                        os.environ[var] = val
-                    return val
+                    value = _getenvpath('CC')
+                    if value:
+                        args += ['QMAKE_CC=' + value,
+                                 'QMAKE_LINK_C=' + value,
+                                 'QMAKE_LINK_C_SHLIB=' + value]
 
-                value = _getenvpath('CC')
-                if value:
-                    args += ['QMAKE_CC=' + value,
-                             'QMAKE_LINK_C=' + value,
-                             'QMAKE_LINK_C_SHLIB=' + value]
-
-                value = _getenvpath('CXX')
-                if value:
-                    args += ['QMAKE_CXX=' + value,
-                             'QMAKE_LINK=' + value,
-                             'QMAKE_LINK_SHLIB=' + value]
+                    value = _getenvpath('CXX')
+                    if value:
+                        args += ['QMAKE_CXX=' + value,
+                                 'QMAKE_LINK=' + value,
+                                 'QMAKE_LINK_SHLIB=' + value]
 
                 self.run("qmake %s" % " ".join(args), run_environment=True)
                 if tools.os_info.is_windows:
@@ -116,7 +116,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if (not tools.cross_building(self.settings)) or\
-                (self.settings.os_build == self.settings.os and self.settings.arch_build == "x86_64" and self.settings.arch == "x86"):
+                (str(self.settings.os_build) == str(self.settings.os) and self.settings.arch_build == "x86_64" and self.settings.arch == "x86"):
             self._test_with_qmake()
             self._test_with_meson()
             self._test_with_cmake()

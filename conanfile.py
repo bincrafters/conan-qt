@@ -142,7 +142,7 @@ class QtConan(ConanFile):
         return ""
 
     def build_requirements(self):
-        if self.options.GUI:
+        if self.options.GUI and self.settings.os != "Android":
             pack_names = []
             if tools.os_info.with_apt:
                 pack_names = ["libxcb1-dev", "libx11-dev", "libc6-dev"]
@@ -264,7 +264,7 @@ class QtConan(ConanFile):
                 self.requires("xkbcommon/0.8.3@bincrafters/stable")
 
     def system_requirements(self):
-        if self.options.GUI:
+        if self.options.GUI and self.settings.os != "Android":
             pack_names = []
             if tools.os_info.is_linux:
                 if tools.os_info.with_apt:
@@ -499,6 +499,8 @@ class QtConan(ConanFile):
                                            "x86_64": "x86_64",
                                            "mips": "mips",
                                            "mips64": "mips64"}.get(str(self.settings.arch))]
+            args.append("-android-sdk %s" % os.getenv('ANDROID_NDK'))
+            args.append("-android-ndk %s" % os.getenv('ANDROID_NDK'))
             # args += ["-android-toolchain-version %s" % self.settings.compiler.version]
 
         if self.options.device:
@@ -509,7 +511,7 @@ class QtConan(ConanFile):
             xplatform_val = self._xplatform()
             if xplatform_val:
                 if (not tools.cross_building(self.settings)) or\
-                        (self.settings.os_build == self.settings.os and\
+                        (str(self.settings.os_build) == str(self.settings.os) and\
                          self.settings.arch_build == "x86_64" and self.settings.arch == "x86"):
                     args += ["-platform %s" % xplatform_val]
                 else:
@@ -519,24 +521,25 @@ class QtConan(ConanFile):
                                  (self.settings.os, self.settings.compiler,
                                   self.settings.compiler.version, self.settings.arch))
 
-        def _getenvpath(var):
-            val = os.getenv(var)
-            if val and tools.os_info.is_windows:
-                val = val.replace("\\", "/")
-                os.environ[var] = val
-            return val
+        if self.settings.os != "Android":
+            def _getenvpath(var):
+                val = os.getenv(var)
+                if val and tools.os_info.is_windows:
+                    val = val.replace("\\", "/")
+                    os.environ[var] = val
+                return val
 
-        value = _getenvpath('CC')
-        if value:
-            args += ['QMAKE_CC="' + value + '"',
-                     'QMAKE_LINK_C="' + value + '"',
-                     'QMAKE_LINK_C_SHLIB="' + value + '"']
+            value = _getenvpath('CC')
+            if value:
+                args += ['QMAKE_CC="' + value + '"',
+                         'QMAKE_LINK_C="' + value + '"',
+                         'QMAKE_LINK_C_SHLIB="' + value + '"']
 
-        value = _getenvpath('CXX')
-        if value:
-            args += ['QMAKE_CXX="' + value + '"',
-                     'QMAKE_LINK="' + value + '"',
-                     'QMAKE_LINK_SHLIB="' + value + '"']
+            value = _getenvpath('CXX')
+            if value:
+                args += ['QMAKE_CXX="' + value + '"',
+                         'QMAKE_LINK="' + value + '"',
+                         'QMAKE_LINK_SHLIB="' + value + '"']
 
         if tools.os_info.is_linux and self.settings.compiler == "clang":
             args += ['QMAKE_CXXFLAGS+="-ftemplate-depth=1024"']
