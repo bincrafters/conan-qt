@@ -1,0 +1,23 @@
+diff --git a/qtbase/mkspecs/android-clang/qmake.conf b/qtbase/mkspecs/android-clang/qmake.conf
+index 20c6efee16..578dceeafc 100644
+--- a/qtbase/mkspecs/android-clang/qmake.conf
++++ b/qtbase/mkspecs/android-clang/qmake.conf
+@@ -34,7 +34,8 @@ QMAKE_CFLAGS += -DANDROID_HAS_WSTRING --sysroot=$$NDK_ROOT/sysroot \
+                 -isystem $$NDK_ROOT/sysroot/usr/include/$$NDK_TOOLS_PREFIX \
+                 -isystem $$NDK_ROOT/sources/cxx-stl/llvm-libc++/include \
+                 -isystem $$NDK_ROOT/sources/android/support/include \
+-                -isystem $$NDK_ROOT/sources/cxx-stl/llvm-libc++abi/include
++                -isystem $$NDK_ROOT/sources/cxx-stl/llvm-libc++abi/include \
++                -nostdinc++
+ 
+ ANDROID_SOURCES_CXX_STL_LIBDIR = $$NDK_ROOT/sources/cxx-stl/llvm-libc++/libs/$$ANDROID_TARGET_ARCH
+ 
+@@ -45,7 +46,7 @@ ANDROID_USE_LLVM = true
+ exists($$ANDROID_SOURCES_CXX_STL_LIBDIR/libc++.so): \
+     ANDROID_CXX_STL_LIBS = -lc++
+ else: \
+-    ANDROID_CXX_STL_LIBS = $$ANDROID_SOURCES_CXX_STL_LIBDIR/libc++.so.$$replace(ANDROID_PLATFORM, "android-", "")
++    ANDROID_CXX_STL_LIBS = $$ANDROID_SOURCES_CXX_STL_LIBDIR/libc++.so.$$replace(ANDROID_PLATFORM, "android-", "") -nostdlib++
+ 
+ QMAKE_CFLAGS_OPTIMIZE_SIZE = -Oz
+ 
