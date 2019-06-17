@@ -417,9 +417,9 @@ class QtConan(ConanFile):
             args += ["-no-openssl"]
         else:
             if self.options["OpenSSL"].shared:
-                args += ["-openssl-linked"]
+                args += ["-openssl-runtime"]
             else:
-                args += ["-openssl"]
+                args += ["-openssl-linked"]
 
         # args.append("--iconv=" + ("gnu" if self.options.with_libiconv else "no"))
 
