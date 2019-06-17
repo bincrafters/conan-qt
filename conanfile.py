@@ -159,10 +159,6 @@ class QtConan(ConanFile):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
             self.build_requires("jom_installer/1.1.2@bincrafters/stable")
 
-        # TODO: there's no android-sdk yet in bincrafters/stable
-        #if self.settings.os == "Android":
-        #    self.build_requires("android-sdk/26.1.1@bincrafters/stable")
-
     def configure(self):
         if self.settings.os != 'Linux':
             self.options.with_glib = False
