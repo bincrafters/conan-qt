@@ -44,7 +44,7 @@ class QtConan(ConanFile):
     _submodules = _getsubmodules()
 
     name = "qt"
-    version = "5.13.0-rc2"
+    version = "5.13.0"
     description = "Qt is a cross-platform framework for graphical user interfaces."
     topics = ("conan", "qt", "ui")
     url = "https://github.com/bincrafters/conan-qt"
@@ -185,7 +185,7 @@ class QtConan(ConanFile):
         if self.options.multiconfiguration:
             del self.settings.build_type
 
-        # assert QtConan.version == QtConan._submodules['qtbase']['branch']
+        assert QtConan.version == QtConan._submodules['qtbase']['branch']
 
         def _enablemodule(mod):
             if mod != 'qtbase':
@@ -278,12 +278,12 @@ class QtConan(ConanFile):
                     installer.install(item + self._system_package_architecture())
 
     def source(self):
-        url = "https://download.qt.io/development_releases/qt/{0}/{1}/single/qt-everywhere-src-{1}" \
+        url = "https://download.qt.io/official_releases/qt/{0}/{1}/single/qt-everywhere-src-{1}" \
             .format(self.version[:self.version.rfind('.')], self.version)
         if tools.os_info.is_windows:
-            tools.get("%s.zip" % url, sha256='28dea623b63e993151609be6f740860ae748627bb0bc5f32a59b6267212dc7c4')
+            tools.get("%s.zip" % url, sha256='68122be08b27c2b8371d532b7639e02633a91b8d28dc88dbcc9af76dab2cc9d9')
         elif sys.version_info.major >= 3:
-            tools.get("%s.tar.xz" % url, sha256='cf2601065f70724c0fe8aedfaa253f15078954d22b5d32a036a624570cc6b491')
+            tools.get("%s.tar.xz" % url, sha256='2cba31e410e169bd5cdae159f839640e672532a4687ea0f265f686421e0e86d6')
         else:  # python 2 cannot deal with .xz archives
             self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
         shutil.move("qt-everywhere-src-%s" % self.version, "qt5")
