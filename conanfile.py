@@ -4,6 +4,7 @@
 import os
 import shutil
 import sys
+import glob
 
 import configparser
 from conans import ConanFile, tools
@@ -51,7 +52,8 @@ class QtConan(ConanFile):
     homepage = "https://www.qt.io"
     license = "LGPL-3.0"
     author = "Bincrafters <bincrafters@gmail.com>"
-    exports = ["LICENSE.md", "qtmodules.conf", "*.diff"]
+    exports = ["LICENSE.md", "qtmodules.conf"]
+    exports_sources = ["patches/*"]
     settings = "os", "arch", "compiler", "build_type", "os_build", "arch_build"
 
     options = dict({
@@ -299,6 +301,9 @@ class QtConan(ConanFile):
             self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
         shutil.move("qt-everywhere-src-%s" % self.version, "qt5")
 
+        for patch in sorted(glob.glob("patches/*.diff")):
+            tools.patch("qt5", patch)
+
     def _xplatform(self):
         if self.settings.os == "Linux":
             if self.settings.compiler == "gcc":
@@ -401,6 +406,9 @@ class QtConan(ConanFile):
                     and os.path.isdir(os.path.join(self.source_folder, 'qt5', QtConan._submodules[module]['path'])):
                 args.append("-skip " + module)
 
+        if self.settings.os == "Android":
+            args.append("-no-warnings-are-errors")
+
         # openGL
         if self.options.opengl == "no":
             args += ["-no-opengl"]
@@ -491,6 +499,7 @@ class QtConan(ConanFile):
         elif self.settings.os == "Macos":
             args += ["-no-framework"]
         elif self.settings.os == "Android":
+            args += ["-android-ndk %s" % os.environ["ANDROID_NDK_HOME"]]
             args += ["-android-ndk-platform android-%s" % self.settings.os.api_level]
             args += ["-android-arch %s" % {"armv6": "armeabi",
                                            "armv7": "armeabi-v7a",
@@ -548,7 +557,7 @@ class QtConan(ConanFile):
             for package in ['xkbcommon', 'glib']:
                 if package in self.deps_cpp_info.deps:
                     lib_path = self.deps_cpp_info[package].rootpath
-                    for dirpath, dirnames, filenames in os.walk(lib_path):
+                    for dirpath, _, filenames in os.walk(lib_path):
                         for filename in filenames:
                             if filename.endswith('.pc'):
                                 shutil.copyfile(os.path.join(dirpath, filename), filename)
