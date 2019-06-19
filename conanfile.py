@@ -301,7 +301,7 @@ class QtConan(ConanFile):
             self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
         shutil.move("qt-everywhere-src-%s" % self.version, "qt5")
 
-        for patch in glob.glob("patches/*.diff"):
+        for patch in sorted(glob.glob("patches/*.diff")):
             tools.patch("qt5", patch)
 
     def _xplatform(self):
