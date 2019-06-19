@@ -142,18 +142,6 @@ class QtConan(ConanFile):
         return ""
 
     def build_requirements(self):
-        if self.options.GUI:
-            pack_names = []
-            if tools.os_info.with_apt:
-                pack_names = ["libxcb1-dev", "libx11-dev", "libc6-dev"]
-            elif tools.os_info.is_linux and not tools.os_info.with_pacman:
-                pack_names = ["libxcb-devel", "libX11-devel", "glibc-devel"]
-
-            if pack_names:
-                installer = tools.SystemPackageTool()
-                for item in pack_names:
-                    installer.install(item + self._system_package_architecture())
-
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
             self.build_requires("jom_installer/1.1.2@bincrafters/stable")
 
@@ -268,7 +256,7 @@ class QtConan(ConanFile):
             pack_names = []
             if tools.os_info.is_linux:
                 if tools.os_info.with_apt:
-                    pack_names = ["libxcb1", "libx11-6"]
+                    pack_names = ["libxcb1-dev", "libx11-dev", "libc6-dev"]
                     if self.options.opengl == "desktop":
                         pack_names.append("libgl1-mesa-dev")
                     elif self.options.opengl == "es2":
@@ -277,6 +265,7 @@ class QtConan(ConanFile):
                     if not tools.os_info.linux_distro.startswith(("opensuse", "sles")):
                         pack_names = ["libxcb"]
                     if not tools.os_info.with_pacman:
+                        pack_names += ["libxcb-devel", "libX11-devel", "glibc-devel"]
                         if self.options.opengl == "desktop":
                             if tools.os_info.linux_distro.startswith(("opensuse", "sles")):
                                 pack_names.append("Mesa-libGL-devel")
