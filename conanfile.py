@@ -211,21 +211,21 @@ class QtConan(ConanFile):
         # if self.options.with_libiconv:
         #     self.requires("libiconv/1.15@bincrafters/stable")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
-            self.requires("double-conversion/3.1.1@bincrafters/stable")
+            self.requires("double-conversion/3.1.4@bincrafters/stable")
         if self.options.with_freetype and not self.options.multiconfiguration:
-            self.requires("freetype/2.9.0@bincrafters/stable")
+            self.requires("freetype/2.10.0@bincrafters/stable")
             self.options["freetype"].with_png = self.options.with_libpng
             self.options["freetype"].with_zlib = True
         # if self.options.with_icu:
         #     self.requires("icu/63.1@bincrafters/stable")
         #     self.options["icu"].shared = self.options.shared
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
-            self.requires("harfbuzz/2.3.0@bincrafters/stable")
+            self.requires("harfbuzz/2.4.0@bincrafters/stable")
             self.options["harbuzz"].with_freetype = self.options.with_freetype
         if self.options.with_libjpeg and not self.options.multiconfiguration:
             self.requires("libjpeg/9c@bincrafters/stable")
         if self.options.with_libpng and not self.options.multiconfiguration:
-            self.requires("libpng/1.6.34@bincrafters/stable")
+            self.requires("libpng/1.6.37@bincrafters/stable")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
             self.requires("sqlite3/3.28.0@bincrafters/stable")
             self.options["sqlite3"].enable_column_metadata = True
@@ -454,11 +454,11 @@ class QtConan(ConanFile):
                   ("libalsa", "ALSA")]
         for package, var in libmap:
             if package in self.deps_cpp_info.deps:
-                if self.deps_cpp_info[package].include_paths:
+                if package == 'odbc' and self.settings.os == "Windows":
+                    continue
+                args.append("\"%s_PREFIX=%s\"" % (var, self.deps_cpp_info[package].rootpath))
+                if package == 'freetype':
                     args.append("\"%s_INCDIR=%s\"" % (var, self.deps_cpp_info[package].include_paths[-1]))
-                for lib_path in self.deps_cpp_info[package].lib_paths:
-                    args.append("\"%s_LIBDIR=%s\"" % (var, lib_path))
-                    break
                 args += ["-D " + s for s in self.deps_cpp_info[package].defines]
 
                 def _gather_libs(p):
