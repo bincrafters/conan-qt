@@ -16,6 +16,8 @@ jobs:
     env:
       CONAN_LOGIN_USERNAME: $(CONAN_LOGIN_USERNAME)
       CONAN_PASSWORD: $(CONAN_PASSWORD)
+      CONAN_DOCKER_IMAGE_SKIP_UPDATE: True
+      CONAN_DOCKER_ENTRY_SCRIPT: pip uninstall -y conan-package-tools && pip uninstall -y conan && pip install git+https://github.com/SSE4/conan.git@fix_connection_reset && pip install git+https://github.com/SSE4/conan-package-tools.git@fix_connection_reset
   strategy:
     matrix:
       Gcc 4.9 x86:
