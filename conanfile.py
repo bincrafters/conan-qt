@@ -547,7 +547,7 @@ class QtConan(ConanFile):
                 try:
                     self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
                 finally:
-                    self.output.info(open('config.log', 'r').read())
+                    self.output.info(open('config.log', errors='backslashreplace').read())
                 self.run(make, run_environment=True)
                 self.run("%s install" % make)
 
