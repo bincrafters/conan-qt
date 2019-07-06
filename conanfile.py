@@ -567,6 +567,4 @@ class QtConan(ConanFile):
         self.copy("bin/qt.conf", src="qtbase")
 
     def package_info(self):
-        if self.settings.os == "Windows":
-            self.env_info.path.append(os.path.join(self.package_folder, "bin"))
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
