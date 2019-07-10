@@ -36,7 +36,8 @@ class QtConan(ConanFile):
             status = str(config.get(section, "status"))
             if status != "obsolete" and status != "ignore":
                 res[modulename] = {"branch": str(config.get(section, "branch")), "status": status,
-                                   "path": str(config.get(section, "path")), "depends": []}
+                                   "path": str(config.get(section, "path")), "depends": [],
+                                   "md5": str(config.get(section, "md5"))}
                 if config.has_option(section, "depends"):
                     res[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
         return res
@@ -278,15 +279,18 @@ class QtConan(ConanFile):
                     installer.install(item + self._system_package_architecture())
 
     def source(self):
-        url = "https://download.qt.io/archive/qt/{0}/{1}/single/qt-everywhere-src-{1}" \
-            .format(self.version[:self.version.rfind('.')], self.version)
-        if tools.os_info.is_windows:
-            tools.get("%s.zip" % url, sha256='caab56aa411ef471d56bd6de54088bb38f0369de26dc874dd2703801d30d4ef9')
-        elif sys.version_info.major >= 3:
-            tools.get("%s.tar.xz" % url, sha256='85da5e0ee498759990180d5b8192efaa6060a313c5018b772f57d446bdd425e1')
-        else:  # python 2 cannot deal with .xz archives
-            self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
-        shutil.move("qt-everywhere-src-%s" % self.version, "qt5")
+        for module in self._submodules:
+            if module == 'qtbase' or getattr(self.options, module):
+                url = "https://download.qt.io/official_releases/qt/{0}/{1}/submodules/{2}-everywhere-src-{1}" \
+                    .format(self.version[:self.version.rfind('.')], self.version, module)
+                if sys.version_info.major >= 3:
+                    tools.get("%s.tar.xz" % url, md5=self._submodules[module]["md5"])
+                else:  # python 2 cannot deal with .xz archives
+                    self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
+
+                if not os.path.exists("qt5"):
+                    os.mkdir("qt5")
+                shutil.move("%s-everywhere-src-%s" % (module, self.version), "qt5/%s" % module)
 
         for patch in ["cc04651dea4c4678c626cb31b3ec8394426e2b25.diff"]:
             tools.patch("qt5/qtbase", patch)
@@ -387,11 +391,6 @@ class QtConan(ConanFile):
         elif self.settings.build_type == "MinSizeRel":
             args.append("-release")
             args.append("-optimize-size")
-            
-        for module in QtConan._submodules:
-            if module != 'qtbase' and not getattr(self.options, module) \
-                    and os.path.isdir(os.path.join(self.source_folder, 'qt5', QtConan._submodules[module]['path'])):
-                args.append("-skip " + module)
 
         # openGL
         if self.options.opengl == "no":
@@ -548,11 +547,18 @@ class QtConan(ConanFile):
 
             with tools.environment_append({"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": os.getcwd()}):
                 try:
-                    self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
+                    self.run("%s/qt5/qtbase/configure %s" % (self.source_folder, " ".join(args)))
                 finally:
                     self.output.info(open('config.log', errors='backslashreplace').read())
-                self.run(make, run_environment=True)
-                self.run("%s install" % make)
+
+            self.run(make, run_environment=True)
+            self.run("%s install" % make)
+
+            for module in self._submodules:
+                if module != 'qtbase' and getattr(self.options, module):
+                    self.run(os.sep.join(["bin", "qmake"]) + " -makefile -o %s/Makefile %s/qt5/%s/%s.pro" % (module, self.source_folder, module, module))
+                    self.run(make, run_environment=True, cwd=module)
+                    self.run("%s install" % make, cwd=module)
 
         if tools.os_info.is_windows:
             if self.settings.compiler == "Visual Studio":
@@ -563,11 +569,8 @@ class QtConan(ConanFile):
         else:
             _build("make")
 
-        with open('qtbase/bin/qt.conf', 'w') as f:
+        with open('bin/qt.conf', 'w') as f:
             f.write('[Paths]\nPrefix = ..')
-
-    def package(self):
-        self.copy("bin/qt.conf", src="qtbase")
 
     def package_info(self):
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
