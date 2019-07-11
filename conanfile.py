@@ -66,7 +66,7 @@ class QtConan(ConanFile):
         # "with_libiconv": [True, False],  # Qt tests failure "invalid conversion from const char** to char**"
         "with_doubleconversion": [True, False],
         "with_freetype": [True, False],
-        # "with_icu": [True, False], # waiting for 64.1 or 63.2
+        "with_icu": [True, False],
         "with_harfbuzz": [True, False],
         "with_libjpeg": [True, False],
         "with_libpng": [True, False],
@@ -99,7 +99,7 @@ class QtConan(ConanFile):
         # "with_libiconv": True,
         "with_doubleconversion": True,
         "with_freetype": True,
-        # "with_icu": True,
+        "with_icu": True,
         "with_harfbuzz": True,
         "with_libjpeg": True,
         "with_libpng": True,
@@ -216,9 +216,9 @@ class QtConan(ConanFile):
             self.requires("double-conversion/3.1.4@bincrafters/stable")
         if self.options.with_freetype and not self.options.multiconfiguration:
             self.requires("freetype/2.10.0@bincrafters/stable")
-        # if self.options.with_icu:
-        #     self.requires("icu/63.1@bincrafters/stable")
-        #     self.options["icu"].shared = self.options.shared
+        if self.options.with_icu:
+            self.requires("icu/64.2@bincrafters/stable")
+            self.options["icu"].shared = self.options.shared
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
             self.requires("harfbuzz/2.4.0@bincrafters/stable")
         if self.options.with_libjpeg and not self.options.multiconfiguration:
@@ -382,7 +382,7 @@ class QtConan(ConanFile):
         elif self.settings.build_type == "MinSizeRel":
             args.append("-release")
             args.append("-optimize-size")
-            
+
         for module in QtConan._submodules:
             if module != 'qtbase' and not getattr(self.options, module) \
                     and os.path.isdir(os.path.join(self.source_folder, 'qt5', QtConan._submodules[module]['path'])):
@@ -412,7 +412,7 @@ class QtConan(ConanFile):
 
         args.append("--glib=" + ("yes" if self.options.with_glib else "no"))
         args.append("--pcre=" + ("system" if self.options.with_pcre2 else "qt"))
-        # args.append("--icu=" + ("yes" if self.options.with_icu else "no"))
+        args.append("--icu=" + ("yes" if self.options.with_icu else "no"))
         args.append("--sql-mysql=" + ("yes" if self.options.with_mysql else "no"))
         args.append("--sql-psql=" + ("yes" if self.options.with_pq else "no"))
         args.append("--sql-odbc=" + ("yes" if self.options.with_odbc else "no"))
@@ -439,7 +439,7 @@ class QtConan(ConanFile):
                   # ("libiconv", "ICONV"),
                   ("double-conversion", "DOUBLECONVERSION"),
                   ("freetype", "FREETYPE"),
-                  # ("icu", "ICU"),
+                  ("icu", "ICU"),
                   ("harfbuzz", "HARFBUZZ"),
                   ("libjpeg", "LIBJPEG"),
                   ("libpng", "LIBPNG"),
