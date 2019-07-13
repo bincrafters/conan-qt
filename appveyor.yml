@@ -6,54 +6,6 @@ environment:
     CONAN_TOTAL_PAGES: 6
 
     matrix:
-        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-          CONAN_VISUAL_VERSIONS: 16
-          CONAN_BUILD_TYPES: Release
-          CONAN_CURRENT_PAGE: 1
-        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-          CONAN_VISUAL_VERSIONS: 16
-          CONAN_BUILD_TYPES: Release
-          CONAN_CURRENT_PAGE: 2
-        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-          CONAN_VISUAL_VERSIONS: 16
-          CONAN_BUILD_TYPES: Release
-          CONAN_CURRENT_PAGE: 3
-        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-          CONAN_VISUAL_VERSIONS: 16
-          CONAN_BUILD_TYPES: Release
-          CONAN_CURRENT_PAGE: 4
-        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-          CONAN_VISUAL_VERSIONS: 16
-          CONAN_BUILD_TYPES: Release
-          CONAN_CURRENT_PAGE: 5
-        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-          CONAN_VISUAL_VERSIONS: 16
-          CONAN_BUILD_TYPES: Release
-          CONAN_CURRENT_PAGE: 6
-        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-          CONAN_VISUAL_VERSIONS: 16
-          CONAN_BUILD_TYPES: Debug
-          CONAN_CURRENT_PAGE: 1
-        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-          CONAN_VISUAL_VERSIONS: 16
-          CONAN_BUILD_TYPES: Debug
-          CONAN_CURRENT_PAGE: 2
-        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-          CONAN_VISUAL_VERSIONS: 16
-          CONAN_BUILD_TYPES: Debug
-          CONAN_CURRENT_PAGE: 3
-        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-          CONAN_VISUAL_VERSIONS: 16
-          CONAN_BUILD_TYPES: Debug
-          CONAN_CURRENT_PAGE: 4
-        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-          CONAN_VISUAL_VERSIONS: 16
-          CONAN_BUILD_TYPES: Debug
-          CONAN_CURRENT_PAGE: 5
-        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-          CONAN_VISUAL_VERSIONS: 16
-          CONAN_BUILD_TYPES: Debug
-          CONAN_CURRENT_PAGE: 6
         - MINGW_CONFIGURATIONS: '4.9@x86@dwarf2@posix'
         - MINGW_CONFIGURATIONS: '4.9@x86_64@seh@posix'
         - MINGW_CONFIGURATIONS: '6@x86@dwarf2@posix'
@@ -158,11 +110,59 @@ environment:
           CONAN_VISUAL_VERSIONS: 15
           CONAN_BUILD_TYPES: Debug
           CONAN_CURRENT_PAGE: 6
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+          CONAN_VISUAL_VERSIONS: 16
+          CONAN_BUILD_TYPES: Release
+          CONAN_CURRENT_PAGE: 1
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+          CONAN_VISUAL_VERSIONS: 16
+          CONAN_BUILD_TYPES: Release
+          CONAN_CURRENT_PAGE: 2
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+          CONAN_VISUAL_VERSIONS: 16
+          CONAN_BUILD_TYPES: Release
+          CONAN_CURRENT_PAGE: 3
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+          CONAN_VISUAL_VERSIONS: 16
+          CONAN_BUILD_TYPES: Release
+          CONAN_CURRENT_PAGE: 4
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+          CONAN_VISUAL_VERSIONS: 16
+          CONAN_BUILD_TYPES: Release
+          CONAN_CURRENT_PAGE: 5
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+          CONAN_VISUAL_VERSIONS: 16
+          CONAN_BUILD_TYPES: Release
+          CONAN_CURRENT_PAGE: 6
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+          CONAN_VISUAL_VERSIONS: 16
+          CONAN_BUILD_TYPES: Debug
+          CONAN_CURRENT_PAGE: 1
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+          CONAN_VISUAL_VERSIONS: 16
+          CONAN_BUILD_TYPES: Debug
+          CONAN_CURRENT_PAGE: 2
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+          CONAN_VISUAL_VERSIONS: 16
+          CONAN_BUILD_TYPES: Debug
+          CONAN_CURRENT_PAGE: 3
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+          CONAN_VISUAL_VERSIONS: 16
+          CONAN_BUILD_TYPES: Debug
+          CONAN_CURRENT_PAGE: 4
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+          CONAN_VISUAL_VERSIONS: 16
+          CONAN_BUILD_TYPES: Debug
+          CONAN_CURRENT_PAGE: 5
+        - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+          CONAN_VISUAL_VERSIONS: 16
+          CONAN_BUILD_TYPES: Debug
+          CONAN_CURRENT_PAGE: 6
 
 install:
   - set PATH=%PYTHON_HOME%;%PYTHON_HOME%/Scripts/;%PATH%
-  - pip.exe install git+https://github.com/SSE4/conan-package-tools.git@fix_connection_reset bincrafters_package_tools
-  - pip.exe install git+https://github.com/SSE4/conan.git@fix_connection_reset
+  - pip.exe install conan --upgrade
+  - pip.exe install conan_package_tools bincrafters_package_tools
   - conan user # It creates the conan data directory
 
 test_script:
