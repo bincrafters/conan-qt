@@ -205,15 +205,15 @@ class QtConan(ConanFile):
                     "gcc": "macx-g++"}.get(str(self.settings.compiler))
 
         elif self.settings.os == "iOS":
-            if self.settings.compiler == "clang":
+            if self.settings.compiler == "apple-clang":
                 return "macx-ios-clang"
 
         elif self.settings.os == "watchOS":
-            if self.settings.compiler == "clang":
+            if self.settings.compiler == "apple-clang":
                 return "macx-watchos-clang"
 
         elif self.settings.os == "tvOS":
-            if self.settings.compiler == "clang":
+            if self.settings.compiler == "apple-clang":
                 return "macx-tvos-clang"
 
         elif self.settings.os == "Android":
