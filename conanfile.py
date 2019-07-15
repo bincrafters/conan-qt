@@ -308,15 +308,15 @@ class QtConan(ConanFile):
                     "gcc": "macx-g++"}.get(str(self.settings.compiler))
 
         elif self.settings.os == "iOS":
-            if self.settings.compiler == "clang":
+            if self.settings.compiler == "apple-clang":
                 return "macx-ios-clang"
 
         elif self.settings.os == "watchOS":
-            if self.settings.compiler == "clang":
+            if self.settings.compiler == "apple-clang":
                 return "macx-watchos-clang"
 
         elif self.settings.os == "tvOS":
-            if self.settings.compiler == "clang":
+            if self.settings.compiler == "apple-clang":
                 return "macx-tvos-clang"
 
         elif self.settings.os == "Android":
@@ -498,7 +498,7 @@ class QtConan(ConanFile):
             xplatform_val = self._xplatform()
             if xplatform_val:
                 if (not tools.cross_building(self.settings)) or\
-                        (self.settings.os_build == self.settings.os and\
+                        (self.settings.os == self.settings.os_build and\
                          self.settings.arch_build == "x86_64" and self.settings.arch == "x86"):
                     args += ["-platform %s" % xplatform_val]
                 else:
