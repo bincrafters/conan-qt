@@ -78,6 +78,6 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if (not tools.cross_building(self.settings)) or\
-                (self.settings.os_build == self.settings.os and self.settings.arch_build == "x86_64" and self.settings.arch == "x86"):
+                (self.settings.os == self.settings.os_build and self.settings.arch_build == "x86_64" and self.settings.arch == "x86"):
             self._test_with_qmake()
             self._test_with_cmake()
