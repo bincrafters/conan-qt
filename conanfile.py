@@ -115,7 +115,7 @@ class QtConan(ConanFile):
 
         "device": None,
         "cross_compile": "/usr/bin/",
-        "sysroot": "/",
+        "sysroot": None,
         "config": None,
         "multiconfiguration": False,
     }, **{module: False for module in _submodules if module != 'qtbase'}
