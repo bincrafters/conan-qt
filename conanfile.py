@@ -82,6 +82,7 @@ class QtConan(ConanFile):
 
         "device": "ANY",
         "cross_compile": "ANY",
+        "sysroot": "ANY",
         "config": "ANY",
         "multiconfiguration": [True, False],
     }, **{module: [True, False] for module in _submodules if module != 'qtbase'}
@@ -113,7 +114,8 @@ class QtConan(ConanFile):
         "widgets": True,
 
         "device": None,
-        "cross_compile": None,
+        "cross_compile": "/usr/bin/",
+        "sysroot": "/",
         "config": None,
         "multiconfiguration": False,
     }, **{module: False for module in _submodules if module != 'qtbase'}
@@ -505,6 +507,8 @@ class QtConan(ConanFile):
             args += ["-device %s" % self.options.device]
             if self.options.cross_compile:
                 args += ["-device-option CROSS_COMPILE=%s" % self.options.cross_compile]
+            if self.options.sysroot:
+                args += ["-sysroot %s" % self.options.sysroot]
         else:
             xplatform_val = self._xplatform()
             if xplatform_val:
@@ -576,6 +580,12 @@ class QtConan(ConanFile):
 
     def package(self):
         self.copy("bin/qt.conf", src="qtbase")
+
+    def package_id(self):
+        # Backwards compatibility for cross_compile to not affect package_id
+        # for people who don't use the `device` option
+        self.info.options.cross_compile = None
+        del self.info.options.sysroot
 
     def package_info(self):
         if self.settings.os == "Windows":
