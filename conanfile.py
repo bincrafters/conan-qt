@@ -503,12 +503,13 @@ class QtConan(ConanFile):
                                            "mips64": "mips64"}.get(str(self.settings.arch))]
             # args += ["-android-toolchain-version %s" % self.settings.compiler.version]
 
+        if self.options.sysroot:
+            args += ["-sysroot %s" % self.options.sysroot]
+
         if self.options.device:
             args += ["-device %s" % self.options.device]
             if self.options.cross_compile:
                 args += ["-device-option CROSS_COMPILE=%s" % self.options.cross_compile]
-            if self.options.sysroot:
-                args += ["-sysroot %s" % self.options.sysroot]
         else:
             xplatform_val = self._xplatform()
             if xplatform_val:
