@@ -539,7 +539,7 @@ class QtConan(ConanFile):
         if self.options.config:
             args.append(str(self.options.config))
 
-        def _build(make):
+        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             for package in ['xkbcommon', 'glib']:
                 if package in self.deps_cpp_info.deps:
                     lib_path = self.deps_cpp_info[package].rootpath
@@ -554,17 +554,15 @@ class QtConan(ConanFile):
                     self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
                 finally:
                     self.output.info(open('config.log', errors='backslashreplace').read())
+
+                if self.settings.compiler == "Visual Studio":
+                    make = "jom"
+                elif tools.os_info.is_windows:
+                    make = "mingw32-make"
+                else:
+                    make = "make"
                 self.run(make, run_environment=True)
                 self.run("%s install" % make)
-
-        if tools.os_info.is_windows:
-            if self.settings.compiler == "Visual Studio":
-                with tools.vcvars(self.settings):
-                    _build("jom")
-            else:
-                _build("mingw32-make")
-        else:
-            _build("make")
 
         with open('qtbase/bin/qt.conf', 'w') as f:
             f.write('[Paths]\nPrefix = ..')
