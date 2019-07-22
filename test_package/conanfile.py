@@ -24,7 +24,7 @@ class TestPackageConan(ConanFile):
         with tools.chdir("qmake_folder"):
             self.output.info("Building with qmake")
 
-            def _qmakebuild():
+            with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
                 args = [self.source_folder, "DESTDIR=bin"]
 
                 def _getenvpath(var):
@@ -54,12 +54,6 @@ class TestPackageConan(ConanFile):
                         self.run("mingw32-make", run_environment=True)
                 else:
                     self.run("make", run_environment=True)
-
-            if self.settings.compiler == "Visual Studio":
-                with tools.vcvars(self.settings):
-                    _qmakebuild()
-            else:
-                _qmakebuild()
 
     def _build_with_meson(self):
         if self.options["qt"].shared and not tools.cross_building(self.settings) and not tools.os_info.is_macos:
