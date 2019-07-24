@@ -43,6 +43,7 @@ class QtConan(ConanFile):
 
     _submodules = _getsubmodules()
 
+    generators = "pkg_config"
     name = "qt"
     version = "5.13.0"
     description = "Qt is a cross-platform framework for graphical user interfaces."
@@ -212,7 +213,6 @@ class QtConan(ConanFile):
         if self.options.with_glib:
             self.requires("glib/2.58.3@bincrafters/stable")
             self.options["glib"].shared = True
-            self.options["glib"].with_pcre = False
         # if self.options.with_libiconv:
         #     self.requires("libiconv/1.15@bincrafters/stable")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -542,16 +542,18 @@ class QtConan(ConanFile):
         if self.options.config:
             args.append(str(self.options.config))
 
-        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-            for package in ['xkbcommon', 'glib']:
-                if package in self.deps_cpp_info.deps:
-                    lib_path = self.deps_cpp_info[package].rootpath
-                    for dirpath, dirnames, filenames in os.walk(lib_path):
-                        for filename in filenames:
-                            if filename.endswith('.pc'):
-                                shutil.copyfile(os.path.join(dirpath, filename), filename)
-                                tools.replace_prefix_in_pc_file(filename, lib_path)
+        for package in ['xkbcommon', 'glib']:
+            if package in self.deps_cpp_info.deps:
+                lib_path = self.deps_cpp_info[package].rootpath
+                for dirpath, dirnames, filenames in os.walk(lib_path):
+                    for filename in filenames:
+                        if filename.endswith('.pc'):
+                            shutil.copyfile(os.path.join(dirpath, filename), filename)
+                            tools.replace_prefix_in_pc_file(filename, lib_path)
 
+        if 'glib' in self.deps_cpp_info.deps:
+            shutil.move("pcre.pc", "libpcre.pc")
+        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             with tools.environment_append({"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": os.getcwd()}):
                 try:
                     self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
