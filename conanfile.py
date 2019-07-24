@@ -156,7 +156,6 @@ class QtConan(ConanFile):
             self.options.with_glib = False
         #     self.options.with_libiconv = False
         if self.settings.os == "Windows":
-            self.options.with_pq = False
             if self.settings.compiler == "gcc":
                 self.options.with_mysql = False
             if self.settings.compiler == "Visual Studio":
@@ -241,7 +240,7 @@ class QtConan(ConanFile):
             self.options["mysql-connector-c"].with_ssl = self.options.openssl
             self.options["mysql-connector-c"].shared = True
         if self.options.with_pq:
-            self.requires("libpq/9.6.9@bincrafters/stable")
+            self.requires("libpq/11.4@bincrafters/stable")
             self.options["libpq"].with_zlib = True
             self.options["libpq"].with_openssl = self.options.openssl
         if self.options.with_odbc:
@@ -255,7 +254,7 @@ class QtConan(ConanFile):
             self.requires("libalsa/1.1.5@conan/stable")
         if self.options.GUI:
             if self.settings.os == "Linux":
-                self.requires("xkbcommon/0.8.3@bincrafters/stable")
+                self.requires("xkbcommon/0.8.4@bincrafters/stable")
 
     def system_requirements(self):
         if self.options.GUI:
