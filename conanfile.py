@@ -205,7 +205,6 @@ class QtConan(ConanFile):
     def requirements(self):
         if self.options.openssl:
             self.requires("OpenSSL/1.1.1c@conan/stable")
-            self.options["OpenSSL"].no_zlib = False
         if self.options.with_pcre2:
             self.requires("pcre2/10.32@bincrafters/stable")
 
@@ -218,15 +217,11 @@ class QtConan(ConanFile):
             self.requires("double-conversion/3.1.4@bincrafters/stable")
         if self.options.with_freetype and not self.options.multiconfiguration:
             self.requires("freetype/2.10.0@bincrafters/stable")
-            self.options["freetype"].with_png = self.options.with_libpng
-            self.options["freetype"].with_zlib = True
         # if self.options.with_icu:
         #     self.requires("icu/63.1@bincrafters/stable")
         #     self.options["icu"].shared = self.options.shared
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
             self.requires("harfbuzz/2.4.0@bincrafters/stable")
-            self.options["harfbuzz"].with_freetype = self.options.with_freetype
-            self.options["harfbuzz"].with_glib = self.options.with_glib
         if self.options.with_libjpeg and not self.options.multiconfiguration:
             self.requires("libjpeg/9c@bincrafters/stable")
         if self.options.with_libpng and not self.options.multiconfiguration:
@@ -236,13 +231,9 @@ class QtConan(ConanFile):
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.with_mysql:
             self.requires("mysql-connector-c/6.1.11@bincrafters/stable")
-            self.options["mysql-connector-c"].with_zlib = True
-            self.options["mysql-connector-c"].with_ssl = self.options.openssl
             self.options["mysql-connector-c"].shared = True
         if self.options.with_pq:
             self.requires("libpq/11.4@bincrafters/stable")
-            self.options["libpq"].with_zlib = True
-            self.options["libpq"].with_openssl = self.options.openssl
         if self.options.with_odbc:
             self.requires("odbc/2.3.7@bincrafters/stable")
             self.options["odbc"].shared = (self.settings.os == "Windows")
