@@ -210,7 +210,6 @@ class QtConan(ConanFile):
 
         if self.options.with_glib:
             self.requires("glib/2.58.3@bincrafters/stable")
-            self.options["glib"].shared = True
         # if self.options.with_libiconv:
         #     self.requires("libiconv/1.15@bincrafters/stable")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -284,7 +283,7 @@ class QtConan(ConanFile):
             self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
         shutil.move("qt-everywhere-src-%s" % self.version, "qt5")
 
-        for patch in ["cc04651dea4c4678c626cb31b3ec8394426e2b25.diff"]:
+        for patch in ["cc04651dea4c4678c626cb31b3ec8394426e2b25.diff", "3f9c9db.diff"]:
             tools.patch("qt5/qtbase", patch)
 
     def _xplatform(self):
