@@ -1,24 +1,24 @@
 env:
    global:
-     - CONAN_TOTAL_PAGES=8
-     - CONAN_DOCKER_32_IMAGES=True
+     - CONAN_TOTAL_PAGES=4
 osx: &osx
    os: osx
    language: generic
 matrix:
    include:
       - <<: *osx
-        osx_image: xcode10.1
+        osx_image: xcode10.2
         env: CONAN_APPLE_CLANG_VERSIONS=10.0 CONAN_CURRENT_PAGE=1
       - <<: *osx
-        osx_image: xcode10.1
+        osx_image: xcode10.2
         env: CONAN_APPLE_CLANG_VERSIONS=10.0 CONAN_CURRENT_PAGE=2
       - <<: *osx
-        osx_image: xcode10.1
+        osx_image: xcode10.2
         env: CONAN_APPLE_CLANG_VERSIONS=10.0 CONAN_CURRENT_PAGE=3
       - <<: *osx
-        osx_image: xcode10.1
+        osx_image: xcode10.2
         env: CONAN_APPLE_CLANG_VERSIONS=10.0 CONAN_CURRENT_PAGE=4
+
 install:
   - chmod +x .ci/install.sh
   - ./.ci/install.sh
