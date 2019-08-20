@@ -163,7 +163,7 @@ class QtConan(ConanFile):
                 if self.settings.compiler.runtime == "MT" or self.settings.compiler.runtime == "MTd":
                     self.options.with_mysql = False
             if not self.options.shared and self.options.with_icu:
-                raise ConanInvalidConfiguration("icu option is not supported on windows in static build.")
+                raise ConanInvalidConfiguration("icu option is not supported on windows in static build. see QTBUG-77120.")
 
         if self.options.widgets:
             self.options.GUI = True
