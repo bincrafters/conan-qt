@@ -92,7 +92,7 @@ jobs:
         CONAN_ARCHS: "x86_64"
 - job: macOS
   pool:
-    vmImage: "macOS-10.13"
+    vmImage: "macOS-10.14"
   timeoutInMinutes: 120
   steps:
   - script: |
@@ -109,4 +109,4 @@ jobs:
     matrix:
       Clang 10.0:
         CONAN_APPLE_CLANG_VERSIONS: 10.0
-        XCODE_VERSION: 10
+        XCODE_VERSION: 10.3
