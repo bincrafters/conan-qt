@@ -4,6 +4,7 @@
 import os
 import shutil
 import sys
+import itertools
 
 import configparser
 from conans import ConanFile, tools
@@ -459,13 +460,20 @@ class QtConan(ConanFile):
                     args.append("\"%s_INCDIR=%s\"" % (var, self.deps_cpp_info[package].include_paths[-1]))
                 args += ["-D " + s for s in self.deps_cpp_info[package].defines]
 
+                def _remove_duplicate(l):
+                    seen = set()
+                    seen_add = seen.add
+                    for element in itertools.filterfalse(seen.__contains__, l):
+                        seen_add(element)
+                        yield element
+                
                 def _gather_libs(p):
                     libs = ["-l" + i for i in self.deps_cpp_info[p].libs]
                     libs += self.deps_cpp_info[p].sharedlinkflags
                     for dep in self.deps_cpp_info[p].public_deps:
                         libs += ["-L" + lpath for lpath in self.deps_cpp_info[dep].lib_paths]
                         libs += _gather_libs(dep)
-                    return libs
+                    return _remove_duplicate(libs)
                 args.append("\"%s_LIBS=%s\"" % (var, " ".join(_gather_libs(package))))
 
         if 'mysql-connector-c' in self.deps_cpp_info.deps:
