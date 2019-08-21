@@ -152,6 +152,10 @@ class QtConan(ConanFile):
             if not tools.which('pkg-config'):
                 self.build_requires('pkg-config_installer/0.29.2@bincrafters/stable')
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            self.options.with_icu = False
+
     def configure(self):
         if self.settings.os != 'Linux':
             self.options.with_glib = False
