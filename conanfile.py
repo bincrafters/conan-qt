@@ -225,7 +225,6 @@ class QtConan(ConanFile):
             self.requires("freetype/2.10.0@bincrafters/stable")
         if self.options.with_icu:
             self.requires("icu/64.2@bincrafters/stable")
-            self.options["icu"].shared = self.options.shared
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
             self.requires("harfbuzz/2.4.0@bincrafters/stable")
         if self.options.with_libjpeg and not self.options.multiconfiguration:
