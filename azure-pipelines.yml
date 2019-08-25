@@ -90,23 +90,3 @@ jobs:
         CONAN_CLANG_VERSIONS: 6.0
         CONAN_DOCKER_IMAGE: conanio/clang60
         CONAN_ARCHS: "x86_64"
-- job: macOS
-  pool:
-    vmImage: "macOS-10.14"
-  timeoutInMinutes: 120
-  steps:
-  - script: |
-      /bin/bash -c "sudo xcode-select -s /Applications/Xcode_$(XCODE_VERSION).app/Contents/Developer"
-      pip install --upgrade pip
-      chmod +x .ci/install.sh
-      ./.ci/install.sh
-      chmod +x .ci/run.sh
-      ./.ci/run.sh
-    env:
-      CONAN_LOGIN_USERNAME: $(CONAN_LOGIN_USERNAME)
-      CONAN_PASSWORD: $(CONAN_PASSWORD)
-  strategy:
-    matrix:
-      Clang 10.0:
-        CONAN_APPLE_CLANG_VERSIONS: 10.0
-        XCODE_VERSION: 10.3
