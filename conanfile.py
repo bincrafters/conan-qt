@@ -153,7 +153,7 @@ class QtConan(ConanFile):
                 self.build_requires('pkg-config_installer/0.29.2@bincrafters/stable')
 
     def config_options(self):
-        if self.settings.os == "Windows":
+        if self.settings.os != "Linux":
             self.options.with_icu = False
 
     def configure(self):
@@ -388,7 +388,7 @@ class QtConan(ConanFile):
         elif self.settings.build_type == "MinSizeRel":
             args.append("-release")
             args.append("-optimize-size")
-
+            
         for module in QtConan._submodules:
             if module != 'qtbase' and not getattr(self.options, module) \
                     and os.path.isdir(os.path.join(self.source_folder, 'qt5', QtConan._submodules[module]['path'])):
