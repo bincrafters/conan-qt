@@ -1,0 +1,35 @@
+on: [push, pull_request]
+
+jobs:
+  MinGW:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        mingwVersion: ["4.9", "5", "6", "7", "8"]
+        arch: [x86, x86_64]
+        buildType: [Debug, Release]
+        threads: [posix]
+        include:
+          - arch: "x86"
+            exceptions: dwarf2
+          - arch: "x86_64"
+            exceptions: seh
+    steps:
+      - uses: actions/checkout@v1
+        with:
+            fetch-depth: 1
+      - name: install
+        run: |
+            set PATH=%PYTHON_HOME%;%PYTHON_HOME%/Scripts/;%PATH%
+            pip install conan --upgrade
+            pip install conan_package_tools bincrafters_package_tools
+            conan user
+      - name: run  
+        env:
+            CONAN_BUILD_TYPES: ${{matrix.buildType}}
+            MINGW_CONFIGURATIONS: ${{matrix.mingwVersion}}@${{matrix.arch}}@${{matrix.exceptions}}@${{matrix.threads}}
+            CONAN_OPTIONS: "qt:qtdeclarative=True,qt:qtmultimedia=True,qt:qttools=True,qt:qttranslations=True,qt:qtdoc=True,qt:qtrepotools=True,qt:qtqa=True,qt:qtquickcontrols2=True,qt:with_openal=False"
+            CONAN_BUILD_REQUIRES: "msys2_installer/latest@bincrafters/stable"
+        run: |
+            python build.py

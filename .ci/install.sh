@@ -17,8 +17,11 @@ if [[ "$(uname -s)" == 'Darwin' ]]; then
     pyenv activate conan
 
     pip install cmake --upgrade
+else
+    export PATH="$HOME/.local/bin:$PATH"
 fi
 
+pip install wheel
 pip install conan --upgrade
 pip install conan_package_tools bincrafters_package_tools
 
