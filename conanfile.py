@@ -4,6 +4,7 @@
 import os
 import shutil
 import sys
+import itertools
 
 import configparser
 from conans import ConanFile, tools
@@ -66,7 +67,7 @@ class QtConan(ConanFile):
         # "with_libiconv": [True, False],  # Qt tests failure "invalid conversion from const char** to char**"
         "with_doubleconversion": [True, False],
         "with_freetype": [True, False],
-        # "with_icu": [True, False], # waiting for 64.1 or 63.2
+        "with_icu": [True, False],
         "with_harfbuzz": [True, False],
         "with_libjpeg": [True, False],
         "with_libpng": [True, False],
@@ -99,7 +100,7 @@ class QtConan(ConanFile):
         # "with_libiconv": True,
         "with_doubleconversion": True,
         "with_freetype": True,
-        # "with_icu": True,
+        "with_icu": True,
         "with_harfbuzz": True,
         "with_libjpeg": True,
         "with_libpng": True,
@@ -151,6 +152,10 @@ class QtConan(ConanFile):
             if not tools.which('pkg-config'):
                 self.build_requires('pkg-config_installer/0.29.2@bincrafters/stable')
 
+    def config_options(self):
+        if self.settings.os != "Linux":
+            self.options.with_icu = False
+
     def configure(self):
         if self.settings.os != 'Linux':
             self.options.with_glib = False
@@ -161,6 +166,8 @@ class QtConan(ConanFile):
             if self.settings.compiler == "Visual Studio":
                 if self.settings.compiler.runtime == "MT" or self.settings.compiler.runtime == "MTd":
                     self.options.with_mysql = False
+            if not self.options.shared and self.options.with_icu:
+                raise ConanInvalidConfiguration("icu option is not supported on windows in static build. see QTBUG-77120.")
 
         if self.options.widgets:
             self.options.GUI = True
@@ -216,9 +223,8 @@ class QtConan(ConanFile):
             self.requires("double-conversion/3.1.4@bincrafters/stable")
         if self.options.with_freetype and not self.options.multiconfiguration:
             self.requires("freetype/2.10.0@bincrafters/stable")
-        # if self.options.with_icu:
-        #     self.requires("icu/63.1@bincrafters/stable")
-        #     self.options["icu"].shared = self.options.shared
+        if self.options.with_icu:
+            self.requires("icu/64.2@bincrafters/stable")
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
             self.requires("harfbuzz/2.4.0@bincrafters/stable")
         if self.options.with_libjpeg and not self.options.multiconfiguration:
@@ -412,7 +418,7 @@ class QtConan(ConanFile):
 
         args.append("--glib=" + ("yes" if self.options.with_glib else "no"))
         args.append("--pcre=" + ("system" if self.options.with_pcre2 else "qt"))
-        # args.append("--icu=" + ("yes" if self.options.with_icu else "no"))
+        args.append("--icu=" + ("yes" if self.options.with_icu else "no"))
         args.append("--sql-mysql=" + ("yes" if self.options.with_mysql else "no"))
         args.append("--sql-psql=" + ("yes" if self.options.with_pq else "no"))
         args.append("--sql-odbc=" + ("yes" if self.options.with_odbc else "no"))
@@ -439,7 +445,7 @@ class QtConan(ConanFile):
                   # ("libiconv", "ICONV"),
                   ("double-conversion", "DOUBLECONVERSION"),
                   ("freetype", "FREETYPE"),
-                  # ("icu", "ICU"),
+                  ("icu", "ICU"),
                   ("harfbuzz", "HARFBUZZ"),
                   ("libjpeg", "LIBJPEG"),
                   ("libpng", "LIBPNG"),
@@ -459,13 +465,20 @@ class QtConan(ConanFile):
                     args.append("\"%s_INCDIR=%s\"" % (var, self.deps_cpp_info[package].include_paths[-1]))
                 args += ["-D " + s for s in self.deps_cpp_info[package].defines]
 
+                def _remove_duplicate(l):
+                    seen = set()
+                    seen_add = seen.add
+                    for element in itertools.filterfalse(seen.__contains__, l):
+                        seen_add(element)
+                        yield element
+                
                 def _gather_libs(p):
                     libs = ["-l" + i for i in self.deps_cpp_info[p].libs]
                     libs += self.deps_cpp_info[p].sharedlinkflags
                     for dep in self.deps_cpp_info[p].public_deps:
                         libs += ["-L" + lpath for lpath in self.deps_cpp_info[dep].lib_paths]
                         libs += _gather_libs(dep)
-                    return libs
+                    return _remove_duplicate(libs)
                 args.append("\"%s_LIBS=%s\"" % (var, " ".join(_gather_libs(package))))
 
         if 'mysql-connector-c' in self.deps_cpp_info.deps:
