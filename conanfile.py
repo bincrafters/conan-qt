@@ -207,7 +207,7 @@ class QtConan(ConanFile):
             self.requires("OpenSSL/1.1.1c@conan/stable")
         if self.options.with_pcre2:
             self.requires("pcre2/10.32@bincrafters/stable")
-
+            self.requires("bzip2/1.0.8@conan/stable", override=True)
         if self.options.with_glib:
             self.requires("glib/2.58.3@bincrafters/stable")
         # if self.options.with_libiconv:
