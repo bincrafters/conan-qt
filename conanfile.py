@@ -191,6 +191,9 @@ class QtConan(ConanFile):
         if self.settings.os == "Android" and self.options.opengl == "desktop":
             raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
 
+        if self.settings.os != "Windows" and self.options.opengl == "dynamic":
+            raise ConanInvalidConfiguration("Dynamic OpenGL is supported only on Windows.")
+
         if self.settings.os == "Macos":
             del self.settings.os.version
 
@@ -394,6 +397,8 @@ class QtConan(ConanFile):
                     and os.path.isdir(os.path.join(self.source_folder, 'qt5', QtConan._submodules[module]['path'])):
                 args.append("-skip " + module)
 
+        args.append("--zlib=system")
+
         # openGL
         if self.options.opengl == "no":
             args += ["-no-opengl"]
@@ -401,9 +406,8 @@ class QtConan(ConanFile):
             args += ["-opengl es2"]
         elif self.options.opengl == "desktop":
             args += ["-opengl desktop"]
-        if self.settings.os == "Windows":
-            if self.options.opengl == "dynamic":
-                args += ["-opengl dynamic"]
+        elif self.options.opengl == "dynamic":
+            args += ["-opengl dynamic"]
 
         # openSSL
         if not self.options.openssl:
