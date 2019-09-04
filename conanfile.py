@@ -109,7 +109,7 @@ class QtConan(ConanFile):
         "with_pq": True,
         "with_odbc": True,
         "with_sdl2": True,
-        "with_libalsa": True,
+        "with_libalsa": False,
         "with_openal": True,
 
         "GUI": True,
@@ -247,7 +247,7 @@ class QtConan(ConanFile):
         if self.options.with_openal:
             self.requires("openal/1.19.0@bincrafters/stable")
         if self.options.with_libalsa:
-            self.requires("libalsa/1.1.5@conan/stable")
+            self.requires("libalsa/1.1.9@conan/stable")
         if self.options.GUI:
             if self.settings.os == "Linux":
                 self.requires("xkbcommon/0.8.4@bincrafters/stable")
@@ -422,6 +422,9 @@ class QtConan(ConanFile):
         args.append("--sql-mysql=" + ("yes" if self.options.with_mysql else "no"))
         args.append("--sql-psql=" + ("yes" if self.options.with_pq else "no"))
         args.append("--sql-odbc=" + ("yes" if self.options.with_odbc else "no"))
+
+        if self.options.qtmultimedia:
+            args.append("--alsa=" + ("yes" if self.options.with_libalsa else "no"))
 
         for opt, conf_arg in [
                               ("with_doubleconversion", "doubleconversion"),
