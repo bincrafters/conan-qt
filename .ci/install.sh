@@ -26,3 +26,14 @@ pip install conan --upgrade
 pip install conan_package_tools bincrafters_package_tools
 
 conan user
+
+pip install requests spdx-lookup
+conan config install https://github.com/conan-io/hooks.git -sf hooks -tf hooks
+conan config set hooks.conan-center
+conan config set hooks.attribute_checker
+if [[ "$(uname -s)" == 'Linux' ]]; then
+  conan config set hooks.binary_linter
+fi
+conan config set hooks.bintray_updater
+conan config set hooks.github_updater
+conan config set hooks.spdx_checker
