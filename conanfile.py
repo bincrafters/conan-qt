@@ -122,7 +122,6 @@ class QtConan(ConanFile):
         "multiconfiguration": False,
     }, **{module: False for module in _submodules if module != 'qtbase'}
     )
-    requires = "zlib/1.2.11@conan/stable"
     short_paths = True
 
     def _system_package_architecture(self):
@@ -213,44 +212,46 @@ class QtConan(ConanFile):
                 _enablemodule(module)
 
     def requirements(self):
+        self.requires("zlib/1.2.11@conan/stable", private=self.options.shared)
+
         if self.options.openssl:
-            self.requires("OpenSSL/1.1.1c@conan/stable")
+            self.requires("OpenSSL/1.1.1c@conan/stable", private=self.options.shared)
         if self.options.with_pcre2:
-            self.requires("pcre2/10.32@bincrafters/stable")
+            self.requires("pcre2/10.32@bincrafters/stable", private=self.options.shared)
 
         if self.options.with_glib:
-            self.requires("glib/2.58.3@bincrafters/stable")
+            self.requires("glib/2.58.3@bincrafters/stable", private=self.options.shared)
         # if self.options.with_libiconv:
         #     self.requires("libiconv/1.15@bincrafters/stable")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
-            self.requires("double-conversion/3.1.4@bincrafters/stable")
+            self.requires("double-conversion/3.1.4@bincrafters/stable", private=self.options.shared)
         if self.options.with_freetype and not self.options.multiconfiguration:
-            self.requires("freetype/2.10.0@bincrafters/stable")
+            self.requires("freetype/2.10.0@bincrafters/stable", private=self.options.shared)
         if self.options.with_icu:
-            self.requires("icu/64.2@bincrafters/stable")
+            self.requires("icu/64.2@bincrafters/stable", private=self.options.shared)
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
-            self.requires("harfbuzz/2.4.0@bincrafters/stable")
+            self.requires("harfbuzz/2.4.0@bincrafters/stable", private=self.options.shared)
         if self.options.with_libjpeg and not self.options.multiconfiguration:
-            self.requires("libjpeg/9c@bincrafters/stable")
+            self.requires("libjpeg/9c@bincrafters/stable", private=self.options.shared)
         if self.options.with_libpng and not self.options.multiconfiguration:
-            self.requires("libpng/1.6.37@bincrafters/stable")
+            self.requires("libpng/1.6.37@bincrafters/stable", private=self.options.shared)
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.28.0@bincrafters/stable")
+            self.requires("sqlite3/3.28.0@bincrafters/stable", private=self.options.shared)
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.with_mysql:
-            self.requires("mysql-connector-c/6.1.11@bincrafters/stable")
+            self.requires("mysql-connector-c/6.1.11@bincrafters/stable", private=self.options.shared)
             self.options["mysql-connector-c"].shared = True
         if self.options.with_pq:
-            self.requires("libpq/11.4@bincrafters/stable")
+            self.requires("libpq/11.4@bincrafters/stable", private=self.options.shared)
         if self.options.with_odbc:
-            self.requires("odbc/2.3.7@bincrafters/stable")
+            self.requires("odbc/2.3.7@bincrafters/stable", private=self.options.shared)
             self.options["odbc"].shared = (self.settings.os == "Windows")
         if self.options.with_sdl2:
-            self.requires("sdl2/2.0.9@bincrafters/stable")
+            self.requires("sdl2/2.0.9@bincrafters/stable", private=self.options.shared)
         if self.options.with_openal:
-            self.requires("openal/1.19.0@bincrafters/stable")
+            self.requires("openal/1.19.0@bincrafters/stable", private=self.options.shared)
         if self.options.with_libalsa:
-            self.requires("libalsa/1.1.9@conan/stable")
+            self.requires("libalsa/1.1.9@conan/stable", private=self.options.shared)
         if self.options.GUI:
             if self.settings.os == "Linux":
                 self.requires("xkbcommon/0.8.4@bincrafters/stable")
