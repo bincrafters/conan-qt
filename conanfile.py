@@ -11,6 +11,7 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.model import Generator
 
+from patch_qt import patchFiles
 
 class qt(Generator):
     @property
@@ -53,7 +54,7 @@ class QtConan(ConanFile):
     homepage = "https://www.qt.io"
     license = "LGPL-3.0"
     author = "Bincrafters <bincrafters@gmail.com>"
-    exports = ["LICENSE.md", "qtmodules.conf", "*.diff"]
+    exports = ["LICENSE.md", "qtmodules.conf", "*.diff", "patch_qt.py"]
     settings = "os", "arch", "compiler", "build_type", "os_build", "arch_build"
 
     options = dict({
@@ -583,6 +584,9 @@ class QtConan(ConanFile):
 
         with open('qtbase/bin/qt.conf', 'w') as f:
             f.write('[Paths]\nPrefix = ..')
+        
+        # patch for 5.13 to remove the hardcoded paths in cmake files.
+        patchFiles(os.path.join(self.package_folder, "lib", "cmake"), product='qt_framework')
 
     def package(self):
         self.copy("bin/qt.conf", src="qtbase")
