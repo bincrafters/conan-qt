@@ -14,13 +14,13 @@ environment:
       CONAN_BUILD_TYPES: Debug
     - MINGW_CONFIGURATIONS: '6@x86_64@seh@posix'
       CONAN_BUILD_TYPES: Release
-    - MINGW_CONFIGURATIONS: '7@x86_64@seh@posix'
+    - MINGW_CONFIGURATIONS: '7@x86_64@seh@posix' # bincrafters-conventions:preserve-build-job
       CONAN_BUILD_TYPES: Debug
-    - MINGW_CONFIGURATIONS: '7@x86_64@seh@posix'
+    - MINGW_CONFIGURATIONS: '7@x86_64@seh@posix' # bincrafters-conventions:preserve-build-job
       CONAN_BUILD_TYPES: Release
-    - MINGW_CONFIGURATIONS: '8@x86_64@seh@posix'
+    - MINGW_CONFIGURATIONS: '8@x86_64@seh@posix' # bincrafters-conventions:preserve-build-job
       CONAN_BUILD_TYPES: Debug
-    - MINGW_CONFIGURATIONS: '8@x86_64@seh@posix'
+    - MINGW_CONFIGURATIONS: '8@x86_64@seh@posix' # bincrafters-conventions:preserve-build-job
       CONAN_BUILD_TYPES: Release
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       CONAN_VISUAL_VERSIONS: 14
