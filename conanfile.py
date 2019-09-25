@@ -200,7 +200,7 @@ class QtConan(ConanFile):
         if self.options.multiconfiguration:
             del self.settings.build_type
 
-        assert QtConan.version == QtConan._submodules['qtbase']['branch']
+        # assert QtConan.version == QtConan._submodules['qtbase']['branch']
 
         def _enablemodule(mod):
             if mod != 'qtbase':

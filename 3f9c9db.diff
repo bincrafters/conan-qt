@@ -11,7 +11,7 @@ diff --git a/mkspecs/features/qt_configure.prf b/mkspecs/features/qt_configure.p
 index 242544d..f759d04 100644
 --- a/mkspecs/features/qt_configure.prf
 +++ b/mkspecs/features/qt_configure.prf
-@@ -827,7 +827,8 @@
+@@ -760,7 +760,8 @@
      contains($${1}.libs, ".*\\.$${QMAKE_EXTENSION_STATICLIB}$") {
          qtRunLoggedCommand("$$pkg_config --static --libs-only-L $$args", libpaths)|return(false)
          qtRunLoggedCommand("$$pkg_config --static --libs-only-l $$args", libs)|return(false)
