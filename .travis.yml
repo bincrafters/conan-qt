@@ -4,6 +4,10 @@ env:
 osx: &osx
    os: osx
    language: generic
+
+# bincrafters-conventions:no-new-compiler-versions  
+# Qt only needs to get build with one compiler version on macOS
+
 matrix:
    include:
       - <<: *osx

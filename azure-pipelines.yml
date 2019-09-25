@@ -17,6 +17,10 @@ jobs:
       CONAN_LOGIN_USERNAME: $(CONAN_LOGIN_USERNAME)
       CONAN_PASSWORD: $(CONAN_PASSWORD)
       CONAN_USE_DOCKER: 1
+
+  # bincrafters-conventions:no-new-compiler-versions  
+  # Qt doesn't work with Clang 8 right now, remove tag when it does
+  
   strategy:
     matrix:
       Gcc 4.9 x86:
