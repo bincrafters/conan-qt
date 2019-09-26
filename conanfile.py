@@ -217,14 +217,14 @@ class QtConan(ConanFile):
         if self.options.openssl:
             self.requires("OpenSSL/1.1.1c@conan/stable")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.32@bincrafters/stable")
+            self.requires("pcre2/10.33")
 
         if self.options.with_glib:
             self.requires("glib/2.58.3@bincrafters/stable")
         # if self.options.with_libiconv:
         #     self.requires("libiconv/1.15@bincrafters/stable")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
-            self.requires("double-conversion/3.1.4@bincrafters/stable")
+            self.requires("double-conversion/3.1.5")
         if self.options.with_freetype and not self.options.multiconfiguration:
             self.requires("freetype/2.10.0@bincrafters/stable")
         if self.options.with_icu:
@@ -242,10 +242,10 @@ class QtConan(ConanFile):
             self.requires("mysql-connector-c/6.1.11@bincrafters/stable")
             self.options["mysql-connector-c"].shared = True
         if self.options.with_pq:
-            self.requires("libpq/11.4@bincrafters/stable")
+            self.requires("libpq/11.5")
         if self.options.with_odbc:
-            self.requires("odbc/2.3.7@bincrafters/stable")
-            self.options["odbc"].shared = (self.settings.os == "Windows")
+            if self.settings.os != "Windows":
+                self.requires("odbc/2.3.7")
         if self.options.with_sdl2:
             self.requires("sdl2/2.0.9@bincrafters/stable")
         if self.options.with_openal:
@@ -466,8 +466,6 @@ class QtConan(ConanFile):
                   ("libalsa", "ALSA")]
         for package, var in libmap:
             if package in self.deps_cpp_info.deps:
-                if package == 'odbc' and self.settings.os == "Windows":
-                    continue
                 args.append("\"%s_PREFIX=%s\"" % (var, self.deps_cpp_info[package].rootpath))
                 if package == 'freetype':
                     args.append("\"%s_INCDIR=%s\"" % (var, self.deps_cpp_info[package].include_paths[-1]))
