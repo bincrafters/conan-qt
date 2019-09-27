@@ -11,16 +11,16 @@ osx: &osx
 matrix:
    include:
       - <<: *osx
-        osx_image: xcode10.2
+        osx_image: xcode10.3
         env: CONAN_APPLE_CLANG_VERSIONS=10.0 CONAN_CURRENT_PAGE=1
       - <<: *osx
-        osx_image: xcode10.2
+        osx_image: xcode10.3
         env: CONAN_APPLE_CLANG_VERSIONS=10.0 CONAN_CURRENT_PAGE=2
       - <<: *osx
-        osx_image: xcode10.2
+        osx_image: xcode10.3
         env: CONAN_APPLE_CLANG_VERSIONS=10.0 CONAN_CURRENT_PAGE=3
       - <<: *osx
-        osx_image: xcode10.2
+        osx_image: xcode10.3
         env: CONAN_APPLE_CLANG_VERSIONS=10.0 CONAN_CURRENT_PAGE=4
 
 install:
