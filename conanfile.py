@@ -47,7 +47,6 @@ class QtConan(ConanFile):
 
     generators = "pkg_config"
     name = "qt"
-    version = "5.12.5"
     description = "Qt is a cross-platform framework for graphical user interfaces."
     topics = ("conan", "qt", "ui")
     url = "https://github.com/bincrafters/conan-qt"
@@ -283,14 +282,7 @@ class QtConan(ConanFile):
                     installer.install(item + self._system_package_architecture())
 
     def source(self):
-        url = "https://download.qt.io/archive/qt/{0}/{1}/single/qt-everywhere-src-{1}" \
-            .format(self.version[:self.version.rfind('.')], self.version)
-        if tools.os_info.is_windows:
-            tools.get("%s.zip" % url, sha256='b08d9b7b496c0f15971e3912a4413b0724fa9eeea4081718b51a80cecd81752a')
-        elif sys.version_info.major >= 3:
-            tools.get("%s.tar.xz" % url, sha256='a2299e21db7767caf98242767bffb18a2a88a42fee2d6a393bedd234f8c91298')
-        else:  # python 2 cannot deal with .xz archives
-            self.run("wget -qO- %s.tar.xz | tar -xJ " % url)
+        tools.get(**self.conan_data["sources"][self.version])
         shutil.move("qt-everywhere-src-%s" % self.version, "qt5")
 
         for patch in ["cc04651dea4c4678c626cb31b3ec8394426e2b25.diff", "3f9c9db.diff"]:
