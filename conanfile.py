@@ -474,10 +474,16 @@ class QtConan(ConanFile):
                     libs = ["-l" + i for i in self.deps_cpp_info[p].libs]
                     libs += self.deps_cpp_info[p].sharedlinkflags
                     for dep in self.deps_cpp_info[p].public_deps:
-                        libs += ["-L" + lpath for lpath in self.deps_cpp_info[dep].lib_paths]
                         libs += _gather_libs(dep)
                     return _remove_duplicate(libs)
                 args.append("\"%s_LIBS=%s\"" % (var, " ".join(_gather_libs(package))))
+
+                def _gather_lib_paths(p):
+                    lib_paths = self.deps_cpp_info[p].lib_paths
+                    for dep in self.deps_cpp_info[p].public_deps:
+                        lib_paths += _gather_lib_paths(dep)
+                    return _remove_duplicate(lib_paths)
+                args += ["-L " + s for s in _gather_lib_paths(package)]
 
         if 'mysql-connector-c' in self.deps_cpp_info.deps:
             args.append("-mysql_config " + os.path.join(self.deps_cpp_info['mysql-connector-c'].rootpath, "bin", "mysql_config"))
