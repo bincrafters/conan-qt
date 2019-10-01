@@ -78,6 +78,7 @@ class QtConan(ConanFile):
         "with_sdl2": [True, False],
         "with_libalsa": [True, False],
         "with_openal": [True, False],
+        "with_zstd": [True, False],
 
         "GUI": [True, False],
         "widgets": [True, False],
@@ -111,6 +112,7 @@ class QtConan(ConanFile):
         "with_sdl2": True,
         "with_libalsa": False,
         "with_openal": True,
+        "with_zstd": True,
 
         "GUI": True,
         "widgets": True,
@@ -254,6 +256,8 @@ class QtConan(ConanFile):
         if self.options.GUI:
             if self.settings.os == "Linux":
                 self.requires("xkbcommon/0.8.4@bincrafters/stable")
+        if self.options.with_zstd:
+            self.requires("zstd/1.4.3")
 
     def system_requirements(self):
         if self.options.GUI:
@@ -419,6 +423,7 @@ class QtConan(ConanFile):
         args.append("--sql-mysql=" + ("yes" if self.options.with_mysql else "no"))
         args.append("--sql-psql=" + ("yes" if self.options.with_pq else "no"))
         args.append("--sql-odbc=" + ("yes" if self.options.with_odbc else "no"))
+        args.append("--zstd=" + ("yes" if self.options.with_zstd else "no"))
 
         if self.options.qtmultimedia:
             args.append("--alsa=" + ("yes" if self.options.with_libalsa else "no"))
@@ -455,6 +460,7 @@ class QtConan(ConanFile):
                   ("odbc", "ODBC"),
                   ("sdl2", "SDL2"),
                   ("openal", "OPENAL"),
+                  ("zstd", "ZSTD"),
                   ("libalsa", "ALSA")]
         for package, var in libmap:
             if package in self.deps_cpp_info.deps:

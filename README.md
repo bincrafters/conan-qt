@@ -68,6 +68,7 @@ The following command both runs all the steps of the conan file, and publishes t
 | with_sdl2      | True |  [True, False] |
 | with_libalsa      | True |  [True, False] |
 | with_openal      | True |  [True, False] |
+| with_zstd      | True |  [True, False] |
 | GUI      | True |  [True, False] |
 | widgets      | True |  [True, False] |
 | device      |  |  ANY |
