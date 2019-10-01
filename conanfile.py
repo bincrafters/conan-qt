@@ -502,14 +502,10 @@ class QtConan(ConanFile):
             args += ["-no-framework"]
         elif self.settings.os == "Android":
             args += ["-android-ndk-platform android-%s" % self.settings.os.api_level]
-            args += ["-android-arch %s" % {"armv6": "armeabi",
-                                           "armv7": "armeabi-v7a",
+            args += ["-android-abis %s" % {"armv7": "armeabi-v7a",
                                            "armv8": "arm64-v8a",
                                            "x86": "x86",
-                                           "x86_64": "x86_64",
-                                           "mips": "mips",
-                                           "mips64": "mips64"}.get(str(self.settings.arch))]
-            # args += ["-android-toolchain-version %s" % self.settings.compiler.version]
+                                           "x86_64": "x86_64"}.get(str(self.settings.arch))]
 
         if self.options.sysroot:
             args += ["-sysroot %s" % self.options.sysroot]
