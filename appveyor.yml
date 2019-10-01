@@ -6,14 +6,6 @@ environment:
   CONAN_TOTAL_PAGES: 3
 
   matrix:
-    - MINGW_CONFIGURATIONS: '4.9@x86_64@seh@posix'
-      CONAN_BUILD_TYPES: Debug
-    - MINGW_CONFIGURATIONS: '4.9@x86_64@seh@posix'
-      CONAN_BUILD_TYPES: Release
-    - MINGW_CONFIGURATIONS: '6@x86_64@seh@posix'
-      CONAN_BUILD_TYPES: Debug
-    - MINGW_CONFIGURATIONS: '6@x86_64@seh@posix'
-      CONAN_BUILD_TYPES: Release
     - MINGW_CONFIGURATIONS: '7@x86_64@seh@posix' # bincrafters-conventions:preserve-build-job
       CONAN_BUILD_TYPES: Debug
     - MINGW_CONFIGURATIONS: '7@x86_64@seh@posix' # bincrafters-conventions:preserve-build-job
