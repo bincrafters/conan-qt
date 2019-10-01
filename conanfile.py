@@ -214,7 +214,7 @@ class QtConan(ConanFile):
 
     def requirements(self):
         if self.options.openssl:
-            self.requires("OpenSSL/1.1.1c@conan/stable")
+            self.requires("openssl/1.1.1c")
         if self.options.with_pcre2:
             self.requires("pcre2/10.33")
 
@@ -227,7 +227,7 @@ class QtConan(ConanFile):
         if self.options.with_freetype and not self.options.multiconfiguration:
             self.requires("freetype/2.10.0")
         if self.options.with_icu:
-            self.requires("icu/64.2@bincrafters/stable")
+            self.requires("icu/64.2")
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
             self.requires("harfbuzz/2.6.1@bincrafters/stable")
         if self.options.with_libjpeg and not self.options.multiconfiguration:
@@ -238,7 +238,7 @@ class QtConan(ConanFile):
             self.requires("sqlite3/3.29.0")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.with_mysql:
-            self.requires("mysql-connector-c/6.1.11@bincrafters/stable")
+            self.requires("mysql-connector-c/6.1.11")
             self.options["mysql-connector-c"].shared = True
         if self.options.with_pq:
             self.requires("libpq/11.5")
@@ -406,7 +406,7 @@ class QtConan(ConanFile):
         if not self.options.openssl:
             args += ["-no-openssl"]
         else:
-            if self.options["OpenSSL"].shared:
+            if self.options["openssl"].shared:
                 args += ["-openssl-runtime"]
             else:
                 args += ["-openssl-linked"]
@@ -439,7 +439,7 @@ class QtConan(ConanFile):
                 args += ["-no-" + conf_arg]
 
         libmap = [("zlib", "ZLIB"),
-                  ("OpenSSL", "OPENSSL"),
+                  ("openssl", "OPENSSL"),
                   ("pcre2", "PCRE2"),
                   ("glib", "GLIB"),
                   # ("libiconv", "ICONV"),
