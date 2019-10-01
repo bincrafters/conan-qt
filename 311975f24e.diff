@@ -1,0 +1,181 @@
+From 311975f24e9a7f0dc30a6fb6fdf16af8bb79915b Mon Sep 17 00:00:00 2001
+From: Eric Lemanissier <eric.lemanissier@gmail.com>
+Date: Tue, 1 Oct 2019 14:25:44 +0200
+Subject: [PATCH] Revert "Revert "configure: actually resolve libraries into
+ full filepaths""
+
+This reverts commit 9864d2c6f3b628ca9f07a56b197e77bd43931cca.
+---
+ mkspecs/common/mac.conf           |   1 +
+ mkspecs/features/qmake_use.prf    |   2 -
+ mkspecs/features/qt_configure.prf | 106 +++++++++++++++++++++++++-----
+ 3 files changed, 91 insertions(+), 18 deletions(-)
+
+diff --git a/mkspecs/common/mac.conf b/mkspecs/common/mac.conf
+index 61bea952b2..b77494ec9b 100644
+--- a/mkspecs/common/mac.conf
++++ b/mkspecs/common/mac.conf
+@@ -14,6 +14,7 @@ include(unix.conf)
+ 
+ QMAKE_RESOURCE          = /Developer/Tools/Rez
+ QMAKE_EXTENSION_SHLIB   = dylib
++QMAKE_EXTENSIONS_AUX_SHLIB = tbd
+ QMAKE_LIBDIR            =
+ 
+ # sdk.prf will prefix the proper SDK sysroot
+diff --git a/mkspecs/features/qmake_use.prf b/mkspecs/features/qmake_use.prf
+index 8475e4111a..ecb4f7ed41 100644
+--- a/mkspecs/features/qmake_use.prf
++++ b/mkspecs/features/qmake_use.prf
+@@ -22,8 +22,6 @@ for(ever) {
+         !defined(QMAKE_LIBS_$$nu, var): \
+             error("Library '$$lower($$replace(nu, _, -))' is not defined.")
+ 
+-        QMAKE_LIBDIR += $$eval(QMAKE_LIBDIR_$$nu)
+-
+         android {
+             ABI_LIBS = $$eval(QMAKE_LIBS_$${nu}_$${QT_ARCH})
+             isEmpty(ABI_LIBS): ABI_LIBS = $$eval(QMAKE_LIBS_$${nu})
+diff --git a/mkspecs/features/qt_configure.prf b/mkspecs/features/qt_configure.prf
+index 52baca1fbb..1219fe1443 100644
+--- a/mkspecs/features/qt_configure.prf
++++ b/mkspecs/features/qt_configure.prf
+@@ -537,23 +537,98 @@ defineReplace(qtGccSysrootifiedPaths) {
+     return($$sysrootified)
+ }
+ 
+-# libs-var, libs, in-paths
++# libs-var, libs, in-paths, out-paths-var
+ defineTest(qtConfResolveLibs) {
+-    for (path, 3): \
+-        pre_lflags += -L$$path
+-    $$1 = $$pre_lflags $$2
++    ret = true
++    paths = $$3
++    out =
++    copy = false
++    for (l, 2) {
++        $$copy {
++            copy = false
++            out += $$l
++        } else: equals(l, "-s") {
++            # em++ flag to link libraries from emscripten-ports; passed on literally.
++            copy = true
++            out += $$l
++        } else: contains(l, "^-L.*") {
++            lp = $$replace(l, "^-L", )
++            gcc: lp = $$qtGccSysrootifiedPath($$lp)
++            !exists($$lp/.) {
++                qtLog("Library path $$val_escape(lp) is invalid.")
++                ret = false
++            } else {
++                paths += $$lp
++            }
++        } else: !android: contains(l, "^-l.*") {
++            lib = $$replace(l, "^-l", )
++            lcan =
++            integrity:contains(lib, "^.*\\.a") {
++                # INTEGRITY compiler searches for exact filename
++                # if -l argument has .a suffix
++                lcan += $${lib}
++            } else: contains(lib, "^:.*") {
++                # Use exact filename when -l:filename syntax is used.
++                lib ~= s/^://
++                lcan += $${lib}
++            } else: unix {
++                # Under UNIX, we look for actual shared libraries, in addition
++                # to static ones.
++                shexts = $$QMAKE_EXTENSION_SHLIB $$QMAKE_EXTENSIONS_AUX_SHLIB
++                for (ext, shexts) {
++                    lcan += $${QMAKE_PREFIX_SHLIB}$${lib}.$${ext}
++                }
++                lcan += \
++                    $${QMAKE_PREFIX_STATICLIB}$${lib}.$${QMAKE_EXTENSION_STATICLIB}
++            } else {
++                # Under Windows, we look only for static libraries, as even for DLLs
++                # one actually links against a static import library.
++                mingw {
++                    lcan += \
++                        # MinGW supports UNIX-style library naming in addition to
++                        # the MSVC style.
++                        lib$${lib}.dll.a lib$${lib}.a \
++                        # Fun fact: prefix-less libraries are also supported.
++                        $${lib}.dll.a $${lib}.a
++                }
++                lcan += $${lib}.lib
++            }
++            l = $$qtConfFindInPathList($$lcan, $$paths $$EXTRA_LIBDIR $$QMAKE_DEFAULT_LIBDIRS)
++            isEmpty(l) {
++                qtLog("None of [$$val_escape(lcan)] found in [$$val_escape(paths)] and global paths.")
++                ret = false
++            } else {
++                out += $$l
++            }
++        } else {
++            out += $$l
++        }
++    }
++    $$1 = $$out
+     export($$1)
+-    return(true)
++    !isEmpty(4) {
++        $$4 = $$paths
++        export($$4)
++    }
++    return($$ret)
++}
++
++# source-var
++defineTest(qtConfResolveAllLibs) {
++    ret = true
++    !qtConfResolveLibs($${1}.libs, $$eval($${1}.libs), , $${1}.libdirs): \
++        ret = false
++    for (b, $${1}.builds._KEYS_): \
++        !qtConfResolveLibs($${1}.builds.$${b}, $$eval($${1}.builds.$${b}), $$eval($${1}.libdirs), ): \
++            ret = false
++    return($$ret)
+ }
+ 
+ # libs-var, in-paths, libs
+ defineTest(qtConfResolvePathLibs) {
+     ret = true
+-    gcc: \
+-        local_paths = $$qtGccSysrootifiedPaths($$2)
+-    else: \
+-        local_paths = $$2
+-    for (libdir, local_paths) {
++    gcc: 2 = $$qtGccSysrootifiedPaths($$2)
++    for (libdir, 2) {
+         !exists($$libdir/.) {
+             qtLog("Library path $$val_escape(libdir) is invalid.")
+             ret = false
+@@ -603,11 +678,8 @@ defineReplace(qtConfGetTestIncludes) {
+ # includes-var, in-paths, test-object-var
+ defineTest(qtConfResolvePathIncs) {
+     ret = true
+-    gcc: \
+-        local_paths = $$qtGccSysrootifiedPaths($$2)
+-    else: \
+-        local_paths = $$2
+-    for (incdir, local_paths) {
++    gcc: 2 = $$qtGccSysrootifiedPaths($$2)
++    for (incdir, 2) {
+         !exists($$incdir/.) {
+             qtLog("Include path $$val_escape(incdir) is invalid.")
+             ret = false
+@@ -701,9 +773,11 @@ defineTest(qtConfLibrary_inline) {
+         for (ld, libdir): \
+             libs += -L$$ld
+         $${1}.libs = $$libs $$eval($${1}.libs)
+-        export($${1}.libs)
+     }
+ 
++    !qtConfResolveAllLibs($$1): \
++        return(false)
++
+     !qtConfResolvePathIncs($${1}.includedir, $$includes, $$2): \
+         return(false)
+ 
+-- 
+2.20.1.windows.1
+
