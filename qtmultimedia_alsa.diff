@@ -1,0 +1,12 @@
+diff -Naur a/src/plugins/alsa/alsa.pro b/src/plugins/alsa/alsa.pro
+--- a/src/plugins/alsa/alsa.pro	2019-08-23 08:42:37.000000000 +0200
++++ b/src/plugins/alsa/alsa.pro	2019-10-04 17:50:55.433743223 +0200
+@@ -1,7 +1,7 @@
+ TARGET = qtaudio_alsa
+ QT += multimedia-private
+ 
+-LIBS += -lasound
++QMAKE_USE += alsa
+ 
+ HEADERS += \
+     qalsaplugin.h \
