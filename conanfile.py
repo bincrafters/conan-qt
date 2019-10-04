@@ -287,6 +287,8 @@ class QtConan(ConanFile):
 
         for patch in ["cc04651dea4c4678c626cb31b3ec8394426e2b25.diff", "3f9c9db.diff"]:
             tools.patch("qt5/qtbase", patch)
+        for patch in ["qtmultimedia_alsa.diff"]:
+            tools.patch("qt5/qtmultimedia", patch)
 
     def _xplatform(self):
         if self.settings.os == "Linux":
