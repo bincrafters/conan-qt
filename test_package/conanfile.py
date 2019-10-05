@@ -38,7 +38,7 @@ class TestPackageConan(ConanFile):
                     args += ['QMAKE_CXX=' + value,
                              'QMAKE_LINK=' + value,
                              'QMAKE_LINK_SHLIB=' + value]
-                             
+
                 self.run("qmake %s" % " ".join(args), run_environment=True)
                 if tools.os_info.is_windows:
                     if self.settings.compiler == "Visual Studio":
@@ -48,6 +48,12 @@ class TestPackageConan(ConanFile):
                 else:
                     self.run("make", run_environment=True)
 
+    def _configure_with_cmake(self):
+        cmake = CMake(self, set_cmake_flags=True)
+        cmake.definitions["MY_TEST_QTWEBENGINE:BOOL"] = self.options["qt"].qtwebengine
+        cmake.configure(build_folder="cmake_folder")
+        return cmake
+
     def _build_with_cmake(self):
         if not self.options["qt"].shared:
             self.output.info(
@@ -56,8 +62,7 @@ class TestPackageConan(ConanFile):
             self.output.info("Building with CMake")
             env_build = RunEnvironment(self)
             with tools.environment_append(env_build.vars):
-                cmake = CMake(self, set_cmake_flags=True)
-                cmake.configure(build_folder="cmake_folder")
+                cmake = self._configure_with_cmake()
                 cmake.build()
 
     def build(self):
@@ -79,11 +84,12 @@ class TestPackageConan(ConanFile):
         else:
             self.output.info("Testing CMake")
             shutil.copy("qt.conf", "cmake_folder")
-            if self.settings.compiler == "Visual Studio":
-                bin_path = str(self.settings.build_type)
-            else:
-                bin_path = ""
-            self.run(os.path.join("cmake_folder", bin_path, "test_package"), run_environment=True)
+            env_build = RunEnvironment(self)
+            with tools.environment_append(env_build.vars):
+                cmake = self._configure_with_cmake()
+                cmake.test(output_on_failure=True)
+
+
 
     def test(self):
         if (not tools.cross_building(self.settings)) or\

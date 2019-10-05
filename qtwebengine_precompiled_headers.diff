@@ -1,0 +1,12 @@
+diff -Naur a/src/core/config/common.pri b/src/core/config/common.pri
+--- a/src/core/config/common.pri	2019-08-29 08:57:46.000000000 +0200
++++ b/src/core/config/common.pri	2019-10-15 08:56:14.253986621 +0200
+@@ -55,7 +55,7 @@
+ qtConfig(webengine-proprietary-codecs): gn_args += proprietary_codecs=true ffmpeg_branding=\"Chrome\"
+ 
+ precompile_header {
+-    gn_args += enable_precompiled_headers=true
++    gn_args += enable_precompiled_headers=false
+ } else {
+     gn_args += enable_precompiled_headers=false
+ }
