@@ -58,6 +58,7 @@ The following command both runs all the steps of the conan file, and publishes t
 | with_glib      | True |  [True, False] |
 | with_doubleconversion      | True |  [True, False] |
 | with_freetype      | True |  [True, False] |
+| with_fontconfig      | True |  [True, False] |
 | with_harfbuzz      | True |  [True, False] |
 | with_libjpeg      | True |  [True, False] |
 | with_libpng      | True |  [True, False] |
