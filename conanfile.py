@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 import shutil
 import sys
@@ -214,14 +211,14 @@ class QtConan(ConanFile):
 
     def requirements(self):
         if self.options.openssl:
-            self.requires("openssl/1.1.1c")
+            self.requires("openssl/1.1.1d")
         if self.options.with_pcre2:
             self.requires("pcre2/10.33")
 
         if self.options.with_glib:
             self.requires("glib/2.58.3@bincrafters/stable")
         # if self.options.with_libiconv:
-        #     self.requires("libiconv/1.15@bincrafters/stable")
+        #     self.requires("libiconv/1.15")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.1.5")
         if self.options.with_freetype and not self.options.multiconfiguration:

@@ -23,59 +23,32 @@ jobs:
   
   strategy:
     matrix:
-      Gcc 4.9 x86:
-        CONAN_GCC_VERSIONS: 4.9
-        CONAN_ARCHS: "x86"
       Gcc 4.9 x86_64:
         CONAN_GCC_VERSIONS: 4.9
         CONAN_ARCHS: "x86_64"
-      Gcc 5 x86:
-        CONAN_GCC_VERSIONS: 5
-        CONAN_ARCHS: "x86"
       Gcc 5 x86_64:
         CONAN_GCC_VERSIONS: 5
         CONAN_ARCHS: "x86_64"
-      Gcc 6 x86:
-        CONAN_GCC_VERSIONS: 6
-        CONAN_ARCHS: "x86"
       Gcc 6 x86_64:
         CONAN_GCC_VERSIONS: 6
         CONAN_ARCHS: "x86_64"
-      Gcc 7 x86:
-        CONAN_GCC_VERSIONS: 7
-        CONAN_ARCHS: "x86"
       Gcc 7 x86_64:
         CONAN_GCC_VERSIONS: 7
         CONAN_ARCHS: "x86_64"
-      Gcc 8 x86:
-        CONAN_GCC_VERSIONS: 8
-        CONAN_ARCHS: "x86"
       Gcc 8 x86_64:
         CONAN_GCC_VERSIONS: 8
         CONAN_ARCHS: "x86_64"
       Gcc 9:
         CONAN_GCC_VERSIONS: 9
-      Clang 3.9 x86:
-        CONAN_CLANG_VERSIONS: 3.9
-        CONAN_ARCHS: "x86"
       Clang 3.9 x86_64:
         CONAN_CLANG_VERSIONS: 3.9
         CONAN_ARCHS: "x86_64"
-      Clang 4.0 x86:
-        CONAN_CLANG_VERSIONS: 4.0
-        CONAN_ARCHS: "x86"
       Clang 4.0 x86_64:
         CONAN_CLANG_VERSIONS: 4.0
         CONAN_ARCHS: "x86_64"
-      Clang 5.0 x86:
-        CONAN_CLANG_VERSIONS: 5.0
-        CONAN_ARCHS: "x86"
       Clang 5.0 x86_64:
         CONAN_CLANG_VERSIONS: 5.0
         CONAN_ARCHS: "x86_64"
-      Clang 6.0 x86:
-        CONAN_CLANG_VERSIONS: 6.0
-        CONAN_ARCHS: "x86"
       Clang 6.0 x86_64:
         CONAN_CLANG_VERSIONS: 6.0
         CONAN_ARCHS: "x86_64"
