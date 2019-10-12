@@ -21,6 +21,7 @@ jobs:
             fetch-depth: 1
       - name: install
         run: |
+            set
             set PATH=%PYTHON_HOME%;%PYTHON_HOME%/Scripts/;%PATH%
             pip install conan --upgrade
             pip install conan_package_tools bincrafters_package_tools
