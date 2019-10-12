@@ -472,6 +472,7 @@ class QtConan(ConanFile):
                 args += ["-I " + s for s in self.deps_cpp_info[package].include_paths]
                 args += ["-F " + s for s in self.deps_cpp_info[package].frameworks]
 
+
                 def _remove_duplicate(l):
                     seen = set()
                     seen_add = seen.add
