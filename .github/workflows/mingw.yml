@@ -6,9 +6,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mingwVersion: ["4.9", "5", "6", "7", "8"]
-        arch: [x86, x86_64]
+        mingwVersion: ["4.9", "6", "7", "8"]
         buildType: [Debug, Release]
+        arch: [x86_64]
         threads: [posix]
         include:
           - arch: "x86"
@@ -29,7 +29,6 @@ jobs:
         env:
             CONAN_BUILD_TYPES: ${{matrix.buildType}}
             MINGW_CONFIGURATIONS: ${{matrix.mingwVersion}}@${{matrix.arch}}@${{matrix.exceptions}}@${{matrix.threads}}
-            CONAN_OPTIONS: "qt:qtdeclarative=True,qt:qtmultimedia=True,qt:qttools=True,qt:qttranslations=True,qt:qtdoc=True,qt:qtrepotools=True,qt:qtqa=True,qt:qtquickcontrols2=True,qt:with_openal=False"
             CONAN_BUILD_REQUIRES: "msys2_installer/latest@bincrafters/stable"
         run: |
             python build.py
