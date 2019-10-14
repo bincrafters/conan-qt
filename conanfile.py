@@ -1,9 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 import shutil
-import sys
 import itertools
 
 import configparser
@@ -67,6 +63,7 @@ class QtConan(ConanFile):
         # "with_libiconv": [True, False],  # Qt tests failure "invalid conversion from const char** to char**"
         "with_doubleconversion": [True, False],
         "with_freetype": [True, False],
+        "with_fontconfig": [True, False],
         "with_icu": [True, False],
         "with_harfbuzz": [True, False],
         "with_libjpeg": [True, False],
@@ -101,6 +98,7 @@ class QtConan(ConanFile):
         # "with_libiconv": True,
         "with_doubleconversion": True,
         "with_freetype": True,
+        "with_fontconfig": True,
         "with_icu": True,
         "with_harfbuzz": True,
         "with_libjpeg": True,
@@ -162,6 +160,7 @@ class QtConan(ConanFile):
         if self.settings.os != 'Linux':
             self.options.with_glib = False
         #     self.options.with_libiconv = False
+            self.options.with_fontconfig = False
         if self.settings.os == "Windows":
             if self.settings.compiler == "gcc":
                 self.options.with_mysql = False
@@ -176,6 +175,7 @@ class QtConan(ConanFile):
         if not self.options.GUI:
             self.options.opengl = "no"
             self.options.with_freetype = False
+            self.options.with_fontconfig = False
             self.options.with_harfbuzz = False
             self.options.with_libjpeg = False
             self.options.with_libpng = False
@@ -195,6 +195,9 @@ class QtConan(ConanFile):
 
         if self.settings.os != "Windows" and self.options.opengl == "dynamic":
             raise ConanInvalidConfiguration("Dynamic OpenGL is supported only on Windows.")
+
+        if self.options.with_fontconfig and not self.options.with_freetype:
+            raise ConanInvalidConfiguration("with_fontconfig cannot be enabled if with_freetype is disabled.")
 
         if self.settings.os == "Macos":
             del self.settings.os.version
@@ -216,18 +219,20 @@ class QtConan(ConanFile):
 
     def requirements(self):
         if self.options.openssl:
-            self.requires("openssl/1.1.1c")
+            self.requires("openssl/1.1.1d")
         if self.options.with_pcre2:
             self.requires("pcre2/10.33")
 
         if self.options.with_glib:
             self.requires("glib/2.58.3@bincrafters/stable")
         # if self.options.with_libiconv:
-        #     self.requires("libiconv/1.15@bincrafters/stable")
+        #     self.requires("libiconv/1.15")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.1.5")
         if self.options.with_freetype and not self.options.multiconfiguration:
             self.requires("freetype/2.10.0")
+        if self.options.with_fontconfig:
+            self.requires("fontconfig/2.13.91@conan/stable")
         if self.options.with_icu:
             self.requires("icu/64.2")
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
@@ -291,6 +296,8 @@ class QtConan(ConanFile):
 
         for patch in ["3f9c9db.diff", "311975f24e.diff"]:
             tools.patch("qt5/qtbase", patch)
+        for patch in ["a9cc8aa.diff"]:
+            tools.patch("qt5/qtmultimedia", patch)
 
     def _xplatform(self):
         if self.settings.os == "Linux":
@@ -419,6 +426,7 @@ class QtConan(ConanFile):
 
         args.append("--glib=" + ("yes" if self.options.with_glib else "no"))
         args.append("--pcre=" + ("system" if self.options.with_pcre2 else "qt"))
+        args.append("--fontconfig=" + ("yes" if self.options.with_fontconfig else "no"))
         args.append("--icu=" + ("yes" if self.options.with_icu else "no"))
         args.append("--sql-mysql=" + ("yes" if self.options.with_mysql else "no"))
         args.append("--sql-psql=" + ("yes" if self.options.with_pq else "no"))
@@ -450,6 +458,7 @@ class QtConan(ConanFile):
                   # ("libiconv", "ICONV"),
                   ("double-conversion", "DOUBLECONVERSION"),
                   ("freetype", "FREETYPE"),
+                  ("fontconfig", "FONTCONFIG"),
                   ("icu", "ICU"),
                   ("harfbuzz", "HARFBUZZ"),
                   ("libjpeg", "LIBJPEG"),
@@ -462,12 +471,15 @@ class QtConan(ConanFile):
                   ("openal", "OPENAL"),
                   ("zstd", "ZSTD"),
                   ("libalsa", "ALSA")]
+        libPaths = []
         for package, var in libmap:
             if package in self.deps_cpp_info.deps:
-                args.append("\"%s_PREFIX=%s\"" % (var, self.deps_cpp_info[package].rootpath))
                 if package == 'freetype':
                     args.append("\"%s_INCDIR=%s\"" % (var, self.deps_cpp_info[package].include_paths[-1]))
+                else:
+                    args += ["-I " + s for s in self.deps_cpp_info[package].include_paths]
                 args += ["-D " + s for s in self.deps_cpp_info[package].defines]
+                args += ["-F " + s for s in self.deps_cpp_info[package].frameworks]
 
                 def _remove_duplicate(l):
                     seen = set()
@@ -489,7 +501,8 @@ class QtConan(ConanFile):
                     for dep in self.deps_cpp_info[p].public_deps:
                         lib_paths += _gather_lib_paths(dep)
                     return _remove_duplicate(lib_paths)
-                args += ["-L " + s for s in _gather_lib_paths(package)]
+                libPaths += _gather_lib_paths(package)
+        args += ["-L " + s for s in _remove_duplicate(libPaths)]
 
         if 'mysql-connector-c' in self.deps_cpp_info.deps:
             args.append("-mysql_config " + os.path.join(self.deps_cpp_info['mysql-connector-c'].rootpath, "bin", "mysql_config"))
