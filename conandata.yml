@@ -8,3 +8,6 @@ sources:
   "5.14.0-alpha":
     url: "https://download.qt.io/development_releases/qt/5.14/5.14.0-alpha/single/qt-everywhere-src-5.14.0-alpha.tar.xz"
     sha256: "5b363eacf6f0d48b568fb38c2168ddb900cfb18a48eaa5e70dac3c3d63563a21"
+  "5.14.0-beta1":
+    url: "https://download.qt.io/development_releases/qt/5.14/5.14.0-beta1/single/qt-everywhere-src-5.14.0-beta1.tar.xz"
+    sha256: "f07cfc26762244bd343190b1b2e8b22708196f017024d6ab59f7fe1c8432f6b3"
