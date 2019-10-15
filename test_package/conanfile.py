@@ -7,7 +7,7 @@ from conans.errors import ConanException
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch", "os_build", "arch_build"
-    generators = "qt"
+    generators = "qt", "cmake"
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":

@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.1.0)
 project(test_package)
 
+include(${CMAKE_BINARY_DIR}/../conanbuildinfo.cmake)
+conan_set_vs_runtime()
+
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 # Find includes in corresponding build directories
