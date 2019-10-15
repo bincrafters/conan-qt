@@ -207,7 +207,7 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration("with_fontconfig cannot be enabled if with_freetype is disabled.")
 
         if self.options.qtwebengine:
-            self.raise_if_python2_not_available()
+            self._raise_if_python2_not_available()
 
         if self.settings.os == "Macos":
             del self.settings.os.version
@@ -241,7 +241,7 @@ class QtConan(ConanFile):
             self.requires("double-conversion/3.1.5")
         if self.options.with_freetype and not self.options.multiconfiguration:
             self.requires("freetype/2.10.0")
-        if self.options.with_fontconfig:
+        if self.options.with_fontconfig or (self.options.qtwebengine and tools.os_info.is_linux):
             self.requires("fontconfig/2.13.91@conan/stable")
         if self.options.with_icu:
             self.requires("icu/64.2")
@@ -278,7 +278,7 @@ class QtConan(ConanFile):
             if tools.os_info.is_linux:
                 if tools.os_info.with_apt:
                     pack_names += ["python",
-                                  "libfontconfig1-dev", "libdbus-1-dev", "libnss3-dev",
+                                  "libdbus-1-dev", "libnss3-dev",
                                   "mesa-common-dev", "libc6-dev",
                                   "libx11-dev", "libdrm-dev", "libxcomposite-dev",
                                   "libxcursor-dev", "libxi-dev", "libxtst-dev", "libxrandr-dev" ]
@@ -499,29 +499,9 @@ class QtConan(ConanFile):
                     args += ["-I " + s for s in self.deps_cpp_info[package].include_paths]
                 args += ["-D " + s for s in self.deps_cpp_info[package].defines]
                 args += ["-F " + s for s in self.deps_cpp_info[package].frameworks]
-
-                def _remove_duplicate(l):
-                    seen = set()
-                    seen_add = seen.add
-                    for element in itertools.filterfalse(seen.__contains__, l):
-                        seen_add(element)
-                        yield element
-
-                def _gather_libs(p):
-                    libs = ["-l" + i for i in self.deps_cpp_info[p].libs]
-                    libs += self.deps_cpp_info[p].sharedlinkflags
-                    for dep in self.deps_cpp_info[p].public_deps:
-                        libs += _gather_libs(dep)
-                    return _remove_duplicate(libs)
-                args.append("\"%s_LIBS=%s\"" % (var, " ".join(_gather_libs(package))))
-
-                def _gather_lib_paths(p):
-                    lib_paths = self.deps_cpp_info[p].lib_paths
-                    for dep in self.deps_cpp_info[p].public_deps:
-                        lib_paths += _gather_lib_paths(dep)
-                    return _remove_duplicate(lib_paths)
-                libPaths += _gather_lib_paths(package)
-        args += ["-L " + s for s in _remove_duplicate(libPaths)]
+                args.append("\"%s_LIBS=%s\"" % (var, " ".join(self._gather_libs(package))))
+                libPaths += self._gather_lib_paths(package)
+        args += ["-L " + s for s in self._remove_duplicate(libPaths)]
 
         if 'libmysqlclient' in self.deps_cpp_info.deps:
             args.append("-mysql_config " + os.path.join(self.deps_cpp_info['libmysqlclient'].rootpath, "bin", "mysql_config"))
@@ -600,8 +580,18 @@ class QtConan(ConanFile):
 
         if 'glib' in self.deps_cpp_info.deps:
             shutil.move("pcre.pc", "libpcre.pc")
+
+        build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": os.getcwd()}
+        if self.options.qtwebengine:
+            if self.options.python2_bin_dir:
+                build_env['PATH'] = [self.options.python2_bin_dir]
+            if self.settings.compiler in ['gcc', 'clang']:
+                build_env['C_INCLUDE_PATH'] = self.deps_cpp_info['fontconfig'].include_paths
+                build_env['C_PLUS_INCLUDE_PATH'] = self.deps_cpp_info['fontconfig'].include_paths
+                build_env['LIBRARY_PATH'] = [ s for s in self._gather_lib_paths('fontconfig') ]
+
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-            with tools.environment_append({"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": os.getcwd()}):
+            with tools.environment_append(build_env):
                 try:
                     self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
                 finally:
@@ -632,8 +622,27 @@ class QtConan(ConanFile):
     def package_info(self):
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
 
+    def _remove_duplicate(self, l):
+        seen = set()
+        seen_add = seen.add
+        for element in itertools.filterfalse(seen.__contains__, l):
+            seen_add(element)
+            yield element
 
-    def raise_if_python2_not_available(self):
+    def _gather_libs(self, p):
+        libs = ["-l" + i for i in self.deps_cpp_info[p].libs]
+        libs += self.deps_cpp_info[p].sharedlinkflags
+        for dep in self.deps_cpp_info[p].public_deps:
+            libs += self._gather_libs(dep)
+        return self._remove_duplicate(libs)
+
+    def _gather_lib_paths(self, p):
+        lib_paths = self.deps_cpp_info[p].lib_paths
+        for dep in self.deps_cpp_info[p].public_deps:
+            lib_paths += self._gather_lib_paths(dep)
+        return self._remove_duplicate(lib_paths)
+
+    def _raise_if_python2_not_available(self):
         python_exe = None
         with tools.environment_append({"PATH": [self.options.python2_bin_dir]}) if self.options.python2_bin_dir else tools.no_op():
             # Check if a valid python2 is available in PATH or it will fail
