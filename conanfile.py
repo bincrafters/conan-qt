@@ -83,6 +83,7 @@ class QtConan(ConanFile):
         "device": "ANY",
         "cross_compile": "ANY",
         "sysroot": "ANY",
+        "python2_bin_dir": "ANY",
         "config": "ANY",
         "multiconfiguration": [True, False],
     }, **{module: [True, False] for module in _submodules if module != 'qtbase'}
@@ -117,6 +118,7 @@ class QtConan(ConanFile):
         "device": None,
         "cross_compile": "/usr/bin/",
         "sysroot": None,
+        "python2_bin_dir": None,
         "config": None,
         "multiconfiguration": False,
     }, **{module: False for module in _submodules if module != 'qtbase'}
@@ -203,6 +205,9 @@ class QtConan(ConanFile):
 
         if self.options.with_fontconfig and not self.options.with_freetype:
             raise ConanInvalidConfiguration("with_fontconfig cannot be enabled if with_freetype is disabled.")
+
+        if self.options.qtwebengine:
+            self.raise_if_python2_not_available()
 
         if self.settings.os == "Macos":
             del self.settings.os.version
@@ -626,3 +631,38 @@ class QtConan(ConanFile):
 
     def package_info(self):
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
+
+
+    def raise_if_python2_not_available(self):
+        python_exe = None
+        with tools.environment_append({"PATH": [self.options.python2_bin_dir]}) if self.options.python2_bin_dir else tools.no_op():
+            # Check if a valid python2 is available in PATH or it will fail
+            # Start by checking if python2 can be found
+            python_exe = tools.which("python2")
+            if not python_exe:
+                # Fall back on regular python
+                python_exe = tools.which("python")
+            if not python_exe:
+                raise ConanInvalidConfiguration(
+                    "Python2 must be available in PATH in order to build Qt WebEngine.")
+
+        # In any case, check its actual version for compatibility
+        from six import StringIO  # Python 2 and 3 compatible
+        from packaging.version import parse as parse_version
+        mybuf = StringIO()
+        cmd_v = "{} --version".format(python_exe)
+        self.run(cmd_v, output=mybuf)
+        version = parse_version(mybuf.getvalue().strip()
+                                .split('Python ')[1])
+        # >= 2.7.5 & < 3
+        v_min = parse_version("2.7.5")
+        v_max = parse_version("3.0.0")
+        if (version >= v_min) and (version < v_max):
+            msg = ("Found valid Python2 required for QtWebengine:"
+                   " version={}, path={}".format(version, python_exe))
+            self.output.success(msg)
+        else:
+            msg = ("Found python2 in path, but with invalid version {}"
+                   " (QtWebEngine requires >= {} & < "
+                   "{})".format(version, v_min, v_max))
+            raise ConanInvalidConfiguration(msg)
