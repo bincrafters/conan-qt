@@ -6,6 +6,7 @@ import configparser
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.model import Generator
+from conans.tools import Version
 
 
 class qt(Generator):
@@ -159,12 +160,10 @@ class QtConan(ConanFile):
             self.options.with_glib = False
         #     self.options.with_libiconv = False
             self.options.with_fontconfig = False
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.3":
+            self.options.with_mysql = False
         if self.settings.os == "Windows":
-            if self.settings.compiler == "gcc":
-                self.options.with_mysql = False
-            if self.settings.compiler == "Visual Studio":
-                if self.settings.compiler.runtime == "MT" or self.settings.compiler.runtime == "MTd":
-                    self.options.with_mysql = False
+            self.options.with_mysql = False
             if not self.options.shared and self.options.with_icu:
                 raise ConanInvalidConfiguration("icu option is not supported on windows in static build. see QTBUG-77120.")
 
@@ -248,8 +247,7 @@ class QtConan(ConanFile):
             self.requires("sqlite3/3.29.0")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.with_mysql:
-            self.requires("mysql-connector-c/6.1.11")
-            self.options["mysql-connector-c"].shared = True
+            self.requires("libmysqlclient/8.0.17")
         if self.options.with_pq:
             self.requires("libpq/11.5")
         if self.options.with_odbc:
@@ -464,7 +462,7 @@ class QtConan(ConanFile):
                   ("libjpeg", "LIBJPEG"),
                   ("libpng", "LIBPNG"),
                   ("sqlite3", "SQLITE"),
-                  ("mysql-connector-c", "MYSQL"),
+                  ("libmysqlclient", "MYSQL"),
                   ("libpq", "PSQL"),
                   ("odbc", "ODBC"),
                   ("sdl2", "SDL2"),
@@ -503,8 +501,8 @@ class QtConan(ConanFile):
                 libPaths += _gather_lib_paths(package)
         args += ["-L " + s for s in _remove_duplicate(libPaths)]
 
-        if 'mysql-connector-c' in self.deps_cpp_info.deps:
-            args.append("-mysql_config " + os.path.join(self.deps_cpp_info['mysql-connector-c'].rootpath, "bin", "mysql_config"))
+        if 'libmysqlclient' in self.deps_cpp_info.deps:
+            args.append("-mysql_config " + os.path.join(self.deps_cpp_info['libmysqlclient'].rootpath, "bin", "mysql_config"))
         if 'libpq' in self.deps_cpp_info.deps:
             args.append("-psql_config " + os.path.join(self.deps_cpp_info['libpq'].rootpath, "bin", "pg_config"))
         if self.settings.os == "Linux":
