@@ -29,6 +29,6 @@ jobs:
         env:
             CONAN_BUILD_TYPES: ${{matrix.buildType}}
             MINGW_CONFIGURATIONS: ${{matrix.mingwVersion}}@${{matrix.arch}}@${{matrix.exceptions}}@${{matrix.threads}}
-            CONAN_BUILD_REQUIRES: "msys2_installer/latest@bincrafters/stable"
+            CONAN_BUILD_REQUIRES: "msys2/20161025"
         run: |
             python build.py
