@@ -1,0 +1,66 @@
+--- a/src/3rdparty/chromium/third_party/sfntly/src/cpp/src/sfntly/table/header.cc	2019-10-15 15:17:27.343035700 +0200
++++ b/src/3rdparty/chromium/third_party/sfntly/src/cpp/src/sfntly/table/header.cc	2019-10-15 11:19:45.120868500 +0200
+@@ -54,12 +54,12 @@
+ Header::~Header() {}
+ 
+ bool HeaderComparatorByOffset::operator() (const HeaderPtr lhs,
+-                                           const HeaderPtr rhs) {
++                                           const HeaderPtr rhs) const {
+   return lhs->offset_ > rhs->offset_;
+ }
+ 
+ bool HeaderComparatorByTag::operator() (const HeaderPtr lhs,
+-                                        const HeaderPtr rhs) {
++                                        const HeaderPtr rhs) const {
+   return lhs->tag_ > rhs->tag_;
+ }
+ 
+--- a/src/3rdparty/chromium/third_party/sfntly/src/cpp/src/sfntly/table/header.h	2019-10-15 15:17:27.343035700 +0200
++++ b/src/3rdparty/chromium/third_party/sfntly/src/cpp/src/sfntly/table/header.h	2019-10-15 11:19:25.997633200 +0200
+@@ -89,21 +89,21 @@
+  public:
+   virtual ~HeaderComparator() {}
+   virtual bool operator()(const HeaderPtr h1,
+-                          const HeaderPtr h2) = 0;
++                          const HeaderPtr h2) const = 0;
+ };
+ 
+ class HeaderComparatorByOffset : public HeaderComparator {
+  public:
+   virtual ~HeaderComparatorByOffset() {}
+   virtual bool operator()(const HeaderPtr h1,
+-                          const HeaderPtr h2);
++                          const HeaderPtr h2) const;
+ };
+ 
+ class HeaderComparatorByTag : public HeaderComparator {
+  public:
+   virtual ~HeaderComparatorByTag() {}
+   virtual bool operator()(const HeaderPtr h1,
+-                          const HeaderPtr h2);
++                          const HeaderPtr h2) const;
+ };
+ 
+ typedef std::set<HeaderPtr, HeaderComparatorByOffset> HeaderOffsetSortedSet;
+--- a/src/3rdparty/chromium/ui/gfx/image/image_generic.cc	2019-10-15 15:16:50.433370800 +0200
++++ b/src/3rdparty/chromium/ui/gfx/image/image_generic.cc	2019-10-15 11:27:15.896285900 +0200
+@@ -76,7 +76,7 @@
+ 
+  private:
+   struct Compare {
+-    bool operator()(const ImageSkiaRep& rep1, const ImageSkiaRep& rep2) {
++    bool operator()(const ImageSkiaRep& rep1, const ImageSkiaRep& rep2) const {
+       return rep1.scale() < rep2.scale();
+     }
+   };
+--- a/src/3rdparty/chromium/v8/src/compiler/register-allocator.h	2019-10-15 15:17:29.870240100 +0200
++++ b/src/3rdparty/chromium/v8/src/compiler/register-allocator.h	2019-10-15 13:43:25.307214100 +0200
+@@ -1041,7 +1041,7 @@
+ 
+  private:
+   struct LiveRangeOrdering {
+-    bool operator()(LiveRange* a, LiveRange* b) {
++    bool operator()(LiveRange* a, LiveRange* b) const {
+       return a->ShouldBeAllocatedBefore(b);
+     }
+   };

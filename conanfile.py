@@ -1,6 +1,6 @@
 import os
 import shutil
-import itertools
+import sys
 
 import configparser
 from conans import ConanFile, tools
@@ -313,11 +313,13 @@ class QtConan(ConanFile):
 
         for patch in ["cc04651dea4c4678c626cb31b3ec8394426e2b25.diff", "3f9c9db.diff"]:
             tools.patch("qt5/qtbase", patch)
+
         for patch in ["a9cc8aa.diff"]:
             tools.patch("qt5/qtmultimedia", patch)
 
-        # fix QTBUG-65677
-        for patch in ["qtwebengine_precompiled_headers.diff"]:
+
+        for patch in ["qtwebengine_precompiled_headers.diff", # QTBUG-65677
+                      "qtwebengine_msvc-2019.diff"]:
             tools.patch("qt5/qtwebengine", patch)
 
     def _xplatform(self):
@@ -584,18 +586,21 @@ class QtConan(ConanFile):
         build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": os.getcwd()}
         if self.options.qtwebengine:
             if self.options.python2_bin_dir:
-                build_env['PATH'] = [self.options.python2_bin_dir]
+                build_env['PATH'] = [str(self.options.python2_bin_dir)]
             if self.settings.compiler in ['gcc', 'clang']:
                 build_env['C_INCLUDE_PATH'] = self.deps_cpp_info['fontconfig'].include_paths
                 build_env['C_PLUS_INCLUDE_PATH'] = self.deps_cpp_info['fontconfig'].include_paths
                 build_env['LIBRARY_PATH'] = [ s for s in self._gather_lib_paths('fontconfig') ]
 
-        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+        with tools.vcvars(self.settings):
             with tools.environment_append(build_env):
                 try:
                     self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
                 finally:
-                    self.output.info(open('config.log', errors='backslashreplace').read())
+                    opts={}
+                    if sys.version_info[0] == 3:
+                        opts={'errors' : 'backslashreplace'}
+                    self.output.info(open('config.log', **opts).read())
 
                 if self.settings.compiler == "Visual Studio":
                     make = "jom"
@@ -622,10 +627,18 @@ class QtConan(ConanFile):
     def package_info(self):
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
 
+
     def _remove_duplicate(self, l):
+        def filterfalse(predicate, iterable):
+            # filterfalse(lambda x: x%2, range(10)) --> 0 2 4 6 8
+            if predicate is None:
+                predicate = bool
+            for x in iterable:
+                if not predicate(x):
+                    yield x
         seen = set()
         seen_add = seen.add
-        for element in itertools.filterfalse(seen.__contains__, l):
+        for element in filterfalse(seen.__contains__, l):
             seen_add(element)
             yield element
 
@@ -644,7 +657,7 @@ class QtConan(ConanFile):
 
     def _raise_if_python2_not_available(self):
         python_exe = None
-        with tools.environment_append({"PATH": [self.options.python2_bin_dir]}) if self.options.python2_bin_dir else tools.no_op():
+        with tools.environment_append({"PATH": [str(self.options.python2_bin_dir)]}) if self.options.python2_bin_dir else tools.no_op():
             # Check if a valid python2 is available in PATH or it will fail
             # Start by checking if python2 can be found
             python_exe = tools.which("python2")
