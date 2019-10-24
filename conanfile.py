@@ -257,7 +257,7 @@ class QtConan(ConanFile):
         if self.options.with_libalsa:
             self.requires("libalsa/1.1.9@conan/stable")
         if self.options.GUI:
-            if self.settings.os == "Linux":
+            if self.settings.os == "Linux" and not tools.cross_building(self.settings):
                 self.requires("xkbcommon/0.8.4@bincrafters/stable")
 
     def system_requirements(self):
