@@ -167,8 +167,9 @@ class QtConan(ConanFile):
             if not self.options.shared and self.options.with_icu:
                 raise ConanInvalidConfiguration("icu option is not supported on windows in static build. see QTBUG-77120.")
 
-        if self.options.widgets:
-            self.options.GUI = True
+        if self.options.widgets and not self.options.GUI:
+            raise ConanInvalidConfiguration("using option qt:widgets without option qt:GUI is not possible. "
+                                            "You can either disable qt:widgets or enable qt:GUI")
         if not self.options.GUI:
             self.options.opengl = "no"
             self.options.with_freetype = False
@@ -201,6 +202,10 @@ class QtConan(ConanFile):
 
         if self.options.multiconfiguration:
             del self.settings.build_type
+
+        if not self.options.with_doubleconversion and str(self.settings.compiler.libcxx) != "libc++":
+            raise ConanInvalidConfiguration('Qt without libc++ needs qt:with_doubleconversion. '
+                                            'Either enable qt:with_doubleconversion or switch to libc++')
 
         assert QtConan.version == QtConan._submodules['qtbase']['branch']
 
