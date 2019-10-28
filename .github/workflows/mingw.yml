@@ -21,14 +21,13 @@ jobs:
             fetch-depth: 1
       - name: install
         run: |
-            set PATH=%PYTHON_HOME%;%PYTHON_HOME%/Scripts/;%PATH%
             pip install conan --upgrade
             pip install conan_package_tools bincrafters_package_tools
-            conan user
       - name: run  
         env:
             CONAN_BUILD_TYPES: ${{matrix.buildType}}
             MINGW_CONFIGURATIONS: ${{matrix.mingwVersion}}@${{matrix.arch}}@${{matrix.exceptions}}@${{matrix.threads}}
             CONAN_BUILD_REQUIRES: "msys2/20161025"
+            CONAN_OPTIONS: "harfbuzz:with_glib=False"
         run: |
             python build.py
