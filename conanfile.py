@@ -238,7 +238,7 @@ class QtConan(ConanFile):
         if self.options.with_icu:
             self.requires("icu/64.2")
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
-            self.requires("harfbuzz/2.6.1@bincrafters/stable")
+            self.requires("harfbuzz/2.6.2@bincrafters/stable")
         if self.options.with_libjpeg and not self.options.multiconfiguration:
             self.requires("libjpeg/9c")
         if self.options.with_libpng and not self.options.multiconfiguration:
