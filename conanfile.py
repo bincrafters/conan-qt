@@ -258,7 +258,7 @@ class QtConan(ConanFile):
         if self.options.with_openal:
             self.requires("openal/1.19.0@bincrafters/stable")
         if self.options.with_libalsa:
-            self.requires("libalsa/1.1.9@conan/stable")
+            self.requires("libalsa/1.1.9")
         if self.options.GUI:
             if self.settings.os == "Linux":
                 self.requires("xkbcommon/0.8.4@bincrafters/stable")
