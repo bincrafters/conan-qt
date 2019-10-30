@@ -361,6 +361,15 @@ class QtConan(ConanFile):
             elif self.settings.compiler == "gcc":
                 return {"sparc": "solaris-g++",
                         "sparcv9": "solaris-g++-64"}.get(str(self.settings.arch))
+        elif self.settings.os == "Neutrino" and self.settings.compiler == "qcc":
+            return {"armv8": "qnx-aarch64le-qcc",
+                    "armv8.3": "qnx-aarch64le-qcc",
+                    "armv7": "qnx-armle-v7-qcc",
+                    "armv7hf": "qnx-armle-v7-qcc",
+                    "armv7s": "qnx-armle-v7-qcc",
+                    "armv7k": "qnx-armle-v7-qcc",
+                    "x86": "qnx-x86-qcc",
+                    "x86_64": "qnx-x86-64-qcc"}.get(str(self.settings.arch))
 
         return None
 
