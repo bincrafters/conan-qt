@@ -119,7 +119,7 @@ class QtConan(ConanFile):
         "multiconfiguration": False,
     }, **{module: False for module in _submodules if module != 'qtbase'}
     )
-    requires = "zlib/1.2.11"
+    requires = "zlib/1.2.11@conan/stable"
     short_paths = True
 
     def _system_package_architecture(self):
@@ -226,13 +226,13 @@ class QtConan(ConanFile):
         if self.options.with_icu:
             self.requires("icu/64.2@bincrafters/stable")
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
-            self.requires("harfbuzz/2.6.1@bincrafters/stable")
+            self.requires("harfbuzz/2.4.0@bincrafters/stable")
         if self.options.with_libjpeg and not self.options.multiconfiguration:
-            self.requires("libjpeg/9c")
+            self.requires("libjpeg/9c@bincrafters/stable")
         if self.options.with_libpng and not self.options.multiconfiguration:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.37@bincrafters/stable")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.29.0")
+            self.requires("sqlite3/3.28.0@bincrafters/stable")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.with_mysql:
             self.requires("mysql-connector-c/6.1.11@bincrafters/stable")
