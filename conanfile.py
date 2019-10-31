@@ -293,10 +293,8 @@ class QtConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         shutil.move("qt-everywhere-src-%s" % self.version, "qt5")
 
-        for patch in ["3f9c9db.diff"]:
-            tools.patch("qt5/qtbase", patch)
-        for patch in ["a9cc8aa.diff"]:
-            tools.patch("qt5/qtmultimedia", patch)
+        for p in self.conan_data["patches"][self.version]:
+            tools.patch(**p)
 
     def _xplatform(self):
         if self.settings.os == "Linux":
