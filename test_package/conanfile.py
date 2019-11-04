@@ -5,7 +5,7 @@ from conans import ConanFile, CMake, tools, RunEnvironment
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch", "os_build", "arch_build"
+    settings = "os", "compiler", "build_type", "arch"
     generators = "qt"
 
     def build_requirements(self):
@@ -86,7 +86,6 @@ class TestPackageConan(ConanFile):
             self.run(os.path.join("cmake_folder", bin_path, "test_package"), run_environment=True)
 
     def test(self):
-        if (not tools.cross_building(self.settings)) or\
-                (self.settings.os == self.settings.os_build and self.settings.arch_build == "x86_64" and self.settings.arch == "x86"):
+        if not tools.cross_building(self.settings, skip_x64_x86=True):
             self._test_with_qmake()
             self._test_with_cmake()
