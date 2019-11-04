@@ -51,7 +51,7 @@ class QtConan(ConanFile):
     license = "LGPL-3.0"
     author = "Bincrafters <bincrafters@gmail.com>"
     exports = ["LICENSE.md", "qtmodules.conf", "*.diff"]
-    settings = "os", "arch", "compiler", "build_type", "os_build", "arch_build"
+    settings = "os", "arch", "compiler", "build_type"
 
     options = dict({
         "shared": [True, False],
@@ -207,15 +207,15 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration('Qt without libc++ needs qt:with_doubleconversion. '
                                             'Either enable qt:with_doubleconversion or switch to libc++')
 
-        assert QtConan.version == QtConan._submodules['qtbase']['branch']
+        assert self.version == self._submodules['qtbase']['branch']
 
         def _enablemodule(mod):
             if mod != 'qtbase':
                 setattr(self.options, mod, True)
-            for req in QtConan._submodules[mod]["depends"]:
+            for req in self._submodules[mod]["depends"]:
                 _enablemodule(req)
 
-        for module in QtConan._submodules:
+        for module in self._submodules:
             if module != 'qtbase' and getattr(self.options, module):
                 _enablemodule(module)
 
@@ -260,7 +260,7 @@ class QtConan(ConanFile):
         if self.options.with_libalsa:
             self.requires("libalsa/1.1.9")
         if self.options.GUI:
-            if self.settings.os == "Linux" and not tools.cross_building(self.settings):
+            if self.settings.os == "Linux" and not tools.cross_building(self.settings, skip_x64_x86=True):
                 self.requires("xkbcommon/0.8.4@bincrafters/stable")
 
     def system_requirements(self):
@@ -402,9 +402,9 @@ class QtConan(ConanFile):
             args.append("-release")
             args.append("-optimize-size")
 
-        for module in QtConan._submodules:
+        for module in self._submodules:
             if module != 'qtbase' and not getattr(self.options, module) \
-                    and os.path.isdir(os.path.join(self.source_folder, 'qt5', QtConan._submodules[module]['path'])):
+                    and os.path.isdir(os.path.join(self.source_folder, 'qt5', self._submodules[module]['path'])):
                 args.append("-skip " + module)
 
         args.append("--zlib=system")
@@ -538,9 +538,7 @@ class QtConan(ConanFile):
         else:
             xplatform_val = self._xplatform()
             if xplatform_val:
-                if (not tools.cross_building(self.settings)) or\
-                        (self.settings.os == self.settings.os_build and\
-                         self.settings.arch_build == "x86_64" and self.settings.arch == "x86"):
+                if not tools.cross_building(self.settings, skip_x64_x86=True):
                     args += ["-platform %s" % xplatform_val]
                 else:
                     args += ["-xplatform %s" % xplatform_val]
