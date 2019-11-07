@@ -147,7 +147,7 @@ class QtConan(ConanFile):
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
             self.build_requires("jom_installer/1.1.2@bincrafters/stable")
-        if self.settings.os == 'Linux':
+        if self.settings.compiler != "Visual Studio":
             if not tools.which('pkg-config'):
                 self.build_requires('pkg-config_installer/0.29.2@bincrafters/stable')
 
@@ -620,3 +620,25 @@ class QtConan(ConanFile):
 
     def package_info(self):
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
+        self.cpp_info.includedirs = [os.path.join("include", x) for x in os.listdir(os.path.join(self.package_folder, "include"))]
+        with tools.environment_append({'PKG_CONFIG_PATH': os.path.join(self.package_folder, "lib", "pkgconfig")}):
+            for p in os.listdir(os.path.join(self.package_folder, "lib", "pkgconfig")):
+                if p.endswith('.pc'):
+                    def _get_info(param):
+                        pkg_config = "pkg-config --define-variable=prefix=. --print-errors %s" % p[:-3]
+                        if self.options.shared:
+                            pkg_config += " --static"
+                        from six import StringIO
+                        mybuf = StringIO()
+                        self.run(" ".join([pkg_config, param]), output=mybuf, run_environment=True)
+                        return mybuf.getvalue()
+
+                    def merge_lists(seq1, seq2):
+                        return [s for s in seq1 if s not in seq2] + seq2
+                    self.cpp_info.includedirs = merge_lists(self.cpp_info.includedirs, [i[2:] for i in _get_info("--cflags-only-I").split()])
+                    self.cpp_info.libdirs = merge_lists(self.cpp_info.libdirs, [i[2:] for i in _get_info("--libs-only-L").split()])
+                    self.cpp_info.libs = merge_lists(self.cpp_info.libs, [i[2:] for i in _get_info("--libs-only-l").split()])
+                    self.cpp_info.sharedlinkflags = merge_lists(self.cpp_info.sharedlinkflags, _get_info("--libs-only-other").split())
+                    self.cpp_info.cflags = merge_lists(self.cpp_info.cflags, _get_info("--cflags-only-other").split())
+        self.cpp_info.exelinkflags = self.cpp_info.sharedlinkflags
+        self.cpp_info.cxxflags = self.cpp_info.cflags

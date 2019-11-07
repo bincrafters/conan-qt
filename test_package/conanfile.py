@@ -6,7 +6,9 @@ from conans import ConanFile, CMake, tools, RunEnvironment
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "qt"
+    generators = "qt", "cmake"
+    options = {"fPIC":[True]}
+    default_options = {"fPIC":True}
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
