@@ -1,0 +1,34 @@
+From 99e43db7cea1c838993c151d2d40fc2874a94256 Mon Sep 17 00:00:00 2001
+From: Kai Koehne <kai.koehne@qt.io>
+Date: Thu, 31 Oct 2019 17:15:39 +0100
+Subject: [PATCH] Fix regression in how "pkg-config --static" output is handled
+
+Change a1ea49878927dfe2 did replace different pkg-config calls for
+-L, -l arguments to one. Anyhow, it also removed the eval() call that
+ensured that the return string was split by whitespace, meaning that
+paths couldn't resolve anymore properly if multiple arguments were
+returned.
+
+Fixes: QTBUG-79668
+Change-Id: I4091fea6891ef79836e05f8e87ffa9d69863a8f5
+Reviewed-by: Joerg Bornemann <joerg.bornemann@qt.io>
+---
+ mkspecs/features/qt_configure.prf | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/mkspecs/features/qt_configure.prf b/mkspecs/features/qt_configure.prf
+index 81110e9f6d..27584b99f5 100644
+--- a/mkspecs/features/qt_configure.prf
++++ b/mkspecs/features/qt_configure.prf
+@@ -822,6 +822,8 @@ defineTest(qtConfLibrary_pkgConfig) {
+         return(false)
+     contains($${1}.libs, ".*\\.$${QMAKE_EXTENSION_STATICLIB}$") {
+         qtRunLoggedCommand("$$pkg_config --static --libs $$args", libs)|return(false)
++        # Split by space
++        eval(libs = $$libs)
+         !qtConfResolveLibs($${1}.libs, $$libs): \
+             return(false)
+     }
+-- 
+2.23.0.windows.1
+

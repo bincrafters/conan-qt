@@ -21,14 +21,14 @@ If you wish to report an issue or make a request for a package, please do so her
 
 ### Basic setup
 
-    $ conan install qt/5.12.5@bincrafters/stable
+    $ conan install qt/5.12.6@bincrafters/stable
 
 ### Project setup
 
 If you handle multiple dependencies in your project is better to add a *conanfile.txt*
 
     [requires]
-    qt/5.12.5@bincrafters/stable
+    qt/5.12.6@bincrafters/stable
 
     [generators]
     txt
@@ -127,4 +127,4 @@ The following command both runs all the steps of the conan file, and publishes t
 NOTE: The conan recipe license applies only to the files of this recipe, which can be used to build and package qt.
 It does *not* in any way apply or is related to the actual software being packaged.
 
-[MIT](https://github.com/bincrafters/conan-qt/blob/stable/5.12.5/LICENSE.md)
+[MIT](https://github.com/bincrafters/conan-qt/blob/stable/5.12.6/LICENSE.md)
