@@ -10,10 +10,10 @@ sources:
     sha256: "55e8273536be41f4f63064a79e552a22133848bb419400b6fa8e9fc0dc05de08"
 patches:
   "5.13.1":
-    - patch_file: "3f9c9db.diff"
+    - patch_file: "patches/3f9c9db.diff"
       base_path: "qt5/qtbase"
-    - patch_file: "a9cc8aa.diff"
+    - patch_file: "patches/a9cc8aa.diff"
       base_path: "qt5/qtmultimedia"
   "5.13.2":
-    - patch_file: "3f9c9db_.diff"
+    - patch_file: "patches/3f9c9db_.diff"
       base_path: "qt5/qtbase"
