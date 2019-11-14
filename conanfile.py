@@ -581,10 +581,6 @@ class QtConan(ConanFile):
                             shutil.copyfile(os.path.join(dirpath, filename), filename)
                             tools.replace_prefix_in_pc_file(filename, lib_path)
 
-        for pc in ['ZLIB.pc', 'EXPAT.pc']:
-            if os.path.isfile(pc):
-                os.rename(pc, pc.lower())
-
         if 'glib' in self.deps_cpp_info.deps:
             shutil.move("pcre.pc", "libpcre.pc")
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
