@@ -10,4 +10,5 @@ jobs:
   parameters:
     conanLoginUsername: $(CONAN_LOGIN_USERNAME)
     conanPassword: $(CONAN_PASSWORD)
+    appleClangVersions: "10"
     splitByBuildTypes: "true"
