@@ -17,12 +17,9 @@ jobs:
             exceptions: seh
     steps:
       - uses: actions/checkout@v1
-        with:
-            fetch-depth: 1
       - name: install
         run: |
-            pip install conan --upgrade
-            pip install conan_package_tools bincrafters_package_tools
+            pip install bincrafters_package_tools
       - name: run  
         env:
             CONAN_BUILD_TYPES: ${{matrix.buildType}}

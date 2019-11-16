@@ -23,12 +23,11 @@ jobs:
           python-version: '3.8'
       - name: Install Conan
         run: |
-          chmod +x .ci/install.sh
-          ./.ci/install.sh
+          pip install bincrafters_package_tools
+          conan user
       - name: Run
         run: |
-          chmod +x .ci/run.sh
-          ./.ci/run.sh
+          python build.py
 
   Clang:
     runs-on: ubuntu-18.04
@@ -47,9 +46,8 @@ jobs:
           python-version: '3.8'
       - name: Install Conan
         run: |
-          chmod +x .ci/install.sh
-          ./.ci/install.sh
+          pip install bincrafters_package_tools
+          conan user
       - name: Run
         run: |
-          chmod +x .ci/run.sh
-          ./.ci/run.sh
+          python build.py
