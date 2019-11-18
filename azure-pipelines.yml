@@ -1,54 +1,14 @@
-jobs:
-- job: Linux
-  pool:
-    vmImage: "ubuntu-16.04"
-  timeoutInMinutes: 180
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: "3.7"
-  - script: |
-      pip install --upgrade pip
-      chmod +x .ci/install.sh
-      ./.ci/install.sh
-      chmod +x .ci/run.sh
-      ./.ci/run.sh
-    env:
-      CONAN_LOGIN_USERNAME: $(CONAN_LOGIN_USERNAME)
-      CONAN_PASSWORD: $(CONAN_PASSWORD)
-      CONAN_USE_DOCKER: 1
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: bincrafters/templates
+      endpoint: github
 
-  # bincrafters-conventions:no-new-compiler-versions  
-  # Qt doesn't work with Clang 8 right now, remove tag when it does
-  
-  strategy:
-    matrix:
-      Gcc 5 x86_64:
-        CONAN_GCC_VERSIONS: 5
-        CONAN_ARCHS: "x86_64"
-      Gcc 6 x86_64:
-        CONAN_GCC_VERSIONS: 6
-        CONAN_ARCHS: "x86_64"
-      Gcc 7 x86_64:
-        CONAN_GCC_VERSIONS: 7
-        CONAN_ARCHS: "x86_64"
-      Gcc 8 x86_64:
-        CONAN_GCC_VERSIONS: 8
-        CONAN_ARCHS: "x86_64"
-      Gcc 9:
-        CONAN_GCC_VERSIONS: 9
-      Clang 3.9 x86_64:
-        CONAN_CLANG_VERSIONS: 3.9
-        CONAN_ARCHS: "x86_64"
-      Clang 4.0 x86_64:
-        CONAN_CLANG_VERSIONS: 4.0
-        CONAN_ARCHS: "x86_64"
-      Clang 5.0 x86_64:
-        CONAN_CLANG_VERSIONS: 5.0
-        CONAN_ARCHS: "x86_64"
-      Clang 6.0 x86_64:
-        CONAN_CLANG_VERSIONS: 6.0
-        CONAN_ARCHS: "x86_64"
-      Clang 7.0:
-        CONAN_CLANG_VERSIONS: 7.0
-        CONAN_DOCKER_IMAGE: conanio/clang7
+jobs:
+- template: .ci/azure.yml@templates
+  parameters:
+    conanLoginUsername: $(CONAN_LOGIN_USERNAME)
+    conanPassword: $(CONAN_PASSWORD)
+    appleClangVersions: "10"
+    splitByBuildTypes: "true"
