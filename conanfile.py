@@ -502,7 +502,7 @@ class QtConan(ConanFile):
 
                 def _gather_libs(p):
                     libs = ["-l" + i for i in self.deps_cpp_info[p].libs]
-                    if self.settings.os in ["Macos", "iOS", "watchOS", "tvOS"]:
+                    if tools.is_apple_os(self.settings.os):
                         libs += ["-framework " + i for i in self.deps_cpp_info[p].frameworks]
                     libs += self.deps_cpp_info[p].sharedlinkflags
                     for dep in self.deps_cpp_info[p].public_deps:
