@@ -121,6 +121,7 @@ class QtConan(ConanFile):
         "sysroot": None,
         "config": None,
         "multiconfiguration": False,
+        "glib:shared": True,    # qt does not detect glib if glib is static QTBUG-78873
     }, **{module: False for module in _submodules if module != 'qtbase'}
     )
     requires = "zlib/1.2.11"
