@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ["4.9", "5", "6", "7", "8", "9"]
+        version: ["5", "6", "7", "8", "9"]
         buildType: [Debug, Release]
     env:
         CONAN_GCC_VERSIONS: ${{matrix.version}}
