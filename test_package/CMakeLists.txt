@@ -20,3 +20,6 @@ add_executable(${PROJECT_NAME} test_package.cpp greeter.h)
 target_link_libraries(${PROJECT_NAME} Qt5::Core)
 
 # configure_file(${CMAKE_CURRENT_BINARY_DIR}/qt.conf ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qt.conf COPYONLY)
+
+message(">>>>>>>> CMAKE_VERSION ${CMAKE_VERSION}")
+message(">>>>>>>> CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES}")
