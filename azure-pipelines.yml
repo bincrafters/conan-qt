@@ -12,3 +12,4 @@ jobs:
     conanPassword: $(CONAN_PASSWORD)
     appleClangVersions: "10"
     splitByBuildTypes: "true"
+    requireMoreDiskSpace: "true"
