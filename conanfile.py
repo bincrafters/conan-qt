@@ -602,7 +602,6 @@ class QtConan(ConanFile):
                     make = "make"
                 self.run(make, run_environment=True)
                 self.run("%s install" % make)
-                self.output.info(open(os.path.join(self.package_folder, 'lib', 'Qt5Core.prl'), errors='backslashreplace').read())
 
         with open('qtbase/bin/qt.conf', 'w') as f:
             f.write('[Paths]\nPrefix = ..')
