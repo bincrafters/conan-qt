@@ -69,6 +69,8 @@ class TestPackageConan(ConanFile):
         env_build = RunEnvironment(self)
         with tools.environment_append(env_build.vars):
             cmake = CMake(self, set_cmake_flags=True)
+            if self.settings.os == "Macos":
+                cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = '10.14'
             cmake.configure(build_folder="cmake_folder")
             cmake.build()
 
