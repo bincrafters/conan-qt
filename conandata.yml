@@ -29,3 +29,5 @@ patches:
   "5.14.0-beta3":
     - patch_file: "patches/fbde9c7.diff"
       base_path: "qt5/qtbase"
+    - patch_file: "patches/aa2a39dea5.diff"
+      base_path: "qt5/qtbase"
