@@ -17,3 +17,5 @@ patches:
   "5.13.2":
     - patch_file: "patches/3f9c9db_.diff"
       base_path: "qt5/qtbase"
+    - patch_file: "patches/aa2a39dea5.diff"
+      base_path: "qt5/qtbase"
