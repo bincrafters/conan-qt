@@ -3,7 +3,7 @@ import shutil
 import itertools
 
 import configparser
-from conans import ConanFile, tools
+from conans import ConanFile, tools, __version__ as conan_version
 from conans.errors import ConanInvalidConfiguration
 from conans.model import Generator
 from conans.tools import Version
@@ -49,7 +49,6 @@ class QtConan(ConanFile):
     url = "https://github.com/bincrafters/conan-qt"
     homepage = "https://www.qt.io"
     license = "LGPL-3.0"
-    author = "Bincrafters <bincrafters@gmail.com>"
     exports = ["qtmodules.conf", "patches/*.diff"]
     settings = "os", "arch", "compiler", "build_type"
 
@@ -126,6 +125,15 @@ class QtConan(ConanFile):
     requires = "zlib/1.2.11"
     short_paths = True
 
+    _xcb_packages = {
+        "libxcb": "1.13.1",
+        "libx11": "1.6.8",
+        "xcb-util": "0.4.0",
+        "xcb-util-wm": "0.4.0",
+        "xcb-util-image": "0.4.0",
+        "xcb-util-keysyms": "0.4.0",
+        "xcb-util-renderutil": "0.3.9"
+    }
     def _system_package_architecture(self):
         if tools.os_info.with_apt:
             if self.settings.arch == "x86":
@@ -158,6 +166,8 @@ class QtConan(ConanFile):
             self.options.with_icu = False
 
     def configure(self):
+        if conan_version < Version("1.20.0"):
+            raise ConanInvalidConfiguration("This recipe needs at least conan 1.20.0, please upgrade.")
         if self.settings.os != 'Linux':
             self.options.with_glib = False
         #     self.options.with_libiconv = False
@@ -261,8 +271,10 @@ class QtConan(ConanFile):
             self.requires("openal/1.19.0@bincrafters/stable")
         if self.options.with_libalsa:
             self.requires("libalsa/1.1.9")
-        if self.options.GUI:
-            if self.settings.os == "Linux" and not tools.cross_building(self.settings, skip_x64_x86=True):
+        if self.options.GUI and self.settings.os == "Linux":
+            for p in self._xcb_packages:
+                self.requires("%s/%s@bincrafters/stable" % (p, self._xcb_packages[p]))
+            if not tools.cross_building(self.settings, skip_x64_x86=True):
                 self.requires("xkbcommon/0.8.4@bincrafters/stable")
         if self.options.with_zstd:
             self.requires("zstd/1.4.3")
@@ -272,16 +284,12 @@ class QtConan(ConanFile):
             pack_names = []
             if tools.os_info.is_linux:
                 if tools.os_info.with_apt:
-                    pack_names = ["libxcb1-dev", "libx11-dev", "libc6-dev"]
                     if self.options.opengl == "desktop":
                         pack_names.append("libgl1-mesa-dev")
                     elif self.options.opengl == "es2":
                         pack_names.append("libgles2-mesa-dev")
                 else:
-                    if not tools.os_info.linux_distro.startswith(("opensuse", "sles")):
-                        pack_names = ["libxcb"]
                     if not tools.os_info.with_pacman:
-                        pack_names += ["libxcb-devel", "libX11-devel", "glibc-devel"]
                         if self.options.opengl == "desktop":
                             if tools.os_info.linux_distro.startswith(("opensuse", "sles")):
                                 pack_names.append("Mesa-libGL-devel")
@@ -469,6 +477,8 @@ class QtConan(ConanFile):
                   ("double-conversion", "DOUBLECONVERSION"),
                   ("freetype", "FREETYPE"),
                   ("fontconfig", "FONTCONFIG"),
+                  ("libxcb", "XCB"),
+                  ("xcb-util-image", "XCB_IMAGE"),
                   ("icu", "ICU"),
                   ("harfbuzz", "HARFBUZZ"),
                   ("libjpeg", "LIBJPEG"),
@@ -499,7 +509,7 @@ class QtConan(ConanFile):
 
                 def _gather_libs(p):
                     libs = ["-l" + i for i in self.deps_cpp_info[p].libs]
-                    if self.settings.os in ["Macos", "iOS", "watchOS", "tvOS"]:
+                    if tools.is_apple_os(self.settings.os):
                         libs += ["-framework " + i for i in self.deps_cpp_info[p].frameworks]
                     libs += self.deps_cpp_info[p].sharedlinkflags
                     for dep in self.deps_cpp_info[p].public_deps:
@@ -521,7 +531,7 @@ class QtConan(ConanFile):
             args.append("-psql_config " + os.path.join(self.deps_cpp_info['libpq'].rootpath, "bin", "pg_config"))
         if self.settings.os == "Linux":
             if self.options.GUI:
-                args.append("-qt-xcb")
+                args.append("-system-xcb")
         elif self.settings.os == "Macos":
             args += ["-no-framework"]
         elif self.settings.os == "Android":
@@ -575,14 +585,18 @@ class QtConan(ConanFile):
         if self.options.config:
             args.append(str(self.options.config))
 
-        for package in ['xkbcommon', 'glib']:
-            if package in self.deps_cpp_info.deps:
-                lib_path = self.deps_cpp_info[package].rootpath
-                for dirpath, _, filenames in os.walk(lib_path):
-                    for filename in filenames:
-                        if filename.endswith('.pc'):
-                            shutil.copyfile(os.path.join(dirpath, filename), filename)
-                            tools.replace_prefix_in_pc_file(filename, lib_path)
+        for package in ['xkbcommon', 'glib'] + [p for p in self._xcb_packages]:
+            def _gather_pc_files(package):
+                if package in self.deps_cpp_info.deps:
+                    lib_path = self.deps_cpp_info[package].rootpath
+                    for dirpath, _, filenames in os.walk(lib_path):
+                        for filename in filenames:
+                            if filename.endswith('.pc'):
+                                shutil.copyfile(os.path.join(dirpath, filename), filename)
+                                tools.replace_prefix_in_pc_file(filename, lib_path)
+                    for dep in self.deps_cpp_info[package].public_deps:
+                        _gather_pc_files(dep)
+            _gather_pc_files(package)
 
         if 'glib' in self.deps_cpp_info.deps:
             shutil.move("pcre.pc", "libpcre.pc")
