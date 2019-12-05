@@ -143,6 +143,57 @@ class QtConan(ConanFile):
         if self.settings.os == 'Linux':
             if not tools.which('pkg-config'):
                 self.build_requires('pkg-config_installer/0.29.2@bincrafters/stable')
+        if self.options.qtwebengine:
+            # gperf, bison, flex, python >= 2.7.5 & < 3
+            if not tools.which("bison"):
+                self.build_requires("bison_installer/3.3.2@bincrafters/stable")
+            if not tools.which("gperf"):
+                self.build_requires("gperf_installer/3.1@conan/stable")
+            if not tools.which("flex"):
+                self.build_requires("flex_installer/2.6.4@bincrafters/stable")
+
+            def _check_python_version():
+                # Check if a valid python2 is available in PATH or it will failflex
+                # Start by checking if python2 can be found
+                python_exe = tools.which("python2")
+                if not python_exe:
+                    # Fall back on regular python
+                    python_exe = tools.which("python")
+
+                if not python_exe:
+                    msg = ("Python2 must be available in PATH "
+                           "in order to build Qt WebEngine")
+                    raise ConanInvalidConfiguration(msg)
+                # In any case, check its actual version for compatibility
+                from six import StringIO  # Python 2 and 3 compatible
+                mybuf = StringIO()
+                cmd_v = "{} --version".format(python_exe)
+                self.run(cmd_v, output=mybuf)
+                verstr = mybuf.getvalue().strip().split('Python ')[1]
+                if verstr.endswith('+'):
+                    verstr = verstr[:-1]
+                version = tools.Version(verstr)
+                # >= 2.7.5 & < 3
+                v_min = "2.7.5"
+                v_max = "3.0.0"
+                if (version >= v_min) and (version < v_max):
+                    msg = ("Found valid Python 2 required for QtWebengine:"
+                           " version={}, path={}".format(mybuf.getvalue(), python_exe))
+                    self.output.success(msg)
+                else:
+                    msg = ("Found Python 2 in path, but with invalid version {}"
+                           " (QtWebEngine requires >= {} & < "
+                           "{})".format(verstr, v_min, v_max))
+                    raise ConanInvalidConfiguration(msg)
+
+            try:
+                _check_python_version()
+            except ConanInvalidConfiguration as e:
+                if tools.os_info.is_windows:
+                    raise e
+                self.output.info("Python 2 not detected in path. Trying to install it")
+                tools.SystemPackageTool().install(["python2", "python"])
+                _check_python_version()
 
     def config_options(self):
         if self.settings.os != "Linux":
@@ -182,6 +233,16 @@ class QtConan(ConanFile):
         if self.settings.os != "Linux":
             self.options.with_libalsa = False
 
+        if self.options.qtwebengine:
+            if not self.options.shared:
+                raise ConanInvalidConfiguration("Static builds of Qt Webengine are not supported")
+
+            if tools.cross_building(self.settings, skip_x64_x86=True):
+                raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
+
+            if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+                raise ConanInvalidConfiguration("Compiling Qt WebEngine with gcc < 5 is not supported")
+
         if self.settings.os == "Android" and self.options.opengl == "desktop":
             raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
 
@@ -200,6 +261,10 @@ class QtConan(ConanFile):
         if not self.options.with_doubleconversion and str(self.settings.compiler.libcxx) != "libc++":
             raise ConanInvalidConfiguration('Qt without libc++ needs qt:with_doubleconversion. '
                                             'Either enable qt:with_doubleconversion or switch to libc++')
+
+        if tools.os_info.is_linux:
+            if self.options.qtwebengine:
+                self.options.with_fontconfig = True
 
         assert self.version == self._submodules['qtbase']['branch']
 
@@ -260,10 +325,27 @@ class QtConan(ConanFile):
                 self.requires("xkbcommon/0.8.4@bincrafters/stable")
         if self.options.with_zstd:
             self.requires("zstd/1.4.3")
+        if self.options.qtwebengine and self.settings.os == "Linux":
+            self.requires("libx11/1.6.8@bincrafters/stable")
+            self.requires("libdrm/2.4.100@bincrafters/stable")
+            self.requires("libxcomposite/0.4.5@bincrafters/stable")
+            self.requires("libxcursor/1.2.0@bincrafters/stable")
+            self.requires("libxi/1.7.10@bincrafters/stable")
+            self.requires("libxtst/1.2.3@bincrafters/stable")
+            self.requires("libxrandr/1.5.2@bincrafters/stable")
+            self.requires("libxscrnsaver/1.2.3@bincrafters/stable")
+            self.requires("expat/2.2.9")
+            #self.requires("ffmpeg/4.2@bincrafters/stable")
+            self.requires("opus/1.3.1@bincrafters/stable")
 
     def system_requirements(self):
+        pack_names = []
+        if tools.os_info.is_linux:
+            if tools.os_info.with_apt:
+                if self.options.qtwebengine:
+                    pack_names.append("libnss3-dev")
+                    pack_names.append("libdbus-1-dev")
         if self.options.GUI:
-            pack_names = []
             if tools.os_info.is_linux:
                 if tools.os_info.with_apt:
                     if self.options.opengl == "desktop":
@@ -278,10 +360,10 @@ class QtConan(ConanFile):
                             else:
                                 pack_names.append("mesa-libGL-devel")
 
-            if pack_names:
-                installer = tools.SystemPackageTool()
-                for item in pack_names:
-                    installer.install(item)
+        if pack_names:
+            installer = tools.SystemPackageTool()
+            for item in pack_names:
+                installer.install(item)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -477,22 +559,7 @@ class QtConan(ConanFile):
                 if package == 'freetype':
                     args.append("\"%s_INCDIR=%s\"" % (var, self.deps_cpp_info[package].include_paths[-1]))
 
-                def _remove_duplicate(l):
-                    seen = set()
-                    seen_add = seen.add
-                    for element in itertools.filterfalse(seen.__contains__, l):
-                        seen_add(element)
-                        yield element
-
-                def _gather_libs(p):
-                    libs = ["-l" + i for i in self.deps_cpp_info[p].libs]
-                    if tools.is_apple_os(self.settings.os):
-                        libs += ["-framework " + i for i in self.deps_cpp_info[p].frameworks]
-                    libs += self.deps_cpp_info[p].sharedlinkflags
-                    for dep in self.deps_cpp_info[p].public_deps:
-                        libs += _gather_libs(dep)
-                    return _remove_duplicate(libs)
-                args.append("\"%s_LIBS=%s\"" % (var, " ".join(_gather_libs(package))))
+                args.append("\"%s_LIBS=%s\"" % (var, " ".join(self._gather_libs(package))))
 
         for package in self.deps_cpp_info.deps:
             args += ["-I " + s for s in self.deps_cpp_info[package].include_paths]
@@ -556,10 +623,14 @@ class QtConan(ConanFile):
         if tools.os_info.is_linux and self.settings.compiler == "clang":
             args += ['QMAKE_CXXFLAGS+="-ftemplate-depth=1024"']
 
+        if self.options.qtwebengine and self.settings.os == "Linux":
+            args += ['-qt-webengine-ffmpeg',
+                     '-system-webengine-opus']
+
         if self.options.config:
             args.append(str(self.options.config))
 
-        for package in self._xcb_packages:
+        for package in ['libxcomposite', 'libxcursor', 'libxi', 'libxtst'] + [p for p in self._xcb_packages]:
             def _gather_pc_files(package):
                 if package in self.deps_cpp_info.deps:
                     lib_path = self.deps_cpp_info[package].rootpath
@@ -572,8 +643,21 @@ class QtConan(ConanFile):
                         _gather_pc_files(dep)
             _gather_pc_files(package)
 
-        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-            with tools.environment_append({"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": os.getcwd()}):
+        with tools.vcvars(self.settings):
+            build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [os.getcwd()]}
+            if self.options.qtwebengine:
+                if self.settings.compiler in ['gcc', 'clang']:
+                    i_path = []
+                    l_path = []
+                    for p in ['fontconfig', 'libxcursor', 'libxi', 'libxtst', 'libxrandr', 'libxscrnsaver', 'libxcomposite', 'zlib']:
+                        i_path.extend(self.deps_cpp_info[p].include_paths)
+                        for dep in self.deps_cpp_info[p].public_deps:
+                            i_path.extend(self.deps_cpp_info[dep].include_paths)
+                        l_path.extend(self._gather_lib_paths(p))
+                    build_env['C_INCLUDE_PATH'] = os.pathsep.join(i_path)
+                    build_env['CPLUS_INCLUDE_PATH'] = os.pathsep.join(i_path)
+                    build_env['LIBRARY_PATH'] = os.pathsep.join(l_path)
+            with tools.environment_append(build_env):
                 try:
                     self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
                 finally:
@@ -600,6 +684,28 @@ class QtConan(ConanFile):
         self.info.options.cross_compile = None
         del self.info.options.sysroot
 
-
     def package_info(self):
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
+
+    @staticmethod
+    def _remove_duplicate(l):
+        seen = set()
+        seen_add = seen.add
+        for element in itertools.filterfalse(seen.__contains__, l):
+            seen_add(element)
+            yield element
+
+    def _gather_libs(self, p):
+        libs = ["-l" + i for i in self.deps_cpp_info[p].libs]
+        if tools.is_apple_os(self.settings.os):
+            libs += ["-framework " + i for i in self.deps_cpp_info[p].frameworks]
+        libs += self.deps_cpp_info[p].sharedlinkflags
+        for dep in self.deps_cpp_info[p].public_deps:
+            libs += self._gather_libs(dep)
+        return self._remove_duplicate(libs)
+
+    def _gather_lib_paths(self, p):
+        lib_paths = self.deps_cpp_info[p].lib_paths
+        for dep in self.deps_cpp_info[p].public_deps:
+            lib_paths += self._gather_lib_paths(dep)
+        return self._remove_duplicate(lib_paths)
