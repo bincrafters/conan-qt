@@ -589,7 +589,7 @@ class QtConan(ConanFile):
                 build_env['PATH'] = [str(self.options.python2_bin_dir)]
             if self.settings.compiler in ['gcc', 'clang']:
                 build_env['C_INCLUDE_PATH'] = self.deps_cpp_info['fontconfig'].include_paths
-                build_env['C_PLUS_INCLUDE_PATH'] = self.deps_cpp_info['fontconfig'].include_paths
+                build_env['CPLUS_INCLUDE_PATH'] = self.deps_cpp_info['fontconfig'].include_paths
                 build_env['LIBRARY_PATH'] = [ s for s in self._gather_lib_paths('fontconfig') ]
 
         with tools.vcvars(self.settings):
