@@ -132,25 +132,6 @@ class QtConan(ConanFile):
         "xcb-util-keysyms": "0.4.0",
         "xcb-util-renderutil": "0.3.9"
     }
-    def _system_package_architecture(self):
-        if tools.os_info.with_apt:
-            if self.settings.arch == "x86":
-                return ':i386'
-            elif self.settings.arch == "x86_64":
-                return ':amd64'
-            elif self.settings.arch == "armv6" or self.settings.arch == "armv7":
-                return ':armel'
-            elif self.settings.arch == "armv7hf":
-                return ':armhf'
-            elif self.settings.arch == "armv8":
-                return ':arm64'
-
-        if tools.os_info.with_yum:
-            if self.settings.arch == "x86":
-                return '.i686'
-            elif self.settings.arch == 'x86_64':
-                return '.x86_64'
-        return ""
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
@@ -293,7 +274,7 @@ class QtConan(ConanFile):
             if pack_names:
                 installer = tools.SystemPackageTool()
                 for item in pack_names:
-                    installer.install(item + self._system_package_architecture())
+                    installer.install(item)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
