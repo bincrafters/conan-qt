@@ -118,6 +118,7 @@ class QtConan(ConanFile):
         "sysroot": None,
         "config": None,
         "multiconfiguration": False,
+        "libxcb:shared": True,
     }, **{module: False for module in _submodules if module != 'qtbase'}
     )
     requires = "zlib/1.2.11"
@@ -130,7 +131,8 @@ class QtConan(ConanFile):
         "xcb-util-wm": "0.4.0",
         "xcb-util-image": "0.4.0",
         "xcb-util-keysyms": "0.4.0",
-        "xcb-util-renderutil": "0.3.9"
+        "xcb-util-renderutil": "0.3.9",
+        "libxcursor": "1.2.0"
     }
 
     def build_requirements(self):
@@ -452,8 +454,6 @@ class QtConan(ConanFile):
                   ("double-conversion", "DOUBLECONVERSION"),
                   ("freetype", "FREETYPE"),
                   ("fontconfig", "FONTCONFIG"),
-                  ("libxcb", "XCB"),
-                  ("xcb-util-image", "XCB_IMAGE"),
                   ("icu", "ICU"),
                   ("harfbuzz", "HARFBUZZ"),
                   ("libjpeg", "LIBJPEG"),
@@ -466,14 +466,10 @@ class QtConan(ConanFile):
                   ("openal", "OPENAL"),
                   ("libalsa", "ALSA"),
                   ("xkbcommon", "XKBCOMMON")]
-        libPaths = []
         for package, var in libmap:
             if package in self.deps_cpp_info.deps:
                 if package == 'freetype':
                     args.append("\"%s_INCDIR=%s\"" % (var, self.deps_cpp_info[package].include_paths[-1]))
-                else:
-                    args += ["-I " + s for s in self.deps_cpp_info[package].include_paths]
-                args += ["-D " + s for s in self.deps_cpp_info[package].defines]
 
                 def _remove_duplicate(l):
                     seen = set()
@@ -492,13 +488,10 @@ class QtConan(ConanFile):
                     return _remove_duplicate(libs)
                 args.append("\"%s_LIBS=%s\"" % (var, " ".join(_gather_libs(package))))
 
-                def _gather_lib_paths(p):
-                    lib_paths = self.deps_cpp_info[p].lib_paths
-                    for dep in self.deps_cpp_info[p].public_deps:
-                        lib_paths += _gather_lib_paths(dep)
-                    return _remove_duplicate(lib_paths)
-                libPaths += _gather_lib_paths(package)
-        args += ["-L " + s for s in _remove_duplicate(libPaths)]
+        for package in self.deps_cpp_info.deps:
+            args += ["-I " + s for s in self.deps_cpp_info[package].include_paths]
+            args += ["-D " + s for s in self.deps_cpp_info[package].defines]
+            args += ["-L " + s for s in self.deps_cpp_info[package].lib_paths]
 
         if 'libmysqlclient' in self.deps_cpp_info.deps:
             args.append("-mysql_config " + os.path.join(self.deps_cpp_info['libmysqlclient'].rootpath, "bin", "mysql_config"))
