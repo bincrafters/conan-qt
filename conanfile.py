@@ -148,7 +148,6 @@ class QtConan(ConanFile):
         if conan_version < Version("1.20.0"):
             raise ConanInvalidConfiguration("This recipe needs at least conan 1.20.0, please upgrade.")
         if self.settings.os != 'Linux':
-            self.options.with_glib = False
         #     self.options.with_libiconv = False
             self.options.with_fontconfig = False
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.3":
@@ -465,7 +464,8 @@ class QtConan(ConanFile):
                   ("odbc", "ODBC"),
                   ("sdl2", "SDL2"),
                   ("openal", "OPENAL"),
-                  ("libalsa", "ALSA")]
+                  ("libalsa", "ALSA"),
+                  ("xkbcommon", "XKBCOMMON")]
         libPaths = []
         for package, var in libmap:
             if package in self.deps_cpp_info.deps:
@@ -564,7 +564,7 @@ class QtConan(ConanFile):
         if self.options.config:
             args.append(str(self.options.config))
 
-        for package in ['xkbcommon', 'glib'] + [p for p in self._xcb_packages]:
+        for package in self._xcb_packages:
             def _gather_pc_files(package):
                 if package in self.deps_cpp_info.deps:
                     lib_path = self.deps_cpp_info[package].rootpath
@@ -577,8 +577,6 @@ class QtConan(ConanFile):
                         _gather_pc_files(dep)
             _gather_pc_files(package)
 
-        if 'glib' in self.deps_cpp_info.deps:
-            shutil.move("pcre.pc", "libpcre.pc")
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             with tools.environment_append({"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": os.getcwd()}):
                 try:
