@@ -20,6 +20,9 @@ sources:
   "5.14.0-rc":
     url: "https://download.qt.io/development_releases/qt/5.14/5.14.0-rc/single/qt-everywhere-src-5.14.0-rc.tar.xz"
     sha256: "5d8642b0c5f2f7acd600bc3aac068b7b3455a49e0e3dfc8eaf5883b1d537e1be"
+  "5.14.0":
+    url: "https://download.qt.io/archive/qt/5.14/5.14.0/single/qt-everywhere-src-5.14.0.tar.xz"
+    sha256: "be9a77cd4e1f9d70b58621d0753be19ea498e6b0da0398753e5038426f76a8ba"
 patches:
   "5.13.1":
     - patch_file: "patches/3f9c9db.diff"
@@ -39,5 +42,8 @@ patches:
   "5.14.0-rc":
     - patch_file: "patches/fbde9c7.diff"
       base_path: "qt5/qtbase"
+    - patch_file: "patches/aa2a39dea5.diff"
+      base_path: "qt5/qtbase"
+  "5.14.0":
     - patch_file: "patches/aa2a39dea5.diff"
       base_path: "qt5/qtbase"

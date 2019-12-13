@@ -201,7 +201,7 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration('Qt without libc++ needs qt:with_doubleconversion. '
                                             'Either enable qt:with_doubleconversion or switch to libc++')
 
-        # assert self.version == self._submodules['qtbase']['branch']
+        assert self.version == self._submodules['qtbase']['branch']
 
         def _enablemodule(mod):
             if mod != 'qtbase':
