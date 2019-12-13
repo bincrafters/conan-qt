@@ -119,7 +119,8 @@ class QtConan(ConanFile):
         "cross_compile": "/usr/bin/",
         "sysroot": None,
         "config": None,
-        "multiconfiguration": False
+        "multiconfiguration": False,
+        "libxcb:shared": True,
     }, **{module: False for module in _submodules if module != 'qtbase'}
     )
     requires = "zlib/1.2.11"
@@ -132,27 +133,9 @@ class QtConan(ConanFile):
         "xcb-util-wm": "0.4.0",
         "xcb-util-image": "0.4.0",
         "xcb-util-keysyms": "0.4.0",
-        "xcb-util-renderutil": "0.3.9"
+        "xcb-util-renderutil": "0.3.9",
+        "libxcursor": "1.2.0"
     }
-    def _system_package_architecture(self):
-        if tools.os_info.with_apt:
-            if self.settings.arch == "x86":
-                return ':i386'
-            elif self.settings.arch == "x86_64":
-                return ':amd64'
-            elif self.settings.arch == "armv6" or self.settings.arch == "armv7":
-                return ':armel'
-            elif self.settings.arch == "armv7hf":
-                return ':armhf'
-            elif self.settings.arch == "armv8":
-                return ':arm64'
-
-        if tools.os_info.with_yum:
-            if self.settings.arch == "x86":
-                return '.i686'
-            elif self.settings.arch == 'x86_64':
-                return '.x86_64'
-        return ""
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
@@ -169,7 +152,6 @@ class QtConan(ConanFile):
         if conan_version < Version("1.20.0"):
             raise ConanInvalidConfiguration("This recipe needs at least conan 1.20.0, please upgrade.")
         if self.settings.os != 'Linux':
-            self.options.with_glib = False
         #     self.options.with_libiconv = False
             self.options.with_fontconfig = False
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.3":
@@ -268,7 +250,7 @@ class QtConan(ConanFile):
         if self.options.with_sdl2:
             self.requires("sdl2/2.0.9@bincrafters/stable")
         if self.options.with_openal:
-            self.requires("openal/1.19.0@bincrafters/stable")
+            self.requires("openal/1.19.1")
         if self.options.with_libalsa:
             self.requires("libalsa/1.1.9")
         if self.options.GUI and self.settings.os == "Linux":
@@ -299,7 +281,7 @@ class QtConan(ConanFile):
             if pack_names:
                 installer = tools.SystemPackageTool()
                 for item in pack_names:
-                    installer.install(item + self._system_package_architecture())
+                    installer.install(item)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -477,8 +459,6 @@ class QtConan(ConanFile):
                   ("double-conversion", "DOUBLECONVERSION"),
                   ("freetype", "FREETYPE"),
                   ("fontconfig", "FONTCONFIG"),
-                  ("libxcb", "XCB"),
-                  ("xcb-util-image", "XCB_IMAGE"),
                   ("icu", "ICU"),
                   ("harfbuzz", "HARFBUZZ"),
                   ("libjpeg", "LIBJPEG"),
@@ -490,15 +470,12 @@ class QtConan(ConanFile):
                   ("sdl2", "SDL2"),
                   ("openal", "OPENAL"),
                   ("zstd", "ZSTD"),
-                  ("libalsa", "ALSA")]
-        libPaths = []
+                  ("libalsa", "ALSA"),
+                  ("xkbcommon", "XKBCOMMON")]
         for package, var in libmap:
             if package in self.deps_cpp_info.deps:
                 if package == 'freetype':
                     args.append("\"%s_INCDIR=%s\"" % (var, self.deps_cpp_info[package].include_paths[-1]))
-                else:
-                    args += ["-I " + s for s in self.deps_cpp_info[package].include_paths]
-                args += ["-D " + s for s in self.deps_cpp_info[package].defines]
 
                 def _remove_duplicate(l):
                     seen = set()
@@ -517,13 +494,10 @@ class QtConan(ConanFile):
                     return _remove_duplicate(libs)
                 args.append("\"%s_LIBS=%s\"" % (var, " ".join(_gather_libs(package))))
 
-                def _gather_lib_paths(p):
-                    lib_paths = self.deps_cpp_info[p].lib_paths
-                    for dep in self.deps_cpp_info[p].public_deps:
-                        lib_paths += _gather_lib_paths(dep)
-                    return _remove_duplicate(lib_paths)
-                libPaths += _gather_lib_paths(package)
-        args += ["-L " + s for s in _remove_duplicate(libPaths)]
+        for package in self.deps_cpp_info.deps:
+            args += ["-I " + s for s in self.deps_cpp_info[package].include_paths]
+            args += ["-D " + s for s in self.deps_cpp_info[package].defines]
+            args += ["-L " + s for s in self.deps_cpp_info[package].lib_paths]
 
         if 'libmysqlclient' in self.deps_cpp_info.deps:
             args.append("-mysql_config " + os.path.join(self.deps_cpp_info['libmysqlclient'].rootpath, "bin", "mysql_config"))
@@ -585,7 +559,7 @@ class QtConan(ConanFile):
         if self.options.config:
             args.append(str(self.options.config))
 
-        for package in ['xkbcommon', 'glib'] + [p for p in self._xcb_packages]:
+        for package in self._xcb_packages:
             def _gather_pc_files(package):
                 if package in self.deps_cpp_info.deps:
                     lib_path = self.deps_cpp_info[package].rootpath
@@ -598,8 +572,6 @@ class QtConan(ConanFile):
                         _gather_pc_files(dep)
             _gather_pc_files(package)
 
-        if 'glib' in self.deps_cpp_info.deps:
-            shutil.move("pcre.pc", "libpcre.pc")
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             with tools.environment_append({"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": os.getcwd()}):
                 try:
