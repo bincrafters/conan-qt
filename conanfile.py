@@ -584,8 +584,6 @@ class QtConan(ConanFile):
                             shutil.copyfile(os.path.join(dirpath, filename), filename)
                             tools.replace_prefix_in_pc_file(filename, lib_path)
 
-        if 'glib' in self.deps_cpp_info.deps:
-            shutil.move("pcre.pc", "libpcre.pc")
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             with tools.environment_append({"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": os.getcwd()}):
                 try:
