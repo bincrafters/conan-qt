@@ -338,6 +338,10 @@ class QtConan(ConanFile):
             #self.requires("ffmpeg/4.2@bincrafters/stable")
             self.requires("opus/1.3.1@bincrafters/stable")
 
+        if self.options.opengl in ["desktop", "es2"]:
+            if self.settings.os == 'Linux':
+                self.requires('mesa/19.3.1@bincrafters/stable')
+
     def system_requirements(self):
         pack_names = []
         if tools.os_info.is_linux:
@@ -345,20 +349,6 @@ class QtConan(ConanFile):
                 if self.options.qtwebengine:
                     pack_names.append("libnss3-dev")
                     pack_names.append("libdbus-1-dev")
-        if self.options.GUI:
-            if tools.os_info.is_linux:
-                if tools.os_info.with_apt:
-                    if self.options.opengl == "desktop":
-                        pack_names.append("libgl1-mesa-dev")
-                    elif self.options.opengl == "es2":
-                        pack_names.append("libgles2-mesa-dev")
-                else:
-                    if not tools.os_info.with_pacman:
-                        if self.options.opengl == "desktop":
-                            if tools.os_info.linux_distro.startswith(("opensuse", "sles")):
-                                pack_names.append("Mesa-libGL-devel")
-                            else:
-                                pack_names.append("mesa-libGL-devel")
 
         if pack_names:
             installer = tools.SystemPackageTool()
@@ -630,7 +620,7 @@ class QtConan(ConanFile):
         if self.options.config:
             args.append(str(self.options.config))
 
-        for package in ['libxcomposite', 'libxcursor', 'libxi', 'libxtst'] + [p for p in self._xcb_packages]:
+        for package in ['libxcomposite', 'libxcursor', 'libxi', 'libxtst', 'mesa'] + [p for p in self._xcb_packages]:
             def _gather_pc_files(package):
                 if package in self.deps_cpp_info.deps:
                     lib_path = self.deps_cpp_info[package].rootpath
@@ -659,7 +649,7 @@ class QtConan(ConanFile):
                     build_env['LIBRARY_PATH'] = os.pathsep.join(l_path)
             with tools.environment_append(build_env):
                 try:
-                    self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
+                    self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)), run_environment=True)
                 finally:
                     self.output.info(open('config.log', errors='backslashreplace').read())
 
@@ -696,7 +686,7 @@ class QtConan(ConanFile):
             yield element
 
     def _gather_libs(self, p):
-        libs = ["-l" + i for i in self.deps_cpp_info[p].libs]
+        libs = ["-l" + i for i in self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs]
         if tools.is_apple_os(self.settings.os):
             libs += ["-framework " + i for i in self.deps_cpp_info[p].frameworks]
         libs += self.deps_cpp_info[p].sharedlinkflags
