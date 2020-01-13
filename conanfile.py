@@ -139,7 +139,7 @@ class QtConan(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
-            self.build_requires("jom_installer/1.1.2@bincrafters/stable")
+            self.build_requires("jom/1.1.3")
         if self.settings.os == 'Linux':
             if not tools.which('pkg-config'):
                 self.build_requires('pkg-config_installer/0.29.2@bincrafters/stable')
