@@ -58,6 +58,7 @@ class QtConan(ConanFile):
 
         "opengl": ["no", "es2", "desktop", "dynamic"],
         "openssl": [True, False],
+        "sanitize_thread": [True, False],
         "with_pcre2": [True, False],
         "with_glib": [True, False],
         # "with_libiconv": [True, False],  # Qt tests failure "invalid conversion from const char** to char**"
@@ -93,6 +94,7 @@ class QtConan(ConanFile):
         "commercial": False,
         "opengl": "desktop",
         "openssl": True,
+        "sanitize_thread": False,
         "with_pcre2": True,
         "with_glib": True,
         # "with_libiconv": True,
@@ -211,6 +213,11 @@ class QtConan(ConanFile):
             self.options.with_mysql = False
             if not self.options.shared and self.options.with_icu:
                 raise ConanInvalidConfiguration("icu option is not supported on windows in static build. see QTBUG-77120.")
+
+        # Sanitize
+        if self.options.sanitize_thread:
+          if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "8.0":
+            raise ConanInvalidConfiguration("Build Qt itself with ThreadSanitizer requires some headers that are not available with Gcc < 8")
 
         if self.options.widgets and not self.options.GUI:
             raise ConanInvalidConfiguration("using option qt:widgets without option qt:GUI is not possible. "
@@ -493,6 +500,10 @@ class QtConan(ConanFile):
                 args += ["-openssl-runtime"]
             else:
                 args += ["-openssl-linked"]
+
+        # Sanitize
+        if self.options.sanitize_thread:
+            args += ["-sanitize thread"]
 
         # args.append("--iconv=" + ("gnu" if self.options.with_libiconv else "no"))
 

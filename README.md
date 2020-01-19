@@ -54,6 +54,7 @@ The following command both runs all the steps of the conan file, and publishes t
 | commercial      | False |  [True, False] |
 | opengl      | desktop |  ['no', 'es2', 'desktop', 'dynamic'] |
 | openssl      | True |  [True, False] |
+| sanitize_thread | False | [True, False] |
 | with_pcre2      | True |  [True, False] |
 | with_glib      | True |  [True, False] |
 | with_doubleconversion      | True |  [True, False] |
