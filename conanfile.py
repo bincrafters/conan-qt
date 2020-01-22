@@ -336,7 +336,7 @@ class QtConan(ConanFile):
             self.requires("libxscrnsaver/1.2.3@bincrafters/stable")
             self.requires("expat/2.2.9")
             #self.requires("ffmpeg/4.2@bincrafters/stable")
-            self.requires("opus/1.3.1@bincrafters/stable")
+            self.requires("opus/1.3.1")
 
         if self.options.opengl in ["desktop", "es2"]:
             if self.settings.os == 'Linux':
