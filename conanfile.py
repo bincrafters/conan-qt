@@ -291,7 +291,7 @@ class QtConan(ConanFile):
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.1.5")
         if self.options.with_freetype and not self.options.multiconfiguration:
-            self.requires("freetype/2.10.0")
+            self.requires("freetype/2.10.1")
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.91@conan/stable")
         if self.options.with_icu:
