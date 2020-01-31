@@ -8,3 +8,6 @@ sources:
   "5.12.6":
     url: "https://download.qt.io/archive/qt/5.12/5.12.6/single/qt-everywhere-src-5.12.6.tar.xz"
     sha256: "a06c34222f4f049e8bd8da170178260aea1438b510cc064d16229dd340bfe592"
+  "5.12.7":
+    url: "https://download.qt.io/archive/qt/5.12/5.12.7/single/qt-everywhere-src-5.12.7.tar.xz"
+    sha256: "873783a0302129d98a8f63de9afe4520fb5f8d5316be8ad7b760c59875cd8a8d"
