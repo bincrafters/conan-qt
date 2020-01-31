@@ -479,7 +479,7 @@ class QtConan(ConanFile):
                         yield element
 
                 def _gather_libs(p):
-                    libs = ["-l" + i for i in self.deps_cpp_info[p].libs]
+                    libs = ["-l" + i for i in self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs]
                     if tools.is_apple_os(self.settings.os):
                         libs += ["-framework " + i for i in self.deps_cpp_info[p].frameworks]
                     libs += self.deps_cpp_info[p].sharedlinkflags
