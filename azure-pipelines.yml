@@ -5,8 +5,8 @@ resources:
       name: bincrafters/templates
       endpoint: github
 
-jobs:
-- template: .ci/azure.yml@templates
+extends:
+  template: .ci/azure.yml@templates
   parameters:
     conanLoginUsername: $(CONAN_LOGIN_USERNAME)
     conanPassword: $(CONAN_PASSWORD)
