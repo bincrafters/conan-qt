@@ -285,7 +285,7 @@ class QtConan(ConanFile):
             self.requires("pcre2/10.33")
 
         if self.options.with_glib:
-            self.requires("glib/2.58.3@bincrafters/stable")
+            self.requires("glib/2.63.6@bincrafters/stable")
         # if self.options.with_libiconv:
         #     self.requires("libiconv/1.15")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
