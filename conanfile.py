@@ -1,8 +1,14 @@
 import os
 import shutil
 import itertools
+import sys
 
-import configparser
+
+if sys.version_info[0] < 3:
+    import ConfigParser as configparser
+else:
+    import configparser
+
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.model import Generator
