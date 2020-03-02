@@ -639,10 +639,8 @@ class QtConan(ConanFile):
                 if self.settings.compiler in ['gcc', 'clang']:
                     i_path = []
                     l_path = []
-                    for p in ['fontconfig', 'libxcursor', 'libxi', 'libxtst', 'libxrandr', 'libxscrnsaver', 'libxcomposite', 'zlib']:
-                        i_path.extend(self.deps_cpp_info[p].include_paths)
-                        for dep in self.deps_cpp_info[p].public_deps:
-                            i_path.extend(self.deps_cpp_info[dep].include_paths)
+                    for p in ['fontconfig', 'libxcursor', 'libxi', 'libxtst', 'libxrandr', 'libxscrnsaver', 'libxcomposite', 'zlib', 'libxdamage']:
+                        i_path.extend(self._gather_include_paths(p))
                         l_path.extend(self._gather_lib_paths(p))
                     build_env['C_INCLUDE_PATH'] = os.pathsep.join(i_path)
                     build_env['CPLUS_INCLUDE_PATH'] = os.pathsep.join(i_path)
@@ -699,3 +697,9 @@ class QtConan(ConanFile):
         for dep in self.deps_cpp_info[p].public_deps:
             lib_paths += self._gather_lib_paths(dep)
         return self._remove_duplicate(lib_paths)
+
+    def _gather_include_paths(self, p):
+        include_paths = self.deps_cpp_info[p].include_paths
+        for dep in self.deps_cpp_info[p].public_deps:
+            include_paths += self._gather_include_paths(dep)
+        return self._remove_duplicate(include_paths)
