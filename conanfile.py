@@ -297,13 +297,13 @@ class QtConan(ConanFile):
         if self.options.with_icu:
             self.requires("icu/64.2")
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
-            self.requires("harfbuzz/2.6.2@bincrafters/stable")
+            self.requires("harfbuzz/2.6.4@bincrafters/stable")
         if self.options.with_libjpeg and not self.options.multiconfiguration:
             self.requires("libjpeg/9d")
         if self.options.with_libpng and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.29.0")
+            self.requires("sqlite3/3.31.0")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.0.17")
@@ -313,7 +313,7 @@ class QtConan(ConanFile):
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.7")
         if self.options.with_sdl2:
-            self.requires("sdl2/2.0.9@bincrafters/stable")
+            self.requires("sdl2/2.0.10@bincrafters/stable")
         if self.options.with_openal:
             self.requires("openal/1.19.1")
         if self.options.with_libalsa:
@@ -322,9 +322,9 @@ class QtConan(ConanFile):
             for p in self._xcb_packages:
                 self.requires("%s/%s@bincrafters/stable" % (p, self._xcb_packages[p]))
             if not tools.cross_building(self.settings, skip_x64_x86=True):
-                self.requires("xkbcommon/0.8.4@bincrafters/stable")
+                self.requires("xkbcommon/0.10.0@bincrafters/stable")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.3")
+            self.requires("zstd/1.4.4")
         if self.options.qtwebengine and self.settings.os == "Linux":
             self.requires("libx11/1.6.8@bincrafters/stable")
             self.requires("libdrm/2.4.100@bincrafters/stable")
