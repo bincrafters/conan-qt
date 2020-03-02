@@ -30,6 +30,93 @@ This git repository is managed by the Bincrafters team and holds files related t
 
 [Bincrafters Blog](https://bincrafters.github.io)
 
+## For users
+
+### Basic Setup
+
+```
+conan install qt/5.14.1@bincrafters/stable
+```
+
+### Available Options
+| Option                | Default   | Possible Values                        |
+| ----------------------|:----------|:--------------------------------------:|
+| shared                | True      |  [True, False]                         |
+| commercial            | False     |  [True, False]                         |
+| opengl                | "desktop" |  ["no", "es2", "desktop", "dynamic"]   |
+| openssl               | True      |  [True, False]                         |
+| with_pcre2            | True      |  [True, False]                         |
+| with_glib             | True      |  [True, False]                         |
+| with_doubleconversion | True      |  [True, False]                         |
+| with_freetype         | True      |  [True, False]                         |
+| with_fontconfig       | True      |  [True, False]                         |
+| with_icu              | True      |  [True, False]                         |
+| with_harfbuzz         | True      |  [True, False]                         |
+| with_libjpeg          | True      |  [True, False]                         |
+| with_libpng           | True      |  [True, False]                         |
+| with_sqlite3          | True      |  [True, False]                         |
+| with_mysql            | True      |  [True, False]                         |
+| with_pq               | True      |  [True, False]                         |
+| with_odbc             | True      |  [True, False]                         |
+| with_sdl2             | True      |  [True, False]                         |
+| with_libalsa          | False     |  [True, False]                         |
+| with_openal           | True      |  [True, False]                         |
+| with_zstd             | True      |  [True, False]                         |
+| GUI                   | True      |  [True, False]                         |
+| widgets               | True      |  [True, False]                         |
+| device                | None      |  Any                                   |
+| cross_compile         | True      |  [True, False]                         |
+| sysroot               | True      |  [True, False]                         |
+| config                | False     |  [True, False]                         |
+| multiconfiguration    | False     |  [True, False]                         |
+| qtsvg                 | False     |  [True, False]                         |
+| qtdeclarative         | False     |  [True, False]                         |
+| qtactiveqt            | False     |  [True, False]                         |
+| qtscript              | False     |  [True, False]                         |
+| qtmultimedia          | False     |  [True, False]                         |
+| qttools               | False     |  [True, False]                         |
+| qtxmlpatterns         | False     |  [True, False]                         |
+| qttranslations        | False     |  [True, False]                         |
+| qtdoc                 | False     |  [True, False]                         |
+| qtrepotools           | False     |  [True, False]                         |
+| qtqa                  | False     |  [True, False]                         |
+| qtlocation            | False     |  [True, False]                         |
+| qtsensors             | False     |  [True, False]                         |
+| qtsystems             | False     |  [True, False]                         |
+| qtfeedback            | False     |  [True, False]                         |
+| qtdocgallery          | False     |  [True, False]                         |
+| qtpim                 | False     |  [True, False]                         |
+| qtconnectivity        | False     |  [True, False]                         |
+| qtwayland             | False     |  [True, False]                         |
+| qt3d                  | False     |  [True, False]                         |
+| qtimageformats        | False     |  [True, False]                         |
+| qtgraphicaleffects    | False     |  [True, False]                         |
+| qtquickcontrols       | False     |  [True, False]                         |
+| qtserialbus           | False     |  [True, False]                         |
+| qtserialport          | False     |  [True, False]                         |
+| qtx11extras           | False     |  [True, False]                         |
+| qtmacextras           | False     |  [True, False]                         |
+| qtwinextras           | False     |  [True, False]                         |
+| qtandroidextras       | False     |  [True, False]                         |
+| qtwebsockets          | False     |  [True, False]                         |
+| qtwebchannel          | False     |  [True, False]                         |
+| qtwebengine           | False     |  [True, False]                         |
+| qtcanvas3d            | False     |  [True, False]                         |
+| qtwebview             | False     |  [True, False]                         |
+| qtquickcontrols2      | False     |  [True, False]                         |
+| qtpurchasing          | False     |  [True, False]                         |
+| qtcharts              | False     |  [True, False]                         |
+| qtdatavis3d           | False     |  [True, False]                         |
+| qtvirtualkeyboard     | False     |  [True, False]                         |
+| qtgamepad             | False     |  [True, False]                         |
+| qtscxml               | False     |  [True, False]                         |
+| qtspeech              | False     |  [True, False]                         |
+| qtnetworkauth         | False     |  [True, False]                         |
+| qtremoteobjects       | False     |  [True, False]                         |
+| qtwebglplugin         | False     |  [True, False]                         |
+| qtlottie              | False     |  [True, False]                         |
+| qtquicktimeline       | False     |  [True, False]                         |
+| qtquick3d             | False     |  [True, False]                         |
 
 ## License Information
 
