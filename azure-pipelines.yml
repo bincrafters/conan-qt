@@ -10,6 +10,6 @@ extends:
   parameters:
     conanLoginUsername: $(CONAN_LOGIN_USERNAME)
     conanPassword: $(CONAN_PASSWORD)
-    appleClangVersions: "10"
+    enableAppleClangBuilds: true
     splitByBuildTypes: "true"
     requireMoreDiskSpace: "true"
