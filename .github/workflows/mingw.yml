@@ -28,4 +28,4 @@ jobs:
             CONAN_OPTIONS: "harfbuzz:with_glib=False"
             CONAN_BUILD_POLICY: "outdated"
         run: |
-            python build.py
+            bincrafters-package-tools --auto
