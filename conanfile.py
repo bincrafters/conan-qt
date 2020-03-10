@@ -74,6 +74,7 @@ class QtConan(ConanFile):
         "with_odbc": [True, False],
         "with_sdl2": [True, False],
         "with_libalsa": [True, False],
+        "with_mesa": [True, False],
         "with_openal": [True, False],
         "with_zstd": [True, False],
 
@@ -109,6 +110,7 @@ class QtConan(ConanFile):
         "with_odbc": True,
         "with_sdl2": True,
         "with_libalsa": False,
+        "with_mesa": True,
         "with_openal": True,
         "with_zstd": True,
 
@@ -339,7 +341,7 @@ class QtConan(ConanFile):
             self.requires("opus/1.3.1")
 
         if self.options.opengl in ["desktop", "es2"]:
-            if self.settings.os == 'Linux':
+            if self.settings.os == 'Linux' and self.options.with_mesa:
                 self.requires('mesa/19.3.1@bincrafters/stable')
 
     def system_requirements(self):
