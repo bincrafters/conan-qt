@@ -541,8 +541,6 @@ class QtConan(ConanFile):
 
         if self.options.device:
             args += ["-device %s" % self.options.device]
-            if self.options.cross_compile:
-                args += ["-device-option CROSS_COMPILE=%s" % self.options.cross_compile]
         else:
             xplatform_val = self._xplatform()
             if xplatform_val:
@@ -554,6 +552,8 @@ class QtConan(ConanFile):
                 self.output.warn("host not supported: %s %s %s %s" %
                                  (self.settings.os, self.settings.compiler,
                                   self.settings.compiler.version, self.settings.arch))
+        if self.options.cross_compile:
+            args += ["-device-option CROSS_COMPILE=%s" % self.options.cross_compile]
 
         def _getenvpath(var):
             val = os.getenv(var)
