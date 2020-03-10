@@ -120,7 +120,7 @@ class QtConan(ConanFile):
         "widgets": True,
 
         "device": None,
-        "cross_compile": "/usr/bin/",
+        "cross_compile": None,
         "sysroot": None,
         "config": None,
         "multiconfiguration": False,
@@ -618,9 +618,7 @@ class QtConan(ConanFile):
         self.copy("bin/qt.conf", src="qtbase")
 
     def package_id(self):
-        # Backwards compatibility for cross_compile to not affect package_id
-        # for people who don't use the `device` option
-        self.info.options.cross_compile = None
+        del self.info.options.cross_compile
         del self.info.options.sysroot
 
 
