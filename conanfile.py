@@ -574,6 +574,11 @@ class QtConan(ConanFile):
                                            "x86": "x86",
                                            "x86_64": "x86_64"}.get(str(self.settings.arch))]
 
+        if self.settings.get_safe("compiler.libcxx") == "libstdc++":
+            args += ["-D_GLIBCXX_USE_CXX11_ABI=0"]
+        elif self.settings.get_safe("compiler.libcxx") == "libstdc++11":
+            args += ["-D_GLIBCXX_USE_CXX11_ABI=1"]
+
         if self.options.sysroot:
             args += ["-sysroot %s" % self.options.sysroot]
 

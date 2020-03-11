@@ -3,6 +3,7 @@ project(test_package)
 
 include(${CMAKE_BINARY_DIR}/../conanbuildinfo.cmake)
 conan_set_vs_runtime()
+conan_set_libcxx()
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
