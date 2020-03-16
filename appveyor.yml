@@ -1,0 +1,16 @@
+# bincrafters-conventions:no-new-compiler-versions
+
+environment:
+  PYTHON_HOME: "C:\\Python37"
+
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      CONAN_VISUAL_VERSIONS: 14
+
+install:
+  - set PATH=%PYTHON_HOME%;%PYTHON_HOME%/Scripts/;%PATH%
+  - pip install bincrafters_package_tools
+  - conan user # It creates the conan data directory
+
+build_script:
+  - bincrafters-package-tools --auto
