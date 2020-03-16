@@ -150,7 +150,7 @@ class QtConan(ConanFile):
             if not tools.which("bison"):
                 self.build_requires("bison_installer/3.3.2@bincrafters/stable")
             if not tools.which("gperf"):
-                self.build_requires("gperf_installer/3.1@conan/stable")
+                self.build_requires("gperf/3.1")
             if not tools.which("flex"):
                 self.build_requires("flex_installer/2.6.4@bincrafters/stable")
 
