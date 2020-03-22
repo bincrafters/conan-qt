@@ -12,14 +12,21 @@ class TestPackageConan(ConanFile):
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
             self.build_requires("jom/1.1.3")
-        if not tools.which("meson"):
+        if self._meson_supported():
             self.build_requires("meson/0.53.2")
+
+    def _is_mingw(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     def _meson_supported(self):
         return self.options["qt"].shared and\
             not tools.cross_building(self.settings) and\
             not tools.os_info.is_macos and\
-            not (self.settings.os == "Windows" and self.settings.compiler == "gcc")
+            not self._is_mingw()
+
+    def _cmake_supported(self):
+        return self.options["qt"].shared or\
+            not self._is_mingw()
 
     def _build_with_qmake(self):
         tools.mkdir("qmake_folder")
@@ -71,14 +78,15 @@ class TestPackageConan(ConanFile):
                 meson.build()
 
     def _build_with_cmake(self):
-        self.output.info("Building with CMake")
-        env_build = RunEnvironment(self)
-        with tools.environment_append(env_build.vars):
-            cmake = CMake(self, set_cmake_flags=True)
-            if self.settings.os == "Macos":
-                cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = '10.14'
-            cmake.configure(build_folder="cmake_folder")
-            cmake.build()
+        if self._cmake_supported():
+            self.output.info("Building with CMake")
+            env_build = RunEnvironment(self)
+            with tools.environment_append(env_build.vars):
+                cmake = CMake(self, set_cmake_flags=True)
+                if self.settings.os == "Macos":
+                    cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = '10.14'
+                cmake.configure(build_folder="cmake_folder")
+                cmake.build()
 
     def build(self):
         self._build_with_qmake()
@@ -100,9 +108,10 @@ class TestPackageConan(ConanFile):
             self.run(os.path.join("meson_folder", "test_package"), run_environment=True)
 
     def _test_with_cmake(self):
-        self.output.info("Testing CMake")
-        shutil.copy("qt.conf", "cmake_folder")
-        self.run(os.path.join("cmake_folder", "test_package"), run_environment=True)
+        if self._cmake_supported():
+            self.output.info("Testing CMake")
+            shutil.copy("qt.conf", os.path.join("cmake_folder", "bin"))
+            self.run(os.path.join("cmake_folder", "bin", "test_package"), run_environment=True)
 
     def test(self):
         if not tools.cross_building(self.settings, skip_x64_x86=True):
