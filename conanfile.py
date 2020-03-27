@@ -436,6 +436,8 @@ class QtConan(ConanFile):
                     "armv7k": "qnx-armle-v7-qcc",
                     "x86": "qnx-x86-qcc",
                     "x86_64": "qnx-x86-64-qcc"}.get(str(self.settings.arch))
+        elif self.settings.os == "Emscripten" and self.settings.arch == "wasm":
+            return "wasm-emscripten"
 
         return None
 
