@@ -9,7 +9,7 @@ if sys.version_info[0] < 3:
 else:
     import configparser
 
-from conans import ConanFile, tools
+from conans import ConanFile, tools, RunEnvironment
 from conans.errors import ConanInvalidConfiguration
 from conans.model import Generator
 from conans.tools import Version
@@ -602,8 +602,14 @@ class QtConan(ConanFile):
                     make = "mingw32-make"
                 else:
                     make = "make"
-                self.run(make, run_environment=True)
-                self.run("%s install" % make)
+                if tools.os_info.is_macos:
+                    with open("bash_env", "w") as f:
+                        f.write('export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
+                with tools.environment_append({
+                    "BASH_ENV": os.path.abspath("bash_env")
+                    }) if tools.os_info.is_macos else tools.no_op():
+                    self.run(make, run_environment=True)
+                    self.run("%s install" % make)
 
         with open('qtbase/bin/qt.conf', 'w') as f:
             f.write('[Paths]\nPrefix = ..')
