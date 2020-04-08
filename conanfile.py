@@ -55,8 +55,7 @@ class QtConan(ConanFile):
     url = "https://github.com/bincrafters/conan-qt"
     homepage = "https://www.qt.io"
     license = "LGPL-3.0"
-    author = "Bincrafters <bincrafters@gmail.com>"
-    exports = ["LICENSE.md", "qtmodules.conf", "*.diff"]
+    exports = ["qtmodules.conf", "*.diff"]
     settings = "os", "arch", "compiler", "build_type"
 
     options = dict({
@@ -152,7 +151,7 @@ class QtConan(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
-            self.build_requires("jom_installer/1.1.2@bincrafters/stable")
+            self.build_requires("jom/1.1.3")
         if self.settings.os == 'Linux':
             if not tools.which('pkg-config'):
                 self.build_requires('pkg-config_installer/0.29.2@bincrafters/stable')
@@ -227,26 +226,26 @@ class QtConan(ConanFile):
 
     def requirements(self):
         if self.options.openssl:
-            self.requires("openssl/1.1.1d")
+            self.requires("openssl/1.1.1f")
         if self.options.with_pcre2:
             self.requires("pcre2/10.33")
 
         if self.options.with_glib:
-            self.requires("glib/2.58.3@bincrafters/stable")
+            self.requires("glib/2.64.0@bincrafters/stable")
         # if self.options.with_libiconv:
-        #     self.requires("libiconv/1.15")
+        #     self.requires("libiconv/1.16")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.1.5")
         if self.options.with_freetype and not self.options.multiconfiguration:
-            self.requires("freetype/2.10.0")
+            self.requires("freetype/2.10.1")
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.91@conan/stable")
         if self.options.with_icu:
             self.requires("icu/64.2")
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
-            self.requires("harfbuzz/2.6.2@bincrafters/stable")
+            self.requires("harfbuzz/2.6.4@bincrafters/stable")
         if self.options.with_libjpeg and not self.options.multiconfiguration:
-            self.requires("libjpeg/9c")
+            self.requires("libjpeg/9d")
         if self.options.with_libpng and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
@@ -262,7 +261,7 @@ class QtConan(ConanFile):
         if self.options.with_sdl2:
             self.requires("sdl2/2.0.9@bincrafters/stable")
         if self.options.with_openal:
-            self.requires("openal/1.19.0@bincrafters/stable")
+            self.requires("openal/1.19.1")
         if self.options.with_libalsa:
             self.requires("libalsa/1.1.9")
         if self.options.GUI:
