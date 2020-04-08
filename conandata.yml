@@ -11,3 +11,6 @@ sources:
   "5.12.7":
     url: "https://download.qt.io/archive/qt/5.12/5.12.7/single/qt-everywhere-src-5.12.7.tar.xz"
     sha256: "873783a0302129d98a8f63de9afe4520fb5f8d5316be8ad7b760c59875cd8a8d"
+  "5.12.8":
+    url: "https://download.qt.io/archive/qt/5.12/5.12.8/single/qt-everywhere-src-5.12.8.tar.xz"
+    sha256: "9142300dfbd641ebdea853546511a352e4bd547c4c7f25d61a40cd997af1f0cf"
