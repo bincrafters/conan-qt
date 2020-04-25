@@ -166,7 +166,7 @@ class QtConan(ConanFile):
                     installer.install(item + self._system_package_architecture())
 
     def source(self):
-        url = "https://download.qt.io/archive/qt/{0}/{1}/single/qt-everywhere-src-{1}" \
+        url = "https://download.qt.io/new_archive/qt/{0}/{1}/single/qt-everywhere-src-{1}" \
             .format(self.version[:self.version.rfind('.')], self.version)
         if tools.os_info.is_windows:
             tools.get("%s.zip" % url, md5='9a57b251658d985c26acb6de18b69328')
