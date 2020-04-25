@@ -57,6 +57,7 @@ class QtConan(ConanFile):
         "commercial": [True, False],
 
         "opengl": ["no", "es2", "desktop", "dynamic"],
+        "with_vulkan": [True, False],
         "openssl": [True, False],
         "with_pcre2": [True, False],
         "with_glib": [True, False],
@@ -92,6 +93,7 @@ class QtConan(ConanFile):
         "shared": True,
         "commercial": False,
         "opengl": "desktop",
+        "with_vulkan": False,
         "openssl": True,
         "with_pcre2": True,
         "with_glib": True,
@@ -217,6 +219,7 @@ class QtConan(ConanFile):
                                             "You can either disable qt:widgets or enable qt:GUI")
         if not self.options.GUI:
             self.options.opengl = "no"
+            self.options.with_vulkan = False
             self.options.with_freetype = False
             self.options.with_fontconfig = False
             self.options.with_harfbuzz = False
@@ -348,6 +351,8 @@ class QtConan(ConanFile):
                 if self.options.qtwebengine:
                     pack_names.append("libnss3-dev")
                     pack_names.append("libdbus-1-dev")
+                if self.options.with_vulkan:
+                    pack_names.append("libvulkan-dev")
 
         if pack_names:
             installer = tools.SystemPackageTool()
@@ -486,6 +491,11 @@ class QtConan(ConanFile):
             args += ["-opengl desktop"]
         elif self.options.opengl == "dynamic":
             args += ["-opengl dynamic"]
+        
+        if self.options.with_vulkan:
+            args.append("-vulkan")
+        else:
+            args.append("-no-vulkan")
 
         # openSSL
         if not self.options.openssl:
