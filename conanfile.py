@@ -441,6 +441,7 @@ class QtConan(ConanFile):
     def build(self):
         args = ["-confirm-license", "-silent", "-nomake examples", "-nomake tests",
                 "-prefix %s" % self.package_folder]
+        args.append("-v")
         if self.options.commercial:
             args.append("-commercial")
         else:
@@ -652,10 +653,7 @@ class QtConan(ConanFile):
                     build_env['CPLUS_INCLUDE_PATH'] = os.pathsep.join(i_path)
                     build_env['LIBRARY_PATH'] = os.pathsep.join(l_path)
             with tools.environment_append(build_env):
-                try:
-                    self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)), run_environment=True)
-                finally:
-                    self.output.info(open('config.log', errors='backslashreplace').read())
+                self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)), run_environment=True)
 
                 if self.settings.compiler == "Visual Studio":
                     make = "jom"
