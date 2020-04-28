@@ -148,7 +148,7 @@ class QtConan(ConanFile):
         if self.options.qtwebengine:
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if not tools.which("bison"):
-                self.build_requires("bison_installer/3.3.2@bincrafters/stable")
+                self.build_requires("bison/3.5.3")
             if not tools.which("gperf"):
                 self.build_requires("gperf/3.1")
             if not tools.which("flex"):
