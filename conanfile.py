@@ -124,11 +124,22 @@ class QtConan(ConanFile):
         "sysroot": None,
         "config": None,
         "multiconfiguration": False,
+        "libxcb:shared": True,
     }, **{module: False for module in _submodules if module != 'qtbase'}
     )
     requires = "zlib/1.2.11"
     short_paths = True
 
+    _xcb_packages = {
+        "libxcb": "1.13.1",
+        "libx11": "1.6.8",
+        "xcb-util": "0.4.0",
+        "xcb-util-wm": "0.4.0",
+        "xcb-util-image": "0.4.0",
+        "xcb-util-keysyms": "0.4.0",
+        "xcb-util-renderutil": "0.3.9",
+        "libxcursor": "1.2.0"
+    }
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
@@ -246,24 +257,23 @@ class QtConan(ConanFile):
         if self.options.with_libalsa:
             self.requires("libalsa/1.1.9")
         if self.options.GUI:
-            if self.settings.os == "Linux" and not tools.cross_building(self.settings, skip_x64_x86=True):
-                self.requires("xkbcommon/0.8.4@bincrafters/stable")
+            if self.settings.os == "Linux":
+                for p in self._xcb_packages:
+                    self.requires("%s/%s@bincrafters/stable" % (p, self._xcb_packages[p]))
+                if not tools.cross_building(self.settings, skip_x64_x86=True):
+                    self.requires("xkbcommon/0.10.0@bincrafters/stable")
 
     def system_requirements(self):
         if self.options.GUI:
             pack_names = []
             if tools.os_info.is_linux:
                 if tools.os_info.with_apt:
-                    pack_names = ["libxcb1-dev", "libx11-dev", "libc6-dev"]
                     if self.options.opengl == "desktop":
                         pack_names.append("libgl1-mesa-dev")
                     elif self.options.opengl == "es2":
                         pack_names.append("libgles2-mesa-dev")
                 else:
-                    if not tools.os_info.linux_distro.startswith(("opensuse", "sles")):
-                        pack_names = ["libxcb"]
                     if not tools.os_info.with_pacman:
-                        pack_names += ["libxcb-devel", "libX11-devel", "glibc-devel"]
                         if self.options.opengl == "desktop":
                             if tools.os_info.linux_distro.startswith(("opensuse", "sles")):
                                 pack_names.append("Mesa-libGL-devel")
@@ -362,6 +372,7 @@ class QtConan(ConanFile):
     def build(self):
         args = ["-confirm-license", "-silent", "-nomake examples", "-nomake tests",
                 "-prefix %s" % self.package_folder]
+        args.append("-v")
         if self.options.commercial:
             args.append("-commercial")
         else:
@@ -462,40 +473,19 @@ class QtConan(ConanFile):
                   ("odbc", "ODBC"),
                   ("sdl2", "SDL2"),
                   ("openal", "OPENAL"),
-                  ("libalsa", "ALSA")]
-        libPaths = []
+                  ("libalsa", "ALSA"),
+                  ("xkbcommon", "XKBCOMMON")]
         for package, var in libmap:
             if package in self.deps_cpp_info.deps:
                 if package == 'freetype':
                     args.append("\"%s_INCDIR=%s\"" % (var, self.deps_cpp_info[package].include_paths[-1]))
-                else:
-                    args += ["-I " + s for s in self.deps_cpp_info[package].include_paths]
-                args += ["-D " + s for s in self.deps_cpp_info[package].defines]
 
-                def _remove_duplicate(l):
-                    seen = set()
-                    seen_add = seen.add
-                    for element in itertools.filterfalse(seen.__contains__, l):
-                        seen_add(element)
-                        yield element
+                args.append("\"%s_LIBS=%s\"" % (var, " ".join(self._gather_libs(package))))
 
-                def _gather_libs(p):
-                    libs = ["-l" + i for i in self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs]
-                    if self.settings.os in ["Macos", "iOS", "watchOS", "tvOS"]:
-                        libs += ["-framework " + i for i in self.deps_cpp_info[p].frameworks]
-                    libs += self.deps_cpp_info[p].sharedlinkflags
-                    for dep in self.deps_cpp_info[p].public_deps:
-                        libs += _gather_libs(dep)
-                    return _remove_duplicate(libs)
-                args.append("\"%s_LIBS=%s\"" % (var, " ".join(_gather_libs(package))))
-
-                def _gather_lib_paths(p):
-                    lib_paths = self.deps_cpp_info[p].lib_paths
-                    for dep in self.deps_cpp_info[p].public_deps:
-                        lib_paths += _gather_lib_paths(dep)
-                    return _remove_duplicate(lib_paths)
-                libPaths += _gather_lib_paths(package)
-        args += ["-L " + s for s in _remove_duplicate(libPaths)]
+        for package in self.deps_cpp_info.deps:
+            args += ["-I " + s for s in self.deps_cpp_info[package].include_paths]
+            args += ["-D " + s for s in self.deps_cpp_info[package].defines]
+            args += ["-L " + s for s in self.deps_cpp_info[package].lib_paths]
 
         if 'libmysqlclient' in self.deps_cpp_info.deps:
             args.append("-mysql_config " + os.path.join(self.deps_cpp_info['libmysqlclient'].rootpath, "bin", "mysql_config"))
@@ -503,7 +493,7 @@ class QtConan(ConanFile):
             args.append("-psql_config " + os.path.join(self.deps_cpp_info['libpq'].rootpath, "bin", "pg_config"))
         if self.settings.os == "Linux":
             if self.options.GUI:
-                args.append("-qt-xcb")
+                args.append("-system-xcb")
         elif self.settings.os == "Macos":
             args += ["-no-framework"]
         elif self.settings.os == "Android":
@@ -561,21 +551,22 @@ class QtConan(ConanFile):
         if self.options.config:
             args.append(str(self.options.config))
 
-        for package in ['xkbcommon', 'glib']:
-            if package in self.deps_cpp_info.deps:
-                lib_path = self.deps_cpp_info[package].rootpath
-                for dirpath, _, filenames in os.walk(lib_path):
-                    for filename in filenames:
-                        if filename.endswith('.pc'):
-                            shutil.copyfile(os.path.join(dirpath, filename), filename)
-                            tools.replace_prefix_in_pc_file(filename, lib_path)
+        for package in ['libxcomposite', 'libxcursor', 'libxi', 'libxtst', 'glib'] + [p for p in self._xcb_packages]:
+            def _gather_pc_files(package):
+                if package in self.deps_cpp_info.deps:
+                    lib_path = self.deps_cpp_info[package].rootpath
+                    for dirpath, _, filenames in os.walk(lib_path):
+                        for filename in filenames:
+                            if filename.endswith('.pc'):
+                                shutil.copyfile(os.path.join(dirpath, filename), filename)
+                                tools.replace_prefix_in_pc_file(filename, lib_path)
+                    for dep in self.deps_cpp_info[package].public_deps:
+                        _gather_pc_files(dep)
+            _gather_pc_files(package)
 
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             with tools.environment_append({"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": os.getcwd()}):
-                try:
-                    self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)))
-                finally:
-                    self.output.info(open('config.log', errors='backslashreplace').read())
+                self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)), run_environment=True)
 
                 if self.settings.compiler == "Visual Studio":
                     make = "jom"
@@ -605,3 +596,32 @@ class QtConan(ConanFile):
 
     def package_info(self):
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
+
+    @staticmethod
+    def _remove_duplicate(l):
+        seen = set()
+        seen_add = seen.add
+        for element in itertools.filterfalse(seen.__contains__, l):
+            seen_add(element)
+            yield element
+
+    def _gather_libs(self, p):
+        libs = ["-l" + i for i in self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs]
+        if tools.is_apple_os(self.settings.os):
+            libs += ["-framework " + i for i in self.deps_cpp_info[p].frameworks]
+        libs += self.deps_cpp_info[p].sharedlinkflags
+        for dep in self.deps_cpp_info[p].public_deps:
+            libs += self._gather_libs(dep)
+        return self._remove_duplicate(libs)
+
+    def _gather_lib_paths(self, p):
+        lib_paths = self.deps_cpp_info[p].lib_paths
+        for dep in self.deps_cpp_info[p].public_deps:
+            lib_paths += self._gather_lib_paths(dep)
+        return self._remove_duplicate(lib_paths)
+
+    def _gather_include_paths(self, p):
+        include_paths = self.deps_cpp_info[p].include_paths
+        for dep in self.deps_cpp_info[p].public_deps:
+            include_paths += self._gather_include_paths(dep)
+        return self._remove_duplicate(include_paths)
