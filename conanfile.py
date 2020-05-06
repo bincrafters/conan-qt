@@ -650,7 +650,7 @@ class QtConan(ConanFile):
                         _gather_pc_files(dep)
             _gather_pc_files(package)
 
-        with tools.vcvars(self.settings):
+        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [os.getcwd()]}
             if self.options.qtwebengine:
                 if self.settings.compiler in ['gcc', 'clang']:
