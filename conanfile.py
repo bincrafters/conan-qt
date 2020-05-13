@@ -594,22 +594,6 @@ class QtConan(ConanFile):
         if self.options.sysroot:
             args += ["-sysroot %s" % self.options.sysroot]
 
-        if self.options.device:
-            args += ["-device %s" % self.options.device]
-        else:
-            xplatform_val = self._xplatform()
-            if xplatform_val:
-                if not tools.cross_building(self.settings, skip_x64_x86=True):
-                    args += ["-platform %s" % xplatform_val]
-                else:
-                    args += ["-xplatform %s" % xplatform_val]
-            else:
-                self.output.warn("host not supported: %s %s %s %s" %
-                                 (self.settings.os, self.settings.compiler,
-                                  self.settings.compiler.version, self.settings.arch))
-        if self.options.cross_compile:
-            args += ["-device-option CROSS_COMPILE=%s" % self.options.cross_compile]
-
         def _getenvpath(var):
             val = os.getenv(var)
             if val and tools.os_info.is_windows:
@@ -617,20 +601,32 @@ class QtConan(ConanFile):
                 os.environ[var] = val
             return val
 
+        qmake_args = []
+
         value = _getenvpath('CC')
         if value:
-            args += ['QMAKE_CC="' + value + '"',
-                     'QMAKE_LINK_C="' + value + '"',
-                     'QMAKE_LINK_C_SHLIB="' + value + '"']
+            qmake_args += ['QMAKE_CC=' + value,
+                           'QMAKE_LINK_C=' + value,
+                           'QMAKE_LINK_C_SHLIB=' + value]
 
         value = _getenvpath('CXX')
         if value:
-            args += ['QMAKE_CXX="' + value + '"',
-                     'QMAKE_LINK="' + value + '"',
-                     'QMAKE_LINK_SHLIB="' + value + '"']
+            qmake_args += ['QMAKE_CXX=' + value,
+                           'QMAKE_LINK=' + value,
+                           'QMAKE_LINK_SHLIB=' + value]
+
+        def _forward_env_flags(env_var, qmake_var):
+            nonlocal qmake_args
+            value = os.getenv(env_var)
+            if value:
+                qmake_args += [qmake_var + '+="' + value + '"']
+
+        _forward_env_flags('CFLAGS',   'QMAKE_CFLAGS')
+        _forward_env_flags('CXXFLAGS', 'QMAKE_CXXFLAGS')
+        _forward_env_flags('LDFLAGS',  'QMAKE_LFLAGS')
 
         if tools.os_info.is_linux and self.settings.compiler == "clang":
-            args += ['QMAKE_CXXFLAGS+="-ftemplate-depth=1024"']
+            qmake_args += ['QMAKE_CXXFLAGS+="-ftemplate-depth=1024"']
 
         if self.options.qtwebengine and self.settings.os == "Linux":
             args += ['-qt-webengine-ffmpeg',
@@ -638,6 +634,58 @@ class QtConan(ConanFile):
 
         if self.options.config:
             args.append(str(self.options.config))
+
+        def setup_mkspec(spec, sub_path = ""):
+            # Potentially this needs to include other platforms than macOS. We
+            # ran into issues with setting custom compilers and flags only on
+            # macOS.
+            #
+            # This is to work around a known issue on macOS that was not fixed
+            # in the past and potentially never will be:
+            #
+            # https://bugreports.qt.io/browse/QTBUG-66404?focusedCommentId=451147#comment-451147
+            if not qmake_args or self.settings.os != "Macos":
+                return spec
+
+            source_mkspec_path = target_mkspec_path = \
+                os.path.join(self.source_folder, "qt5", "qtbase", "mkspecs", sub_path)
+            custom_mkspec = "conan-" + self.info.package_id()
+
+            source_mkspec_path = os.path.join(source_mkspec_path, spec)
+            target_mkspec_path = os.path.join(target_mkspec_path, custom_mkspec)
+
+            if os.path.isdir(target_mkspec_path):
+                shutil.rmtree(target_mkspec_path)
+            shutil.copytree(source_mkspec_path, target_mkspec_path)
+
+            with open(os.path.join(target_mkspec_path, "qmake.conf"), 'a') as f:
+                f.write('\n')
+                f.write('#\n')
+                f.write('# Auto-generated QMAKE variables from Conan:\n')
+                f.write('#\n')
+                f.write('\n')
+                f.write("\n".join(qmake_args))
+
+            return custom_mkspec
+
+        if self.options.device:
+            args += ["-device %s" % setup_mkspec(self.options.device, "devices")]
+        else:
+            xplatform_val = self._xplatform()
+            if xplatform_val:
+                if not tools.cross_building(self.settings, skip_x64_x86=True):
+                    args += ["-platform %s" % setup_mkspec(xplatform_val)]
+                else:
+                    args += ["-xplatform %s" % setup_mkspec(xplatform_val)]
+            else:
+                self.output.warn("host not supported: %s %s %s %s" %
+                                 (self.settings.os, self.settings.compiler,
+                                  self.settings.compiler.version, self.settings.arch))
+
+        if self.options.cross_compile:
+            args += ["-device-option CROSS_COMPILE=%s" % self.options.cross_compile]
+
+        args += qmake_args
 
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [os.getcwd()]}
