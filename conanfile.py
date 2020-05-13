@@ -147,12 +147,13 @@ class QtConan(ConanFile):
                 self.build_requires('pkg-config_installer/0.29.2@bincrafters/stable')
         if self.options.qtwebengine:
             # gperf, bison, flex, python >= 2.7.5 & < 3
-            if not tools.which("bison"):
-                self.build_requires("bison/3.5.3")
-            if not tools.which("gperf"):
-                self.build_requires("gperf/3.1")
-            if not tools.which("flex"):
-                self.build_requires("flex_installer/2.6.4@bincrafters/stable")
+            if self.settings.os != "Windows":
+                if not tools.which("bison"):
+                    self.build_requires("bison/3.5.3")
+                if not tools.which("gperf"):
+                    self.build_requires("gperf/3.1")
+                if not tools.which("flex"):
+                    self.build_requires("flex_installer/2.6.4@bincrafters/stable")
 
             def _check_python_version():
                 # Check if a valid python2 is available in PATH or it will failflex
@@ -663,6 +664,8 @@ class QtConan(ConanFile):
                     build_env['C_INCLUDE_PATH'] = os.pathsep.join(i_path)
                     build_env['CPLUS_INCLUDE_PATH'] = os.pathsep.join(i_path)
                     build_env['LIBRARY_PATH'] = os.pathsep.join(l_path)
+            if self.settings.os == "Windows":
+                build_env["PATH"] = [os.path.join(self.source_folder, "qt5", "gnuwin32", "bin")]
             with tools.environment_append(build_env):
                 self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)), run_environment=True)
 
