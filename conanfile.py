@@ -366,6 +366,11 @@ class QtConan(ConanFile):
 
         for p in self.conan_data["patches"][self.version]:
             tools.patch(**p)
+        for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
+            tools.replace_in_file(os.path.join(self.source_folder, "qt5", "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
+            "  if (enable_precompiled_headers) {\n    if (is_win) {",
+            "  if (enable_precompiled_headers) {\n    if (false) {"
+            )
 
     def _xplatform(self):
         if self.settings.os == "Linux":
