@@ -59,3 +59,5 @@ patches:
   "5.14.2":
     - patch_file: "patches/aa2a39dea5.diff"
       base_path: "qt5/qtbase"
+    - patch_file: "patches/5d2026c.diff"
+      base_path: "qt5/qtwebengine"
