@@ -61,3 +61,5 @@ patches:
       base_path: "qt5/qtbase"
     - patch_file: "patches/5d2026c.diff"
       base_path: "qt5/qtwebengine"
+    - patch_file: "patches/c72097e.diff"
+      base_path: "qt5/qtwebengine"
