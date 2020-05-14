@@ -146,6 +146,7 @@ class QtConan(ConanFile):
             if not tools.which('pkg-config'):
                 self.build_requires('pkg-config_installer/0.29.2@bincrafters/stable')
         if self.options.qtwebengine:
+            self.build_requires("ninja/1.9.0")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self.settings.os != "Windows":
                 if not tools.which("bison"):
