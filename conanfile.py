@@ -32,9 +32,11 @@ def _getsubmodules():
         status = str(config.get(section, "status"))
         if status != "obsolete" and status != "ignore":
             res[modulename] = {"branch": str(config.get(section, "branch")), "status": status,
-                               "path": str(config.get(section, "path")), "depends": []}
+                               "path": str(config.get(section, "path")), "depends": [], "recommends": []}
             if config.has_option(section, "depends"):
                 res[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
+            if config.has_option(section, "recommends"):
+                res[modulename]["recommends"] = [str(i) for i in config.get(section, "recommends").split()]
     return res
 
 
@@ -86,6 +88,7 @@ class QtConan(ConanFile):
         "sysroot": "ANY",
         "config": "ANY",
         "multiconfiguration": [True, False],
+        "add_recommends": [True, False],
     }, **{module: [True, False] for module in _submodules if module != 'qtbase'}
     )
     no_copy_source = True
@@ -123,6 +126,7 @@ class QtConan(ConanFile):
         "config": None,
         "multiconfiguration": False,
         "libxcb:shared": True,
+        "add_recommends": False,
     }, **{module: False for module in _submodules if module != 'qtbase'}
     )
     requires = "zlib/1.2.11"
@@ -278,6 +282,9 @@ class QtConan(ConanFile):
                 setattr(self.options, mod, True)
             for req in self._submodules[mod]["depends"]:
                 _enablemodule(req)
+            if self.options.add_recommends:
+                for req in self._submodules[mod]["recommends"]:
+                    _enablemodule(req)
 
         for module in self._submodules:
             if module != 'qtbase' and getattr(self.options, module):
