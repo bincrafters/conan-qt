@@ -154,7 +154,7 @@ class QtConan(ConanFile):
                 if not tools.which("gperf"):
                     self.build_requires("gperf/3.1")
                 if not tools.which("flex"):
-                    self.build_requires("flex_installer/2.6.4@bincrafters/stable")
+                    self.build_requires("flex/2.6.4")
 
             def _check_python_version():
                 # Check if a valid python2 is available in PATH or it will failflex
