@@ -579,10 +579,7 @@ class QtConan(ConanFile):
             args.append("-mysql_config " + os.path.join(self.deps_cpp_info['libmysqlclient'].rootpath, "bin", "mysql_config"))
         if 'libpq' in self.deps_cpp_info.deps:
             args.append("-psql_config " + os.path.join(self.deps_cpp_info['libpq'].rootpath, "bin", "pg_config"))
-        if self.settings.os == "Linux":
-            if self.options.GUI:
-                args.append("-system-xcb")
-        elif self.settings.os == "Macos":
+        if self.settings.os == "Macos":
             args += ["-no-framework"]
         elif self.settings.os == "Android":
             args += ["-android-ndk-platform android-%s" % self.settings.os.api_level]
