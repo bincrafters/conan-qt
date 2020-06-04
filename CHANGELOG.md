@@ -3,6 +3,7 @@
 This changelog describes interface changes (options and requirements) in the conan package. For qt's changelogs, please go to https://wiki.qt.io/Template:Release_Information
 
 ## Unreleased
+- migrate to `fontconfig/2.13.91` - 2020-06-04
 ## [5.15.0](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/5.15.0%3Astable)
 - migrate to build requirement `flex/2.6.4` - [2020-05-21](https://github.com/bincrafters/conan-qt/commit/750851425c3f4217365f5a9aaa9d856e6533fdfd#diff-2b1d42f71f22b7ea0412d7602dec166f)
 ## [5.14.2](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/5.14.2%3Astable)

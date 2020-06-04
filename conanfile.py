@@ -298,7 +298,7 @@ class QtConan(ConanFile):
         if self.options.with_freetype and not self.options.multiconfiguration:
             self.requires("freetype/2.10.1")
         if self.options.with_fontconfig:
-            self.requires("fontconfig/2.13.91@conan/stable")
+            self.requires("fontconfig/2.13.91")
         if self.options.with_icu:
             self.requires("icu/64.2")
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
