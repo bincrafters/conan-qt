@@ -123,6 +123,7 @@ class QtConan(ConanFile):
         "config": None,
         "multiconfiguration": False,
         "libxcb:shared": True,
+        "libx11:shared": True,
     }, **{module: False for module in _submodules if module != 'qtbase'}
     )
     requires = "zlib/1.2.11"
