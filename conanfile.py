@@ -690,9 +690,8 @@ class QtConan(ConanFile):
 
     def package(self):
         self.run("%s install" % self._make_program())
-        with open('qtbase/bin/qt.conf', 'w') as f:
-            f.write('[Paths]\nPrefix = ..')
-        self.copy("bin/qt.conf", src="qtbase")
+        with open(os.path.join(self.package_folder, 'bin/qt.conf', 'w')) as f:
+            f.write('[Paths]\nPrefix = ..\n')
         self.copy("*LICENSE*", src="qt5/", dst="licenses")
 
     def package_id(self):
