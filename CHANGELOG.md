@@ -4,6 +4,7 @@ This changelog describes interface changes (options and requirements) in the con
 
 ## Unreleased
 ## [5.15.0](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/5.15.0%3Astable)
+- upgrade to `harfbuzz/2.6.7@bincrafters/stable` [2020-06-09](https://github.com/bincrafters/conan-qt/commit/1a3d13e2e92c81c774a194dc6457e62b4f31bb79)
 - linux: make `xlib` requirement shared by default - [2020-06-08](https://github.com/bincrafters/conan-qt/commit/cb1d1e914c0191803e21da9c81ef71de0d7e52c7)
 - linux: migrate to `fontconfig/2.13.91` - [2020-06-04](https://github.com/bincrafters/conan-qt/commit/2fe7f984af734fb175a9ecffa14e81ae49a22dbd)
 - linux/macos: migrate to build requirement `flex/2.6.4` - [2020-05-21](https://github.com/bincrafters/conan-qt/commit/750851425c3f4217365f5a9aaa9d856e6533fdfd#diff-2b1d42f71f22b7ea0412d7602dec166f)
