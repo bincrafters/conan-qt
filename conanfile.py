@@ -688,11 +688,10 @@ class QtConan(ConanFile):
                     }) if tools.os_info.is_macos else tools.no_op():
                     self.run(self._make_program(), run_environment=True)
 
-        with open('qtbase/bin/qt.conf', 'w') as f:
-            f.write('[Paths]\nPrefix = ..')
-
     def package(self):
         self.run("%s install" % self._make_program())
+        with open('qtbase/bin/qt.conf', 'w') as f:
+            f.write('[Paths]\nPrefix = ..')
         self.copy("bin/qt.conf", src="qtbase")
         self.copy("*LICENSE*", src="qt5/", dst="licenses")
 
