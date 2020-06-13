@@ -147,7 +147,7 @@ class QtConan(ConanFile):
             if not tools.which('pkg-config'):
                 self.build_requires('pkg-config_installer/0.29.2@bincrafters/stable')
         if self.options.qtwebengine:
-            self.build_requires("ninja/1.9.0")
+            self.build_requires("ninja/1.10.0")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self.settings.os != "Windows":
                 if not tools.which("bison"):
@@ -345,7 +345,7 @@ class QtConan(ConanFile):
             self.requires("opus/1.3.1")
 
         if self.options.opengl in ["desktop", "es2"]:
-            self.requires('opengl/virtual@bincrafters/stable')
+            self.requires('opengl/system')
 
     def system_requirements(self):
         pack_names = []
