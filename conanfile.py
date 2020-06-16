@@ -697,6 +697,11 @@ class QtConan(ConanFile):
     def package_id(self):
         del self.info.options.cross_compile
         del self.info.options.sysroot
+        if self.options.multiconfiguration and self.settings.compiler == "Visual Studio":
+            if "MD" in self.settings.compiler.runtime:
+                self.info.settings.compiler.runtime = "MD/MDd"
+            else:
+                self.info.settings.compiler.runtime = "MT/MTd"
 
     def package_info(self):
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
