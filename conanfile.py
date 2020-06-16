@@ -693,6 +693,9 @@ class QtConan(ConanFile):
         with open(os.path.join(self.package_folder, "bin", "qt.conf"), 'w') as f:
             f.write('[Paths]\nPrefix = ..\n')
         self.copy("*LICENSE*", src="qt5/", dst="licenses")
+        for module in self._submodules:
+            if module != 'qtbase' and not getattr(self.options, module):
+                tools.rmdir(os.path.join(self.package_folder, "licenses", module))
 
     def package_id(self):
         del self.info.options.cross_compile
