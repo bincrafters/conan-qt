@@ -4,6 +4,8 @@ This changelog describes interface changes (options and requirements) in the con
 
 ## Unreleased
 ## [5.15.0](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/5.15.0%3Astable)
+- qtwebengine: upgrade to build requirement `ninja/1.10.0` [2020-06-13](https://github.com/bincrafters/conan-qt/commit/52490d71b8a2d6df62d01cecd7d3358536961ca7)
+- migrate to `opengl/system` [2020-06-13](https://github.com/bincrafters/conan-qt/commit/52490d71b8a2d6df62d01cecd7d3358536961ca7)
 - upgrade to `harfbuzz/2.6.7@bincrafters/stable` [2020-06-09](https://github.com/bincrafters/conan-qt/commit/1a3d13e2e92c81c774a194dc6457e62b4f31bb79)
 - linux: make `xlib` requirement shared by default - [2020-06-08](https://github.com/bincrafters/conan-qt/commit/cb1d1e914c0191803e21da9c81ef71de0d7e52c7)
 - linux: migrate to `fontconfig/2.13.91` - [2020-06-04](https://github.com/bincrafters/conan-qt/commit/2fe7f984af734fb175a9ecffa14e81ae49a22dbd)
