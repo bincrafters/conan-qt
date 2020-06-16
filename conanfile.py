@@ -205,6 +205,9 @@ class QtConan(ConanFile):
             self.options.with_icu = False
 
     def configure(self):
+        if self.settings.compiler in ["gcc", "clang"]:
+            if tools.Version(self.settings.compiler.version) < "5.0":
+                raise ConanInvalidConfiguration("qt 5.15.0 is not support on GCC or clang before 5.0")
         if conan_version < Version("1.20.0"):
             raise ConanInvalidConfiguration("This recipe needs at least conan 1.20.0, please upgrade.")
         if self.settings.os != 'Linux':
