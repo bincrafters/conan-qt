@@ -1,0 +1,16 @@
+diff --git a/qmake/generators/makefile.cpp b/qmake/generators/makefile.cpp
+index 5c61a3c65c..931e769178 100644
+--- a/qmake/generators/makefile.cpp
++++ b/qmake/generators/makefile.cpp
+@@ -997,11 +997,6 @@ MakefileGenerator::writePrlFile(QTextStream &t)
+         t << Qt::endl;
+ 
+         t << "QMAKE_PRL_LIBS_FOR_CMAKE = ";
+-        QString sep;
+-        for (ProStringList::Iterator it = libs.begin(); it != libs.end(); ++it) {
+-            t << sep << project->values((*it).toKey()).join(';').replace('\\', "\\\\");
+-            sep = ';';
+-        }
+         t << Qt::endl;
+     }
+ }

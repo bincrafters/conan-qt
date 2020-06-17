@@ -75,3 +75,5 @@ patches:
       base_path: "qt5/qtbase"
     - patch_file: "patches/c994a33.diff"
       base_path: "qt5/qtbase"
+    - patch_file: "patches/remove_deps.diff"
+      base_path: "qt5/qtbase"
