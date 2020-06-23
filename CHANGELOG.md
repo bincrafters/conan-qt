@@ -3,6 +3,7 @@
 This changelog describes interface changes (options and requirements) in the conan package. For qt's changelogs, please go to https://wiki.qt.io/Template:Release_Information
 
 ## Unreleased
+- linux: migrate x11 requirements to `xorg/system` |2020-06-23](https://github.com/bincrafters/conan-qt/commit/)
 ## [5.15.0](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/5.15.0%3Astable)
 - qtwebengine: upgrade to build requirement `ninja/1.10.0` [2020-06-13](https://github.com/bincrafters/conan-qt/commit/52490d71b8a2d6df62d01cecd7d3358536961ca7)
 - migrate to `opengl/system` [2020-06-13](https://github.com/bincrafters/conan-qt/commit/52490d71b8a2d6df62d01cecd7d3358536961ca7)

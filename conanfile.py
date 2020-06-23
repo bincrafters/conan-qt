@@ -122,23 +122,10 @@ class QtConan(ConanFile):
         "sysroot": None,
         "config": None,
         "multiconfiguration": False,
-        "libxcb:shared": True,
-        "libx11:shared": True,
     }, **{module: False for module in _submodules if module != 'qtbase'}
     )
     requires = "zlib/1.2.11"
     short_paths = True
-
-    _xcb_packages = {
-        "libxcb": "1.13.1",
-        "libx11": "1.6.8",
-        "xcb-util": "0.4.0",
-        "xcb-util-wm": "0.4.0",
-        "xcb-util-image": "0.4.0",
-        "xcb-util-keysyms": "0.4.0",
-        "xcb-util-renderutil": "0.3.9",
-        "libxcursor": "1.2.0"
-    }
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
@@ -328,21 +315,11 @@ class QtConan(ConanFile):
         if self.options.with_libalsa:
             self.requires("libalsa/1.1.9")
         if self.options.GUI and self.settings.os == "Linux":
-            for p in self._xcb_packages:
-                self.requires("%s/%s@bincrafters/stable" % (p, self._xcb_packages[p]))
-            if not tools.cross_building(self.settings, skip_x64_x86=True):
-                self.requires("xkbcommon/0.10.0@bincrafters/stable")
+            self.requires("xorg/system")
         if self.options.with_zstd:
             self.requires("zstd/1.4.4")
         if self.options.qtwebengine and self.settings.os == "Linux":
-            self.requires("libx11/1.6.8@bincrafters/stable")
-            self.requires("libdrm/2.4.100@bincrafters/stable")
-            self.requires("libxcomposite/0.4.5@bincrafters/stable")
-            self.requires("libxcursor/1.2.0@bincrafters/stable")
-            self.requires("libxi/1.7.10@bincrafters/stable")
-            self.requires("libxtst/1.2.3@bincrafters/stable")
-            self.requires("libxrandr/1.5.2@bincrafters/stable")
-            self.requires("libxscrnsaver/1.2.3@bincrafters/stable")
+            self.requires("xorg/system")
             self.requires("expat/2.2.9")
             #self.requires("ffmpeg/4.2@bincrafters/stable")
             self.requires("opus/1.3.1")
@@ -573,8 +550,7 @@ class QtConan(ConanFile):
                   ("sdl2", "SDL2"),
                   ("openal", "OPENAL"),
                   ("zstd", "ZSTD"),
-                  ("libalsa", "ALSA"),
-                  ("xkbcommon", "XKBCOMMON")]
+                  ("libalsa", "ALSA")]
         for package, var in libmap:
             if package in self.deps_cpp_info.deps:
                 if package == 'freetype':
@@ -653,32 +629,8 @@ class QtConan(ConanFile):
         if self.options.config:
             args.append(str(self.options.config))
 
-        for package in ['libxcomposite', 'libxcursor', 'libxi', 'libxtst', 'mesa'] + [p for p in self._xcb_packages]:
-            def _gather_pc_files(package):
-                if package in self.deps_cpp_info.deps:
-                    lib_path = self.deps_cpp_info[package].rootpath
-                    for dirpath, _, filenames in os.walk(lib_path):
-                        for filename in filenames:
-                            if filename.endswith('.pc'):
-                                shutil.copyfile(os.path.join(dirpath, filename), filename)
-                                tools.replace_prefix_in_pc_file(filename, lib_path)
-                    for dep in self.deps_cpp_info[package].public_deps:
-                        _gather_pc_files(dep)
-            _gather_pc_files(package)
-
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [os.getcwd()]}
-            if self.options.qtwebengine:
-                if self.settings.compiler in ['gcc', 'clang']:
-                    i_path = []
-                    l_path = []
-                    for p in ['fontconfig', 'libxcursor', 'libxi', 'libxtst', 'libxrandr', 'libxscrnsaver', 'libxcomposite', 'zlib', 'libxdamage']:
-                        if p in self.deps_cpp_info.deps:
-                            i_path.extend(self._gather_include_paths(p))
-                            l_path.extend(self._gather_lib_paths(p))
-                    build_env['C_INCLUDE_PATH'] = os.pathsep.join(i_path)
-                    build_env['CPLUS_INCLUDE_PATH'] = os.pathsep.join(i_path)
-                    build_env['LIBRARY_PATH'] = os.pathsep.join(l_path)
             if self.settings.os == "Windows":
                 build_env["PATH"] = [os.path.join(self.source_folder, "qt5", "gnuwin32", "bin")]
             with tools.environment_append(build_env):
