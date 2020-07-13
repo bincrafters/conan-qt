@@ -227,6 +227,9 @@ class QtConan(ConanFile):
             self.options.with_libalsa = False
             self.options.with_openal = False
 
+        if self.options.qtmultimedia and not self.options.GUI:
+            raise ConanInvalidConfiguration("Qt multimedia cannot be used without GUI")
+
         if self.settings.os != "Linux":
             self.options.with_libalsa = False
 
