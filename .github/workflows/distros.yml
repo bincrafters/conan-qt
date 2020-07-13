@@ -1,0 +1,52 @@
+on: [push, pull_request]
+
+jobs:
+  Distros:
+    runs-on:  ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: ["alpine", "opensuse/tumbleweed", "debian", "centos", "archlinux", "fedora"]
+        build: ["","outdated"]
+    container: ${{ matrix.distro }}
+    steps:
+      - name: Install Python(alpine)
+        if: ${{ matrix.distro == 'alpine' }}
+        run: apk add --update bash py3-setuptools py3-pip g++ mesa-dev cmake make perl libxcb-dev libfontenc-dev libice-dev libsm-dev libxaw-dev libxcomposite-dev libxcursor-dev libxdamage-dev libxdmcp-dev libxft-dev libxi-dev libxinerama-dev libxkbfile-dev libxrandr-dev libxres-dev libxscrnsaver-dev libxtst-dev libxv-dev libxvmc-dev libxxf86vm-dev xcb-util-wm-dev xcb-util-image-dev xcb-util-keysyms-dev xcb-util-renderutil-dev xkeyboard-config
+
+      - name: Install Python(opensuse)
+        if: ${{ matrix.distro == 'opensuse/tumbleweed' }}
+        run: zypper --non-interactive install python3 python3-pip python3-setuptools python3-wheel gcc-c++ pkgconf-pkg-config cmake make which perl diff
+
+      - name: Install Python(debian)
+        if: ${{ matrix.distro == 'debian'}}
+        run: apt-get update && apt-get -qq install -y --no-install-recommends python3-pip python3-setuptools g++ pkg-config cmake make
+
+      - name: Install Python(archlinux)
+        if: ${{ matrix.distro == 'archlinux' }}
+        run: pacman -Syu --noconfirm python-pip gcc pkgconf cmake make which
+
+      - name: enable powerTools(centos)
+        if: ${{ matrix.distro == 'centos' }}
+        run: dnf -y install dnf-plugins-core && dnf config-manager --set-enabled PowerTools
+
+      - name: Install Python(centos/fedora)
+        if: ${{ matrix.distro == 'fedora' || matrix.distro == 'centos' }}
+        run: dnf -y install python3 python3-wheel python3-pip gcc-c++ pkgconf-pkg-config cmake make which perl diffutils texinfo
+
+      - name: install
+        run: pip3 install conan --ignore-installed 
+      - uses: actions/checkout@v1
+      - name: run
+        shell: bash
+        env:
+          CONAN_SYSREQUIRES_MODE: enabled
+          CONAN_SYSREQUIRES_SUDO: 0
+          DISTRO: ${{ matrix.distro }}
+        run: |
+          if [ $DISTRO != "alpine" ]
+          then
+            conan install cmake/3.18.2@ -g virtualrunenv -b missing
+            source ./activate_run.sh
+          fi
+          conan create . qt/5.15.2@bincrafters/testing -b ${{ matrix.build }} -o qt:with_mysql=False -o qt:config="-xcb"
