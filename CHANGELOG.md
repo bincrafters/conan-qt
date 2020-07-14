@@ -3,8 +3,8 @@
 This changelog describes interface changes (options and requirements) in the conan package. For qt's changelogs, please go to https://wiki.qt.io/Template:Release_Information
 
 ## Unreleased
-- migrate to `harfbuzz/2.6.8` [2020-07-10](https://github.com/bincrafters/conan-qt/commit/16628e59004350230eec8bb62a17b4ae59dc7d11)
 ## [5.15.0](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/5.15.0%3Astable)
+- migrate to `harfbuzz/2.6.8` [2020-07-10](https://github.com/bincrafters/conan-qt/commit/16628e59004350230eec8bb62a17b4ae59dc7d11)
 - qtwebengine: only require `ninja/1.10.0` if ninja not available in PATH [2020-06-29](https://github.com/bincrafters/conan-qt/commit/d5610e837036337be1487118cdfa887dfaf2b495)
 - linux: migrate x11 requirements to `xorg/system` [2020-06-23](https://github.com/bincrafters/conan-qt/commit/d504c309fe8a551b72a580157d5fe47915f8aa74)
 - qtwebengine: upgrade to build requirement `ninja/1.10.0` [2020-06-13](https://github.com/bincrafters/conan-qt/commit/52490d71b8a2d6df62d01cecd7d3358536961ca7)
