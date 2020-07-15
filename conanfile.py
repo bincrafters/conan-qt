@@ -191,6 +191,9 @@ class QtConan(ConanFile):
     def config_options(self):
         if self.settings.os != "Linux":
             self.options.with_icu = False
+        if self.settings.compiler == "apple-clang":
+            if tools.Version(self.settings.compiler.version) < "10.0":
+                raise ConanInvalidConfiguration("Old versions of apple sdk are not supported by Qt (QTBUG-76777)")
 
     def configure(self):
         if self.settings.compiler in ["gcc", "clang"]:
