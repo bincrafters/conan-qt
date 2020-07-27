@@ -670,8 +670,8 @@ class QtConan(ConanFile):
 
         self.cpp_info.libs = tools.collect_libs(self)
 
-        # Not sure why, but "Qt5Bootstrap.lib" need to be removed in order to 
-        # Release configuration links successfully
+        # "Qt5Bootstrap.lib" contains symbols that are also in "Qt5Core.lib",
+        # removing it so linker succeed.
         if 'Qt5Bootstrap' in self.cpp_info.libs:
             self.cpp_info.libs.remove('Qt5Bootstrap')
 
