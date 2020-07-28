@@ -7,7 +7,7 @@ find_package(qt REQUIRED CONFIG)
 #below macros are missing and probably unnecessary when using "find_package(qt...)"
 #conan_set_vs_runtime()
 #conan_set_libcxx()
-conan_output_dirs_setup()
+#conan_output_dirs_setup()
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
