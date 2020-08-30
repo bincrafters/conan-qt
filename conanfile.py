@@ -331,7 +331,7 @@ class QtConan(ConanFile):
             self.requires("xorg/system")
             self.requires("expat/2.2.9")
             #self.requires("ffmpeg/4.2@bincrafters/stable")
-            self.requires("opus/1.3.1")
+            #self.requires("opus/1.3.1")
 
         if self.options.opengl in ["desktop", "es2"]:
             self.requires('opengl/system')
@@ -634,7 +634,7 @@ class QtConan(ConanFile):
 
         if self.options.qtwebengine and self.settings.os == "Linux":
             args += ['-qt-webengine-ffmpeg',
-                     '-system-webengine-opus']
+                     '-qt-webengine-opus']
 
         if self.options.config:
             args.append(str(self.options.config))
