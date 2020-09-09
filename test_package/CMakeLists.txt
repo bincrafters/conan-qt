@@ -6,7 +6,6 @@ conan_set_vs_runtime()
 conan_set_libcxx()
 conan_output_dirs_setup()
 
-set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
