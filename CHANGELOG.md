@@ -2,7 +2,8 @@
 
 This changelog describes interface changes (options and requirements) in the conan package. For qt's changelogs, please go to https://wiki.qt.io/Template:Release_Information
 
-## Unreleased
+## [5.15.1](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/5.15.1%3Astable)
+- upgrade to `glib/2.65.1` [2020-09-03](https://github.com/bincrafters/conan-qt/commit/761813f2db4e24d098276e6724be405dcfbacb73)
 ## [5.15.0](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/5.15.0%3Astable)
 - linux: add requirement on `xkbcommon/0.10.0` [2020-07-20](https://github.com/bincrafters/conan-qt/commit/6dadca2c03feaf0a18d8e2b5efc44db8cdf99f3f)
 - upgrade to `freetype/2.10.2` [2020-07-20](https://github.com/bincrafters/conan-qt/commit/50e706f02a6654037074ce2a5a3b25e63d482c05)
