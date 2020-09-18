@@ -638,18 +638,33 @@ class QtConan(ConanFile):
             args.append(str(self.options.config))
 
         def setup_mkspec(spec, sub_path = ""):
-            # Potentially this needs to include other platforms than macOS. We
-            # ran into issues with setting custom compilers and flags only on
-            # macOS.
+            # This sets up a custom Qt mkspec to provide build variables like a
+            # custom compiler and/or flags to the Qt build. Usually, this should
+            # work simply by appending QMAKE_... variables to Qt's configure
+            # script. Unfortunately, it is broken on macOS (at least).
             #
-            # This is to work around a known issue on macOS that was not fixed
-            # in the past and potentially never will be:
+            # The issue is known but it doesn't seem to be addressed upstream:
+            #   https://bugreports.qt.io/browse/QTBUG-66404?focusedCommentId=451147#comment-451147
             #
-            # https://bugreports.qt.io/browse/QTBUG-66404?focusedCommentId=451147#comment-451147
+            #  Potentially this needs to include other platforms than macOS.
             if not qmake_args or self.settings.os != "Macos":
                 return spec
 
+            # Define a 'unique' name for our custom mkspec file by appending the
+            # current Unix timestamp (in seconds). Qt does not allow mkspecs to
+            # live outside its source tree. Hence, the unique name provides some
+            # amount of concurrent build safety while altering Qt's source tree.
+            #
+            # It would probably be better to use the conan package id (i.e. the
+            # "build hash") for this, but currently there is no documented or
+            # reliable way to access this information from the build() method.
+            #
+            # Further details:
+            #  * https://stackoverflow.com/q/62942054/4842497
+            #  * https://github.com/conan-io/conan/issues/7100
+            #  * https://github.com/conan-io/docs/issues/225
             custom_mkspec = "conan-" + str(math.floor(time.time()))
+
             source_mkspec_path = target_mkspec_path = \
                 os.path.join(self.source_folder, "qt5", "qtbase", "mkspecs", sub_path)
 
