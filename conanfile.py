@@ -1,6 +1,8 @@
 import os
 import shutil
 import itertools
+import time
+import math
 
 import configparser
 from conans import ConanFile, tools, __version__ as conan_version, RunEnvironment
@@ -647,9 +649,9 @@ class QtConan(ConanFile):
             if not qmake_args or self.settings.os != "Macos":
                 return spec
 
+            custom_mkspec = "conan-" + str(math.floor(time.time()))
             source_mkspec_path = target_mkspec_path = \
                 os.path.join(self.source_folder, "qt5", "qtbase", "mkspecs", sub_path)
-            custom_mkspec = "conan-" + self.info.package_id()
 
             source_mkspec_path = os.path.join(source_mkspec_path, spec)
             target_mkspec_path = os.path.join(target_mkspec_path, custom_mkspec)
