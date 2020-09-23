@@ -132,7 +132,7 @@ class QtConan(ConanFile):
             self.build_requires("jom/1.1.3")
         if self.settings.os == 'Linux':
             if not tools.which('pkg-config'):
-                self.build_requires('pkg-config_installer/0.29.2@bincrafters/stable')
+                self.build_requires('pkgconf/1.7.3')
         if self.options.qtwebengine:
             if not tools.which("ninja"):
                 self.build_requires("ninja/1.10.0")
@@ -288,7 +288,7 @@ class QtConan(ConanFile):
             self.requires("pcre2/10.33")
 
         if self.options.with_glib:
-            self.requires("glib/2.65.1")
+            self.requires("glib/2.66.0")
         # if self.options.with_libiconv:
         #     self.requires("libiconv/1.16")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
