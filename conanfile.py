@@ -135,7 +135,7 @@ class QtConan(ConanFile):
                 self.build_requires('pkgconf/1.7.3')
         if self.options.qtwebengine:
             if not tools.which("ninja"):
-                self.build_requires("ninja/1.10.0")
+                self.build_requires("ninja/1.10.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self.settings.os != "Windows":
                 if not tools.which("bison"):
@@ -283,7 +283,7 @@ class QtConan(ConanFile):
 
     def requirements(self):
         if self.options.openssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1h")
         if self.options.with_pcre2:
             self.requires("pcre2/10.33")
 
