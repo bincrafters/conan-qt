@@ -4,7 +4,9 @@ project(test_package)
 # Below lines are to fix this error:
 #     error: "You must build your code with position independent code if Qt was built with -reduce-relocations. "
 #     "Compile your code with -fPIC (-fPIE is not enough)."
-conan_message(STATUS "Conan: Adjusting fPIC flag (${CONAN_CMAKE_POSITION_INDEPENDENT_CODE})")
+#
+# Why conan_message() is unknown for this context? Removing it...
+#conan_message(STATUS "Conan: Adjusting fPIC flag (${CONAN_CMAKE_POSITION_INDEPENDENT_CODE})")
 set(CMAKE_POSITION_INDEPENDENT_CODE ${CONAN_CMAKE_POSITION_INDEPENDENT_CODE})
 
 

@@ -110,8 +110,11 @@ class TestPackageConan(ConanFile):
     def _test_with_cmake(self):
         if self._cmake_supported():
             self.output.info("Testing CMake")
-            shutil.copy("qt.conf", os.path.join("cmake_folder", "bin"))
-            self.run(os.path.join("cmake_folder", "bin", "test_package"), run_environment=True)
+            # shutil.copy("qt.conf", os.path.join("cmake_folder", "bin"))
+            # self.run(os.path.join("cmake_folder", "bin", "test_package"), run_environment=True)
+            # Executable for cmake_find_package_multi on VS2019 is provided to differetn folder - correcting path
+            shutil.copy("qt.conf", "cmake_folder")
+            self.run(os.path.join("cmake_folder", "test_package"), run_environment=True)
 
     def test(self):
         if not tools.cross_building(self.settings, skip_x64_x86=True):
