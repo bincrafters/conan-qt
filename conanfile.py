@@ -674,6 +674,22 @@ class QtConan(ConanFile):
     def package_info(self):
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
 
+        self.cpp_info.libs = tools.collect_libs(self)
+
+        # "Qt5Bootstrap.lib" contains symbols that are also in "Qt5Core.lib",
+        # removing it so linker succeed.
+        if 'Qt5Bootstrap' in self.cpp_info.libs:
+            self.cpp_info.libs.remove('Qt5Bootstrap')
+
+        # Add top level include directory, so code compile if someone uses
+        # includes with prefixes (e.g. "#include <QtCore/QString>")
+        self.cpp_info.includedirs = ['include']
+
+        # Add all Qt module directories (QtCore, QtGui, QtWidgets and so on), so prefix
+        # can be omited in includes (e.g. "#include <QtCore/QString>" => "#include <QString>")
+        fu = ['include/' + f.name for f in os.scandir('include') if f.is_dir()]
+        self.cpp_info.includedirs.extend(fu)
+
     @staticmethod
     def _remove_duplicate(l):
         seen = set()
