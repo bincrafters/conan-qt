@@ -128,8 +128,10 @@ class QtConan(ConanFile):
     short_paths = True
 
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
-            self.build_requires("jom/1.1.3")
+        if tools.os_info.is_windows:
+            self.build_requires("strawberryperl/5.30.0.1")
+            if self.settings.compiler == "Visual Studio":
+                self.build_requires("jom/1.1.3")
         if self.settings.os == 'Linux':
             if not tools.which('pkg-config'):
                 self.build_requires('pkgconf/1.7.3')
