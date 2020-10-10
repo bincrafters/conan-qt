@@ -329,7 +329,7 @@ class QtConan(ConanFile):
             self.requires("zstd/1.4.4")
         if self.options.qtwebengine and self.settings.os == "Linux":
             self.requires("xorg/system")
-            self.requires("expat/2.2.9")
+            self.requires("expat/2.2.10")
             #self.requires("ffmpeg/4.2@bincrafters/stable")
             self.requires("opus/1.3.1")
 
