@@ -207,7 +207,6 @@ class QtConan(ConanFile):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.3":
             self.options.with_mysql = False
         if self.settings.os == "Windows":
-            self.options.with_mysql = False
             if not self.options.shared and self.options.with_icu:
                 raise ConanInvalidConfiguration("icu option is not supported on windows in static build. see QTBUG-77120.")
 
