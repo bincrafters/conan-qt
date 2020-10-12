@@ -7,13 +7,12 @@ project(test_package)
 set(CMAKE_POSITION_INDEPENDENT_CODE ${CONAN_CMAKE_POSITION_INDEPENDENT_CODE})
 
 
-#include(${CMAKE_BINARY_DIR}/../conanbuildinfo.cmake)
-find_package(qt REQUIRED CONFIG)
+include(${CMAKE_BINARY_DIR}/../conanbuildinfo_multi.cmake)
+conan_set_vs_runtime()
+conan_set_libcxx()
+conan_output_dirs_setup()
 
-#below macros are missing and probably unnecessary when using "find_package(qt...)"
-#conan_set_vs_runtime()
-#conan_set_libcxx()
-#conan_output_dirs_setup()
+find_package(qt REQUIRED CONFIG)
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
