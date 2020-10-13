@@ -72,7 +72,8 @@ class QtConan(ConanFile):
         "with_mysql": [True, False],
         "with_pq": [True, False],
         "with_odbc": [True, False],
-        "with_sdl2": [True, False],
+        # FIXME : not needed if qtgamepad is not a qt module ?
+        # "with_sdl2": [True, False],
         "with_libalsa": [True, False],
         "with_openal": [True, False],
         "with_zstd": [True, False],
@@ -106,7 +107,8 @@ class QtConan(ConanFile):
         "with_mysql": True,
         "with_pq": True,
         "with_odbc": True,
-        "with_sdl2": True,
+        # FIXME : not needed if qtgamepad is not a qt module ?
+        # "with_sdl2": True,
         "with_libalsa": False,
         "with_openal": True,
         "with_zstd": True,
@@ -129,58 +131,59 @@ class QtConan(ConanFile):
                 self.build_requires('pkgconf/1.7.3')
         if not tools.which("ninja"):
             self.build_requires("ninja/1.10.1")
-        if self.options.qtwebengine:
-            # gperf, bison, flex, python >= 2.7.5 & < 3
-            if self.settings.os != "Windows":
-                if not tools.which("bison"):
-                    self.build_requires("bison/3.5.3")
-                if not tools.which("gperf"):
-                    self.build_requires("gperf/3.1")
-                if not tools.which("flex"):
-                    self.build_requires("flex/2.6.4")
+        # FIXME : is qtwebengine a qt6 module ?
+        # if self.options.qtwebengine:
+        #     # gperf, bison, flex, python >= 2.7.5 & < 3
+        #     if self.settings.os != "Windows":
+        #         if not tools.which("bison"):
+        #             self.build_requires("bison/3.5.3")
+        #         if not tools.which("gperf"):
+        #             self.build_requires("gperf/3.1")
+        #         if not tools.which("flex"):
+        #             self.build_requires("flex/2.6.4")
 
-            def _check_python_version():
-                # Check if a valid python2 is available in PATH or it will failflex
-                # Start by checking if python2 can be found
-                python_exe = tools.which("python2")
-                if not python_exe:
-                    # Fall back on regular python
-                    python_exe = tools.which("python")
+        #     def _check_python_version():
+        #         # Check if a valid python2 is available in PATH or it will failflex
+        #         # Start by checking if python2 can be found
+        #         python_exe = tools.which("python2")
+        #         if not python_exe:
+        #             # Fall back on regular python
+        #             python_exe = tools.which("python")
 
-                if not python_exe:
-                    msg = ("Python2 must be available in PATH "
-                           "in order to build Qt WebEngine")
-                    raise ConanInvalidConfiguration(msg)
-                # In any case, check its actual version for compatibility
-                from six import StringIO  # Python 2 and 3 compatible
-                mybuf = StringIO()
-                cmd_v = "{} --version".format(python_exe)
-                self.run(cmd_v, output=mybuf)
-                verstr = mybuf.getvalue().strip().split('Python ')[1]
-                if verstr.endswith('+'):
-                    verstr = verstr[:-1]
-                version = tools.Version(verstr)
-                # >= 2.7.5 & < 3
-                v_min = "2.7.5"
-                v_max = "3.0.0"
-                if (version >= v_min) and (version < v_max):
-                    msg = ("Found valid Python 2 required for QtWebengine:"
-                           " version={}, path={}".format(mybuf.getvalue(), python_exe))
-                    self.output.success(msg)
-                else:
-                    msg = ("Found Python 2 in path, but with invalid version {}"
-                           " (QtWebEngine requires >= {} & < "
-                           "{})".format(verstr, v_min, v_max))
-                    raise ConanInvalidConfiguration(msg)
+        #         if not python_exe:
+        #             msg = ("Python2 must be available in PATH "
+        #                    "in order to build Qt WebEngine")
+        #             raise ConanInvalidConfiguration(msg)
+        #         # In any case, check its actual version for compatibility
+        #         from six import StringIO  # Python 2 and 3 compatible
+        #         mybuf = StringIO()
+        #         cmd_v = "{} --version".format(python_exe)
+        #         self.run(cmd_v, output=mybuf)
+        #         verstr = mybuf.getvalue().strip().split('Python ')[1]
+        #         if verstr.endswith('+'):
+        #             verstr = verstr[:-1]
+        #         version = tools.Version(verstr)
+        #         # >= 2.7.5 & < 3
+        #         v_min = "2.7.5"
+        #         v_max = "3.0.0"
+        #         if (version >= v_min) and (version < v_max):
+        #             msg = ("Found valid Python 2 required for QtWebengine:"
+        #                    " version={}, path={}".format(mybuf.getvalue(), python_exe))
+        #             self.output.success(msg)
+        #         else:
+        #             msg = ("Found Python 2 in path, but with invalid version {}"
+        #                    " (QtWebEngine requires >= {} & < "
+        #                    "{})".format(verstr, v_min, v_max))
+        #             raise ConanInvalidConfiguration(msg)
 
-            try:
-                _check_python_version()
-            except ConanInvalidConfiguration as e:
-                if tools.os_info.is_windows:
-                    raise e
-                self.output.info("Python 2 not detected in path. Trying to install it")
-                tools.SystemPackageTool().install(["python2", "python"])
-                _check_python_version()
+        #     try:
+        #         _check_python_version()
+        #     except ConanInvalidConfiguration as e:
+        #         if tools.os_info.is_windows:
+        #             raise e
+        #         self.output.info("Python 2 not detected in path. Trying to install it")
+        #         tools.SystemPackageTool().install(["python2", "python"])
+        #         _check_python_version()
 
     def config_options(self):
         if self.settings.os != "Linux":
@@ -216,28 +219,31 @@ class QtConan(ConanFile):
             self.options.with_libjpeg = False
             self.options.with_libpng = False
 
-        if not self.options.qtgamepad:
-            self.options.with_sdl2 = False
+        # FIXME : is qtgamepad a qt6 module?
+        # if not self.options.qtgamepad:
+        #    self.options.with_sdl2 = False
 
-        if not self.options.qtmultimedia:
-            self.options.with_libalsa = False
-            self.options.with_openal = False
-
-        if self.options.qtmultimedia and not self.options.GUI:
-            raise ConanInvalidConfiguration("Qt multimedia cannot be used without GUI")
+        # FIXME : is qtmultimedia a qt6 module?
+        # if not self.options.qtmultimedia:
+        #     self.options.with_libalsa = False
+        #     self.options.with_openal = False
+        #  
+        # if self.options.qtmultimedia and not self.options.GUI:
+        #     raise ConanInvalidConfiguration("Qt multimedia cannot be used without GUI")
 
         if self.settings.os != "Linux":
             self.options.with_libalsa = False
 
-        if self.options.qtwebengine:
-            if not self.options.shared:
-                raise ConanInvalidConfiguration("Static builds of Qt Webengine are not supported")
+        # FIXME : is qtwebengine a qt6 module?
+        # if self.options.qtwebengine:
+        #     if not self.options.shared:
+        #         raise ConanInvalidConfiguration("Static builds of Qt Webengine are not supported")
 
-            if tools.cross_building(self.settings, skip_x64_x86=True):
-                raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
+        #     if tools.cross_building(self.settings, skip_x64_x86=True):
+        #         raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
 
-            if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
-                raise ConanInvalidConfiguration("Compiling Qt WebEngine with gcc < 5 is not supported")
+        #     if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+        #         raise ConanInvalidConfiguration("Compiling Qt WebEngine with gcc < 5 is not supported")
 
         if self.settings.os == "Android" and self.options.opengl == "desktop":
             raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android.")
@@ -258,9 +264,10 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration('Qt without libc++ needs qt:with_doubleconversion. '
                                             'Either enable qt:with_doubleconversion or switch to libc++')
 
-        if tools.os_info.is_linux:
-            if self.options.qtwebengine:
-                self.options.with_fontconfig = True
+        # FIXME : is qtwebengine a qt6 module ?
+        # if tools.os_info.is_linux:
+        #     if self.options.qtwebengine:
+        #         self.options.with_fontconfig = True
 
         # FIXME : reenable this when out of prerelease
         # assert self.version == self._submodules['qtbase']['branch']
@@ -307,8 +314,9 @@ class QtConan(ConanFile):
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.7")
-        if self.options.with_sdl2:
-            self.requires("sdl2/2.0.10@bincrafters/stable")
+        # FIXME : not needed if qtgamepad is not a qt module ?
+        # if self.options.with_sdl2:
+        #     self.requires("sdl2/2.0.10@bincrafters/stable")
         if self.options.with_openal:
             self.requires("openal/1.19.1")
         if self.options.with_libalsa:
@@ -319,11 +327,12 @@ class QtConan(ConanFile):
                 self.requires("xkbcommon/0.10.0")
         if self.options.with_zstd:
             self.requires("zstd/1.4.4")
-        if self.options.qtwebengine and self.settings.os == "Linux":
-            self.requires("xorg/system")
-            self.requires("expat/2.2.10")
-            #self.requires("ffmpeg/4.2@bincrafters/stable")
-            self.requires("opus/1.3.1")
+        # FIXME : is qtwebengine a qt6 module ?
+        # if self.options.qtwebengine and self.settings.os == "Linux":
+        #     self.requires("xorg/system")
+        #     self.requires("expat/2.2.10")
+        #     #self.requires("ffmpeg/4.2@bincrafters/stable")
+        #     self.requires("opus/1.3.1")
 
         if self.options.opengl == "desktop":
             self.requires('opengl/system')
@@ -332,9 +341,10 @@ class QtConan(ConanFile):
         pack_names = []
         if tools.os_info.is_linux:
             if tools.os_info.with_apt:
-                if self.options.qtwebengine:
-                    pack_names.append("libnss3-dev")
-                    pack_names.append("libdbus-1-dev")
+                # FIXME : is qtwebengine a qt6 module ?
+                # if self.options.qtwebengine:
+                #     pack_names.append("libnss3-dev")
+                #     pack_names.append("libdbus-1-dev")
                 if self.options.with_vulkan:
                     pack_names.append("libvulkan-dev")
 
@@ -347,13 +357,14 @@ class QtConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         shutil.move("qt-everywhere-src-%s" % self.version, "qt6")
 
-        for p in self.conan_data["patches"][self.version]:
-            tools.patch(**p)
-        for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
-            tools.replace_in_file(os.path.join(self.source_folder, "qt5", "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
-            "  if (enable_precompiled_headers) {\n    if (is_win) {",
-            "  if (enable_precompiled_headers) {\n    if (false) {"
-            )
+        for patch in self.conan_data["patches"].get(self.version, []):
+            tools.patch(**patch)
+        # FIXME: is qtwebengine a qt6 module?
+        # for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
+        #     tools.replace_in_file(os.path.join(self.source_folder, "qt5", "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
+        #     "  if (enable_precompiled_headers) {\n    if (is_win) {",
+        #     "  if (enable_precompiled_headers) {\n    if (false) {"
+        #     )
 
     def _xplatform(self):
         if self.settings.os == "Linux":
