@@ -61,7 +61,6 @@ class QtConan(ConanFile):
         "openssl": [True, False],
         "with_pcre2": [True, False],
         "with_glib": [True, False],
-        # "with_libiconv": [True, False],  # Qt tests failure "invalid conversion from const char** to char**"
         "with_doubleconversion": [True, False],
         "with_freetype": [True, False],
         "with_fontconfig": [True, False],
@@ -97,7 +96,6 @@ class QtConan(ConanFile):
         "openssl": True,
         "with_pcre2": True,
         "with_glib": True,
-        # "with_libiconv": True,
         "with_doubleconversion": True,
         "with_freetype": True,
         "with_fontconfig": True,
@@ -202,7 +200,6 @@ class QtConan(ConanFile):
         if conan_version < Version("1.20.0"):
             raise ConanInvalidConfiguration("This recipe needs at least conan 1.20.0, please upgrade.")
         if self.settings.os != 'Linux':
-        #     self.options.with_libiconv = False
             self.options.with_fontconfig = False
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.3":
             self.options.with_mysql = False
@@ -290,8 +287,6 @@ class QtConan(ConanFile):
 
         if self.options.with_glib:
             self.requires("glib/2.66.0")
-        # if self.options.with_libiconv:
-        #     self.requires("libiconv/1.16")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.1.5")
         if self.options.with_freetype and not self.options.multiconfiguration:
@@ -491,8 +486,6 @@ class QtConan(ConanFile):
         # openGL
         if self.options.opengl == "no":
             args += ["-no-opengl"]
-        elif self.options.opengl == "es2":
-            args += ["-opengl es2"]
         elif self.options.opengl == "desktop":
             args += ["-opengl desktop"]
         elif self.options.opengl == "dynamic":
@@ -511,8 +504,6 @@ class QtConan(ConanFile):
                 args += ["-openssl-runtime"]
             else:
                 args += ["-openssl-linked"]
-
-        # args.append("--iconv=" + ("gnu" if self.options.with_libiconv else "no"))
 
         args.append("--glib=" + ("yes" if self.options.with_glib else "no"))
         args.append("--pcre=" + ("system" if self.options.with_pcre2 else "qt"))
@@ -545,7 +536,6 @@ class QtConan(ConanFile):
                   ("openssl", "OPENSSL"),
                   ("pcre2", "PCRE2"),
                   ("glib", "GLIB"),
-                  # ("libiconv", "ICONV"),
                   ("double-conversion", "DOUBLECONVERSION"),
                   ("freetype", "FREETYPE"),
                   ("fontconfig", "FONTCONFIG"),
