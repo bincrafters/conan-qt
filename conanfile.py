@@ -56,7 +56,7 @@ class QtConan(ConanFile):
         "shared": [True, False],
         "commercial": [True, False],
 
-        "opengl": ["no", "es2", "desktop", "dynamic"],
+        "opengl": ["no", "desktop", "dynamic"],
         "with_vulkan": [True, False],
         "openssl": [True, False],
         "with_pcre2": [True, False],
@@ -247,7 +247,7 @@ class QtConan(ConanFile):
                 raise ConanInvalidConfiguration("Compiling Qt WebEngine with gcc < 5 is not supported")
 
         if self.settings.os == "Android" and self.options.opengl == "desktop":
-            raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
+            raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android.")
 
         if self.settings.os != "Windows" and self.options.opengl == "dynamic":
             raise ConanInvalidConfiguration("Dynamic OpenGL is supported only on Windows.")
@@ -334,7 +334,7 @@ class QtConan(ConanFile):
             #self.requires("ffmpeg/4.2@bincrafters/stable")
             self.requires("opus/1.3.1")
 
-        if self.options.opengl in ["desktop", "es2"]:
+        if self.options.opengl == "desktop":
             self.requires('opengl/system')
 
     def system_requirements(self):
