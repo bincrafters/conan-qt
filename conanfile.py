@@ -104,7 +104,7 @@ class QtConan(ConanFile):
         "with_libjpeg": True,
         "with_libpng": True,
         "with_sqlite3": True,
-        "with_mysql": True,
+        "with_mysql": False,
         "with_pq": True,
         "with_odbc": True,
         # FIXME : not needed if qtgamepad is not a qt module ?
