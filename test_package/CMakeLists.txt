@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 3.1.0)
 project(test_package)
 
-# Below lines are to fix this error:
-#     error: "You must build your code with position independent code if Qt was built with -reduce-relocations. "
-#     "Compile your code with -fPIC (-fPIE is not enough)."
-set(CMAKE_POSITION_INDEPENDENT_CODE ${CONAN_CMAKE_POSITION_INDEPENDENT_CODE})
-
-
 include(${CMAKE_BINARY_DIR}/../conanbuildinfo.cmake)
 conan_set_vs_runtime()
 conan_set_libcxx()
@@ -15,6 +9,12 @@ conan_output_dirs_setup()
 find_package(qt REQUIRED CONFIG)
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
+
+# Below lines are to fix this error:
+#     error: "You must build your code with position independent code if Qt was built with -reduce-relocations. "
+#     "Compile your code with -fPIC (-fPIE is not enough)."
+#set(CMAKE_POSITION_INDEPENDENT_CODE ${CONAN_CMAKE_POSITION_INDEPENDENT_CODE})
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
