@@ -695,6 +695,7 @@ class QtConan(ConanFile):
             self.cpp_info.system_libs.append('Version')   # 'Qt5Cored.lib' require 'GetFileVersionInfoW' and 'VerQueryValueW' which are in 'Version.lib' library
             self.cpp_info.system_libs.append('Winmm')     # 'Qt5Cored.lib' require '__imp_timeSetEvent' which is in 'Winmm.lib' library
             self.cpp_info.system_libs.append('Netapi32')  # 'Qt5Cored.lib' require 'NetApiBufferFree' which is in 'Netapi32.lib' library
+            self.cpp_info.system_libs.append('UserEnv')   # 'Qt5Cored.lib' require '__imp_GetUserProfileDirectoryW ' which is in 'UserEnv.Lib' library
 
 
     @staticmethod
