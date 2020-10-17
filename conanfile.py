@@ -690,6 +690,13 @@ class QtConan(ConanFile):
         fu = ['include/' + f.name for f in os.scandir('include') if f.is_dir()]
         self.cpp_info.includedirs.extend(fu)
 
+        # Should it be some extra 'if' here like "if not self.options.shared" or for generator type "cmake_find_package_multi" vs "cmake"?
+        if self.settings.os == 'Windows':
+            self.cpp_info.system_libs.append('Version')   # 'Qt5Cored.lib' require 'GetFileVersionInfoW' and 'VerQueryValueW' which are in 'Version.lib' library
+            self.cpp_info.system_libs.append('Winmm')     # 'Qt5Cored.lib' require '__imp_timeSetEvent' which is in 'Winmm.lib' library
+            self.cpp_info.system_libs.append('Netapi32')  # 'Qt5Cored.lib' require 'NetApiBufferFree' which is in 'Netapi32.lib' library
+
+
     @staticmethod
     def _remove_duplicate(l):
         seen = set()
