@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.1.0)
 
 set(CMAKE_CXX_STANDARD 11)
 
+# Below lines are to fix this error:
+#     error: "You must build your code with position independent code if Qt was built with -reduce-relocations. "
+#     "Compile your code with -fPIC (-fPIE is not enough)."
+#set(CMAKE_POSITION_INDEPENDENT_CODE ${CONAN_CMAKE_POSITION_INDEPENDENT_CODE})
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fpic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic")
+
 project(test_package)
 
 include(${CMAKE_BINARY_DIR}/../conanbuildinfo.cmake)
@@ -12,14 +20,6 @@ conan_output_dirs_setup()
 find_package(qt REQUIRED CONFIG)
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
-
-# Below lines are to fix this error:
-#     error: "You must build your code with position independent code if Qt was built with -reduce-relocations. "
-#     "Compile your code with -fPIC (-fPIE is not enough)."
-#set(CMAKE_POSITION_INDEPENDENT_CODE ${CONAN_CMAKE_POSITION_INDEPENDENT_CODE})
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fpic")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic")
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -35,6 +35,7 @@ set(CMAKE_AUTOUIC ON)
 find_package(Qt5 COMPONENTS Core)
 
 add_executable(${PROJECT_NAME} test_package.cpp greeter.h)
+target_compile_options(${PROJECT_NAME} PRIVATE -fPIC)
 #target_link_libraries(${PROJECT_NAME} Qt5::Core)
 target_link_libraries(${PROJECT_NAME} qt::qt)
 
