@@ -7,7 +7,7 @@ project(test_package)
 set(CMAKE_POSITION_INDEPENDENT_CODE ${CONAN_CMAKE_POSITION_INDEPENDENT_CODE})
 
 
-include(${CMAKE_BINARY_DIR}/../conanbuildinfo_multi.cmake)
+include(${CMAKE_BINARY_DIR}/../conanbuildinfo.cmake)
 conan_set_vs_runtime()
 conan_set_libcxx()
 conan_output_dirs_setup()
