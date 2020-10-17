@@ -697,6 +697,10 @@ class QtConan(ConanFile):
             self.cpp_info.system_libs.append('Netapi32')  # 'Qt5Cored.lib' require 'NetApiBufferFree' which is in 'Netapi32.lib' library
             self.cpp_info.system_libs.append('UserEnv')   # 'Qt5Cored.lib' require '__imp_GetUserProfileDirectoryW ' which is in 'UserEnv.Lib' library
 
+        if self.settings.os == 'Macos':
+            self.cpp_info.frameworks.extend(["IOKit"])    # 'libQt5Core.a' require '_IORegistryEntryCreateCFProperty', '_IOServiceGetMatchingService' and much more which are in 'IOKit' framework
+            self.cpp_info.frameworks.extend(["Cocoa"])    # 'libQt5Core.a' require '_OBJC_CLASS_$_NSApplication' and more, which are in 'Cocoa' framework
+            self.cpp_info.frameworks.extend(["Security"]) # 'libQt5Core.a' require '_SecRequirementCreateWithString' and more, which are in 'Security' framework
 
     @staticmethod
     def _remove_duplicate(l):
