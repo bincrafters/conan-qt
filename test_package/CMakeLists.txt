@@ -2,13 +2,7 @@ cmake_minimum_required(VERSION 3.1.0)
 
 set(CMAKE_CXX_STANDARD 11)
 
-# Below lines are to fix this error:
-#     error: "You must build your code with position independent code if Qt was built with -reduce-relocations. "
-#     "Compile your code with -fPIC (-fPIE is not enough)."
-#set(CMAKE_POSITION_INDEPENDENT_CODE ${CONAN_CMAKE_POSITION_INDEPENDENT_CODE})
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fpic")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic")
+#set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 project(test_package)
 
@@ -19,8 +13,6 @@ conan_output_dirs_setup()
 
 find_package(qt REQUIRED CONFIG)
 
-set(CMAKE_VERBOSE_MAKEFILE TRUE)
-
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed
@@ -28,15 +20,13 @@ set(CMAKE_AUTOMOC ON)
 # Create code from a list of Qt designer ui files
 set(CMAKE_AUTOUIC ON)
 
-# Find the QtCore library
-#find_package(Qt5Core CONFIG REQUIRED)
-# "find_package(Qt5 COMPONENTS Widgets)" or "find_package(Qt5 COMPONENTS Core)" or maybe other can be used
-# in order to AUTOMOC, AUTOUIC and AUTORCC be enabled / works correctly
+# Find the QtCore library in order to AUTOMOC, AUTOUIC and AUTORCC be enabled / works correctly
 find_package(Qt5 COMPONENTS Core)
 
 add_executable(${PROJECT_NAME} test_package.cpp greeter.h)
+# Must compile with "-fPIC" since Qt was built with -reduce-relocations.
 target_compile_options(${PROJECT_NAME} PRIVATE -fPIC)
-#target_link_libraries(${PROJECT_NAME} Qt5::Core)
+
 target_link_libraries(${PROJECT_NAME} qt::qt)
 
 # configure_file(${CMAKE_CURRENT_BINARY_DIR}/qt.conf ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qt.conf COPYONLY)

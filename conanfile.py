@@ -677,7 +677,7 @@ class QtConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
 
         # "Qt5Bootstrap.lib" contains symbols that are also in "Qt5Core.lib",
-        # removing it so linker succeed.
+        # Linking to both, cause linker failure, so removing "Qt5Bootstrap".
         if 'Qt5Bootstrap' in self.cpp_info.libs:
             self.cpp_info.libs.remove('Qt5Bootstrap')
 
@@ -690,17 +690,17 @@ class QtConan(ConanFile):
         fu = ['include/' + f.name for f in os.scandir('include') if f.is_dir()]
         self.cpp_info.includedirs.extend(fu)
 
-        # Should it be some extra 'if' here like "if not self.options.shared" or for generator type "cmake_find_package_multi" vs "cmake"?
-        if self.settings.os == 'Windows':
-            self.cpp_info.system_libs.append('Version')   # 'Qt5Cored.lib' require 'GetFileVersionInfoW' and 'VerQueryValueW' which are in 'Version.lib' library
-            self.cpp_info.system_libs.append('Winmm')     # 'Qt5Cored.lib' require '__imp_timeSetEvent' which is in 'Winmm.lib' library
-            self.cpp_info.system_libs.append('Netapi32')  # 'Qt5Cored.lib' require 'NetApiBufferFree' which is in 'Netapi32.lib' library
-            self.cpp_info.system_libs.append('UserEnv')   # 'Qt5Cored.lib' require '__imp_GetUserProfileDirectoryW ' which is in 'UserEnv.Lib' library
+        if not self.options.shared:
+            if self.settings.os == 'Windows':
+                self.cpp_info.system_libs.append('Version')   # 'Qt5Cored.lib' require 'GetFileVersionInfoW' and 'VerQueryValueW' which are in 'Version.lib' library
+                self.cpp_info.system_libs.append('Winmm')     # 'Qt5Cored.lib' require '__imp_timeSetEvent' which is in 'Winmm.lib' library
+                self.cpp_info.system_libs.append('Netapi32')  # 'Qt5Cored.lib' require 'NetApiBufferFree' which is in 'Netapi32.lib' library
+                self.cpp_info.system_libs.append('UserEnv')   # 'Qt5Cored.lib' require '__imp_GetUserProfileDirectoryW ' which is in 'UserEnv.Lib' library
 
-        if self.settings.os == 'Macos':
-            self.cpp_info.frameworks.extend(["IOKit"])    # 'libQt5Core.a' require '_IORegistryEntryCreateCFProperty', '_IOServiceGetMatchingService' and much more which are in 'IOKit' framework
-            self.cpp_info.frameworks.extend(["Cocoa"])    # 'libQt5Core.a' require '_OBJC_CLASS_$_NSApplication' and more, which are in 'Cocoa' framework
-            self.cpp_info.frameworks.extend(["Security"]) # 'libQt5Core.a' require '_SecRequirementCreateWithString' and more, which are in 'Security' framework
+            if self.settings.os == 'Macos':
+                self.cpp_info.frameworks.extend(["IOKit"])    # 'libQt5Core.a' require '_IORegistryEntryCreateCFProperty', '_IOServiceGetMatchingService' and much more which are in 'IOKit' framework
+                self.cpp_info.frameworks.extend(["Cocoa"])    # 'libQt5Core.a' require '_OBJC_CLASS_$_NSApplication' and more, which are in 'Cocoa' framework
+                self.cpp_info.frameworks.extend(["Security"]) # 'libQt5Core.a' require '_SecRequirementCreateWithString' and more, which are in 'Security' framework
 
     @staticmethod
     def _remove_duplicate(l):
