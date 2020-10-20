@@ -664,7 +664,7 @@ class QtConan(ConanFile):
                 tools.rmdir(os.path.join(self.package_folder, "licenses", module))
         # "Qt5Bootstrap" is internal Qt library - removing it to avoid linking error, since it contains
         # symbols that are also in "Qt5Core.lib". It looks like there is no "Qt5Bootstrap.dll".
-        for fl in glob.glob(os.path.join(self.package_folder, "lib", "Qt5Bootstrap.*")):
+        for fl in glob.glob(os.path.join(self.package_folder, "lib", "*Qt5Bootstrap*")):
             os.remove(fl)
 
     def package_id(self):
