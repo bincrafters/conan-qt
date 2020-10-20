@@ -38,6 +38,9 @@ sources:
   "6.0.0-alpha":
     url: "http://download.qt.io/development_releases/qt/6.0/6.0.0-alpha/single/qt-everywhere-src-6.0.0-alpha.zip"
     sha256: "185cc4be72d8f91c575a26277379f7d40ea9c9971d8c8932d1f3da70b2ae01cb"
+  "6.0.0-beta1":
+    url: "http://download.qt.io/development_releases/qt/6.0/6.0.0-beta1/single/qt-everywhere-src-6.0.0-beta1.tar.xz"
+    sha256: "8ce60c420399cdb06544b3fc22d91ab38fc88a456738ed4d8c221e40064f8aaf"
 patches:
   "5.13.1":
     - patch_file: "patches/3f9c9db.diff"
