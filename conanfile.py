@@ -1,7 +1,7 @@
 import os
 import shutil
 import itertools
-
+import glob
 import configparser
 from conans import ConanFile, tools, __version__ as conan_version, RunEnvironment, CMake
 from conans.errors import ConanInvalidConfiguration
@@ -511,7 +511,7 @@ class QtConan(ConanFile):
         #    args.append("--alsa=" + ("yes" if self.options.with_libalsa else "no"))
 
         for opt, conf_arg in [
-                              ("with_doubleconversion", "doubleconversion"),
+                              #("with_doubleconversion", "doubleconversion"),
                               ("with_freetype", "freetype"),
                               ("with_harfbuzz", "harfbuzz"),
                               ("with_libjpeg", "libjpeg"),
@@ -605,6 +605,19 @@ class QtConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for f in ['Findglib.cmake', 'Findharfbuzz.cmake']:
+            if os.path.exists(f):
+                os.remove(f)
+        for f in glob.glob("*.cmake"):
+            tools.replace_in_file(f,
+                "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,SHARED_LIBRARY>:>",
+                "")
+            tools.replace_in_file(f,
+                "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,MODULE_LIBRARY>:>",
+                "")
+            tools.replace_in_file(f,
+                "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:>",
+                "")
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [os.getcwd()]}
             if self.settings.os == "Windows":
