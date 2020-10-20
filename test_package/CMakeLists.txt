@@ -15,10 +15,10 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
 # Find the QtCore library
-find_package(Qt5Core CONFIG REQUIRED)
+find_package(Qt6Core CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp greeter.h)
-target_link_libraries(${PROJECT_NAME} Qt5::Core)
+target_link_libraries(${PROJECT_NAME} Qt6::Core)
 
 # configure_file(${CMAKE_CURRENT_BINARY_DIR}/qt.conf ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qt.conf COPYONLY)
 
