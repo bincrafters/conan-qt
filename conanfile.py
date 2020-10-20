@@ -1,3 +1,4 @@
+import glob
 import os
 import shutil
 import itertools
@@ -661,6 +662,10 @@ class QtConan(ConanFile):
         for module in self._submodules:
             if module != 'qtbase' and not getattr(self.options, module):
                 tools.rmdir(os.path.join(self.package_folder, "licenses", module))
+        # "Qt5Bootstrap" is internal Qt library - removing it to avoid linking error, since it contains
+        # symbols that are also in "Qt5Core.lib". It looks like there is no "Qt5Bootstrap.dll".
+        for fl in glob.glob(os.path.join(self.package_folder, "lib", "Qt5Bootstrap.*")):
+            os.remove(fl)
 
     def package_id(self):
         del self.info.options.cross_compile
@@ -675,11 +680,6 @@ class QtConan(ConanFile):
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
 
         self.cpp_info.libs = tools.collect_libs(self)
-
-        # "Qt5Bootstrap.lib" contains symbols that are also in "Qt5Core.lib",
-        # Linking to both, cause linker failure, so removing "Qt5Bootstrap".
-        if 'Qt5Bootstrap' in self.cpp_info.libs:
-            self.cpp_info.libs.remove('Qt5Bootstrap')
 
         # Add top level include directory, so code compile if someone uses
         # includes with prefixes (e.g. "#include <QtCore/QString>")
