@@ -126,9 +126,7 @@ class QtConan(ConanFile):
     short_paths = True
 
     def build_requirements(self):
-        if self.settings.os == 'Linux':
-            if not tools.which('pkg-config'):
-                self.build_requires('pkgconf/1.7.3')
+        self.build_requires('pkgconf/1.7.3')
         if not tools.which("ninja"):
             self.build_requires("ninja/1.10.1")
         # FIXME : is qtwebengine a qt6 module ?
