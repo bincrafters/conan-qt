@@ -554,6 +554,7 @@ class QtConan(ConanFile):
                   ("icu", "ICU"),
                   ("harfbuzz", "HARFBUZZ"),
                   ("libjpeg", "LIBJPEG"),
+                  ("libjpeg-turbo", "LIBJPEG"),
                   ("libpng", "LIBPNG"),
                   ("sqlite3", "SQLITE"),
                   ("libmysqlclient", "MYSQL"),
