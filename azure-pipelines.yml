@@ -4,6 +4,7 @@ resources:
       type: github
       name: bincrafters/templates
       endpoint: github
+      ref: azp_generate_matrix
 
 extends:
   template: .ci/azure.yml@templates
