@@ -13,4 +13,4 @@ extends:
     conanPassword: $(CONAN_PASSWORD)
     enableAppleClangBuilds: true
     splitByBuildTypes: "true"
-    requireMoreDiskSpace: "true"
+    requireMoreDiskSpace: "false"
