@@ -45,7 +45,7 @@ class QtConan(ConanFile):
     generators = "pkg_config"
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
-    topics = ("conan", "qt", "ui")
+    topics = ("qt", "ui")
     url = "https://github.com/bincrafters/conan-qt"
     homepage = "https://www.qt.io"
     license = "LGPL-3.0"
