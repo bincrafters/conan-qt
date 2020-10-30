@@ -288,13 +288,13 @@ class QtConan(ConanFile):
             self.requires("pcre2/10.33")
 
         if self.options.with_glib:
-            self.requires("glib/2.66.1")
+            self.requires("glib/2.66.2")
         # if self.options.with_libiconv:
         #     self.requires("libiconv/1.16")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.1.5")
         if self.options.with_freetype and not self.options.multiconfiguration:
-            self.requires("freetype/2.10.2")
+            self.requires("freetype/2.10.4")
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.91")
         if self.options.with_icu:
