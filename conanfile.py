@@ -41,7 +41,6 @@ def _getsubmodules():
 class QtConan(ConanFile):
 
     _submodules = _getsubmodules()
-
     generators = "pkg_config"
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
