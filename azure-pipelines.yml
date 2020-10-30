@@ -1,3 +1,8 @@
+variables:
+  BPT_SPLT_BY_BUILD_TYPES: "true"
+  BPT_REQUIRE_MORE_DISK_SPACE: "true"
+  BPT_VARIABLE_TEST: "Templates can access global variables!"
+
 resources:
   repositories:
     - repository: templates
@@ -11,5 +16,3 @@ extends:
   parameters:
     conanLoginUsername: $(CONAN_LOGIN_USERNAME)
     conanPassword: $(CONAN_PASSWORD)
-    splitByBuildTypes: "true"
-    requireMoreDiskSpace: "false"
