@@ -1,7 +1,18 @@
 variables:
-  BPT_SPLT_BY_BUILD_TYPES: "true"
+  BPT_SPLIT_BY_BUILD_TYPES: "true"
   BPT_REQUIRE_MORE_DISK_SPACE: "true"
-  BPT_VARIABLE_TEST: "Templates can access global variables!"
+
+# bincrafters-conventions:azp-version:2
+# You can add custom environment variables above the version tag
+# Do not modify the tag or anything below the tag
+# This script gets automatically updated
+
+# Example
+# variables:
+#   BPT_SPLIT_BY_BUILD_TYPES: "true"  # Possible values "false", "true", default: false
+#   BPT_REQUIRE_MORE_DISK_SPACE: "true" # Possible values "false", "true", default: false
+
+# You can set any environment variable understood by Conan and Conan Package Tools
 
 resources:
   repositories:
