@@ -1,5 +1,9 @@
 versions:
   "5.15.1":
     folder: "5.15.x"
+  "5.14.0":
+    folder: "5.15.x"
+    build: "none"
   "5.15.0":
     folder: "5.15.x"
+    build: "minimal"
