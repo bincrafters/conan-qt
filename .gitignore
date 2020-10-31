@@ -29,10 +29,8 @@
 *.app
 
 # Cache
-__pycache__/*
-test_package/__pycache__/*
-test_package/build/*
-build/*
+__pycache__/
+build/
 *.pyc
 tmp/
 
