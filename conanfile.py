@@ -682,6 +682,9 @@ class QtConan(ConanFile):
 
     def package_info(self):
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info("Append %s to environment variable PATH" % bindir)
+        self.env_info.PATH.append(bindir)
 
     @staticmethod
     def _remove_duplicate(l):
