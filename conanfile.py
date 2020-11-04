@@ -327,7 +327,7 @@ class QtConan(ConanFile):
         if self.options.GUI and self.settings.os == "Linux":
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/0.10.0")
+                self.requires("xkbcommon/1.0.1")
         if self.options.with_zstd:
             self.requires("zstd/1.4.4")
         if self.options.qtwebengine and self.settings.os == "Linux":
