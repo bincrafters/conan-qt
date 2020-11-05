@@ -13,17 +13,7 @@ conan_output_dirs_setup()
 
 find_package(qt REQUIRED CONFIG)
 
-# Find includes in corresponding build directories
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-# Instruct CMake to run moc automatically when needed
-set(CMAKE_AUTOMOC ON)
-# Create code from a list of Qt designer ui files
-set(CMAKE_AUTOUIC ON)
-
-# Find the QtCore library in order to AUTOMOC, AUTOUIC and AUTORCC be enabled / works correctly
-find_package(Qt5 COMPONENTS Core)
-
-add_executable(${PROJECT_NAME} test_package.cpp greeter.h)
+add_executable(${PROJECT_NAME} ../test_package.cpp ../greeter.h ../moc_greeter.cpp)
 # Must compile with "-fPIC" since Qt was built with -reduce-relocations.
 target_compile_options(${PROJECT_NAME} PRIVATE -fPIC)
 
