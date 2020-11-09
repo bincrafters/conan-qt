@@ -3,7 +3,7 @@ import shutil
 import itertools
 
 import configparser
-from conans import ConanFile, tools, __version__ as conan_version, RunEnvironment
+from conans import ConanFile, tools, RunEnvironment
 from conans.errors import ConanInvalidConfiguration
 from conans.model import Generator
 from conans.tools import Version
@@ -37,6 +37,8 @@ def _getsubmodules():
                 res[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
     return res
 
+
+required_conan_version = ">=1.28.0"
 
 class QtConan(ConanFile):
 
@@ -199,8 +201,6 @@ class QtConan(ConanFile):
         if self.settings.compiler in ["gcc", "clang"]:
             if tools.Version(self.settings.compiler.version) < "5.0":
                 raise ConanInvalidConfiguration("qt 5.15.0 is not support on GCC or clang before 5.0")
-        if conan_version < Version("1.20.0"):
-            raise ConanInvalidConfiguration("This recipe needs at least conan 1.20.0, please upgrade.")
         if self.settings.os != 'Linux':
         #     self.options.with_libiconv = False
             self.options.with_fontconfig = False
