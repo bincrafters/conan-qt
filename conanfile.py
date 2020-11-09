@@ -1,3 +1,4 @@
+import glob
 import os
 import shutil
 import itertools
@@ -670,6 +671,10 @@ class QtConan(ConanFile):
         for module in self._submodules:
             if module != 'qtbase' and not getattr(self.options, module):
                 tools.rmdir(os.path.join(self.package_folder, "licenses", module))
+        # "Qt5Bootstrap" is internal Qt library - removing it to avoid linking error, since it contains
+        # symbols that are also in "Qt5Core.lib". It looks like there is no "Qt5Bootstrap.dll".
+        for fl in glob.glob(os.path.join(self.package_folder, "lib", "*Qt5Bootstrap*")):
+            os.remove(fl)
 
     def package_id(self):
         del self.info.options.cross_compile
@@ -682,6 +687,29 @@ class QtConan(ConanFile):
 
     def package_info(self):
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
+
+        self.cpp_info.libs = tools.collect_libs(self)
+
+        # Add top level include directory, so code compile if someone uses
+        # includes with prefixes (e.g. "#include <QtCore/QString>")
+        self.cpp_info.includedirs = ['include']
+
+        # Add all Qt module directories (QtCore, QtGui, QtWidgets and so on), so prefix
+        # can be omited in includes (e.g. "#include <QtCore/QString>" => "#include <QString>")
+        fu = ['include/' + f.name for f in os.scandir('include') if f.is_dir()]
+        self.cpp_info.includedirs.extend(fu)
+
+        if not self.options.shared:
+            if self.settings.os == 'Windows':
+                self.cpp_info.system_libs.append('Version')   # 'Qt5Cored.lib' require 'GetFileVersionInfoW' and 'VerQueryValueW' which are in 'Version.lib' library
+                self.cpp_info.system_libs.append('Winmm')     # 'Qt5Cored.lib' require '__imp_timeSetEvent' which is in 'Winmm.lib' library
+                self.cpp_info.system_libs.append('Netapi32')  # 'Qt5Cored.lib' require 'NetApiBufferFree' which is in 'Netapi32.lib' library
+                self.cpp_info.system_libs.append('UserEnv')   # 'Qt5Cored.lib' require '__imp_GetUserProfileDirectoryW ' which is in 'UserEnv.Lib' library
+
+            if self.settings.os == 'Macos':
+                self.cpp_info.frameworks.extend(["IOKit"])    # 'libQt5Core.a' require '_IORegistryEntryCreateCFProperty', '_IOServiceGetMatchingService' and much more which are in 'IOKit' framework
+                self.cpp_info.frameworks.extend(["Cocoa"])    # 'libQt5Core.a' require '_OBJC_CLASS_$_NSApplication' and more, which are in 'Cocoa' framework
+                self.cpp_info.frameworks.extend(["Security"]) # 'libQt5Core.a' require '_SecRequirementCreateWithString' and more, which are in 'Security' framework
 
     @staticmethod
     def _remove_duplicate(l):
