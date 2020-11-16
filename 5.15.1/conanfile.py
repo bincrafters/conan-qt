@@ -37,6 +37,7 @@ def _getsubmodules():
                 res[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
     return res
 
+
 required_conan_version = ">=1.28.0"
 
 class QtConan(ConanFile):
