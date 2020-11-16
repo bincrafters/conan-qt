@@ -39,7 +39,7 @@ jobs:
         run: |
           MATRIX=$(bincrafters-package-tools generate-ci-jobs --platform gha)
           echo "${MATRIX}"
-          # echo "::set-output name=matrix::${MATRIX}"
+          echo "::set-output name=matrix::${MATRIX}"
   conan:
     needs: generate-matrix
     runs-on: ${{ matrix.config.os }}
