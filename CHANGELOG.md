@@ -2,6 +2,10 @@
 
 This changelog describes interface changes (options and requirements) in the conan package. For qt's changelogs, please go to https://wiki.qt.io/Template:Release_Information
 
+## [5.15.2](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/5.15.2%3Astable)
+- upgrade to `glib/2.67.0` [2020-11-14](https://github.com/bincrafters/conan-qt/commit/b5b8f20955d93ec0835416acefdb6cb1b647b9f3)
+- upgrade to `fontconfig/2.13.92` [2020-11-14](https://github.com/bincrafters/conan-qt/commit/b5b8f20955d93ec0835416acefdb6cb1b647b9f3)
+- upgrade to `icu/68.1` [2020-11-14](https://github.com/bincrafters/conan-qt/commit/b5b8f20955d93ec0835416acefdb6cb1b647b9f3)
 ## [5.15.1](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/5.15.1%3Astable)
 - upgrade to `xkbcommon/1.0.1` [2020-11-04](https://github.com/bincrafters/conan-qt/commit/52f848cd837a4fe90db0d8447215edcb6a17476b)
 - upgrade to `glib/2.66.2` [2020-10-30](https://github.com/bincrafters/conan-qt/commit/982a1b9ec6e53b2d1d54880e1adcfa131b7902fd)
