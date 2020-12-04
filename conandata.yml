@@ -93,3 +93,5 @@ patches:
       base_path: "qt5/qtbase"
     - patch_file: "patches/c72097e.diff"
       base_path: "qt5/qtwebengine"
+    - patch_file: "patches/138a720.diff"
+      base_path: "qt5/qtwebengine/src/3rdparty"
