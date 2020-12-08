@@ -336,6 +336,7 @@ class QtConan(ConanFile):
             self.requires("expat/2.2.10")
             #self.requires("ffmpeg/4.2@bincrafters/stable")
             self.requires("opus/1.3.1")
+            self.requires("egl/system")
 
         if self.options.opengl in ["desktop", "es2"]:
             self.requires('opengl/system')
