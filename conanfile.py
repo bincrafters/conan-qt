@@ -126,6 +126,7 @@ class QtConan(ConanFile):
     short_paths = True
 
     def build_requirements(self):
+        self.build_requires("cmake/3.19.1")
         self.build_requires('pkgconf/1.7.3')
         if not tools.which("ninja"):
             self.build_requires("ninja/1.10.1")
@@ -267,8 +268,7 @@ class QtConan(ConanFile):
         #     if self.options.qtwebengine:
         #         self.options.with_fontconfig = True
 
-        # FIXME : reenable this when out of prerelease
-        # assert self.version == self._submodules['qtbase']['branch']
+        assert self.version == self._submodules['qtbase']['branch']
 
         def _enablemodule(mod):
             if mod != 'qtbase':
@@ -355,7 +355,7 @@ class QtConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         shutil.move("qt-everywhere-src-%s" % self.version, "qt6")
 
-        for patch in self.conan_data["patches"].get(self.version, []):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         # FIXME: is qtwebengine a qt6 module?
         # for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
