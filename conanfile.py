@@ -61,7 +61,8 @@ class QtConan(ConanFile):
         "openssl": [True, False],
         "with_pcre2": [True, False],
         "with_glib": [True, False],
-        "with_doubleconversion": [True, False],
+        # FIXME : is there a way to make doubleconversion work?
+        # "with_doubleconversion": [True, False],
         "with_freetype": [True, False],
         "with_fontconfig": [True, False],
         "with_icu": [True, False],
@@ -96,7 +97,8 @@ class QtConan(ConanFile):
         "openssl": True,
         "with_pcre2": True,
         "with_glib": True,
-        "with_doubleconversion": True,
+        # FIXME
+        # "with_doubleconversion": True,
         "with_freetype": True,
         "with_fontconfig": True,
         "with_icu": True,
@@ -259,9 +261,10 @@ class QtConan(ConanFile):
         if self.options.multiconfiguration:
             del self.settings.build_type
 
-        if not self.options.with_doubleconversion and str(self.settings.compiler.libcxx) != "libc++":
-            raise ConanInvalidConfiguration('Qt without libc++ needs qt:with_doubleconversion. '
-                                            'Either enable qt:with_doubleconversion or switch to libc++')
+        # FIXME
+        # if not self.options.with_doubleconversion and str(self.settings.compiler.libcxx) != "libc++":
+        #     raise ConanInvalidConfiguration('Qt without libc++ needs qt:with_doubleconversion. '
+        #                                     'Either enable qt:with_doubleconversion or switch to libc++')
 
         # FIXME : is qtwebengine a qt6 module ?
         # if tools.os_info.is_linux:
@@ -288,8 +291,9 @@ class QtConan(ConanFile):
 
         if self.options.with_glib:
             self.requires("glib/2.66.0")
-        if self.options.with_doubleconversion and not self.options.multiconfiguration:
-            self.requires("double-conversion/3.1.5")
+        # FIXME
+        #if self.options.with_doubleconversion and not self.options.multiconfiguration:
+        #    self.requires("double-conversion/3.1.5")
         if self.options.with_freetype and not self.options.multiconfiguration:
             self.requires("freetype/2.10.2")
         if self.options.with_fontconfig:
@@ -509,6 +513,7 @@ class QtConan(ConanFile):
         #    args.append("--alsa=" + ("yes" if self.options.with_libalsa else "no"))
 
         for opt, conf_arg in [
+                              # FIXME
                               #("with_doubleconversion", "doubleconversion"),
                               ("with_freetype", "freetype"),
                               ("with_harfbuzz", "harfbuzz"),
