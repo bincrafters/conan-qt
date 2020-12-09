@@ -194,9 +194,14 @@ class QtConan(ConanFile):
                 raise ConanInvalidConfiguration("Old versions of apple sdk are not supported by Qt (QTBUG-76777)")
 
     def configure(self):
-        if self.settings.compiler in ["gcc", "clang"]:
-            if tools.Version(self.settings.compiler.version) < "5.0":
-                raise ConanInvalidConfiguration("qt 5.15.0 is not support on GCC or clang before 5.0")
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "8":
+            raise ConanInvalidConfiguration("qt 6 does not support GCC before 8")
+        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "9":
+            raise ConanInvalidConfiguration("qt 6 does not support clang before 9")
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "16":
+            raise ConanInvalidConfiguration("qt 6 does not support Visual Studio before 2019")
+        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "11":
+            raise ConanInvalidConfiguration("qt 6 does not support apple-clang before 11")
         if conan_version < Version("1.20.0"):
             raise ConanInvalidConfiguration("This recipe needs at least conan 1.20.0, please upgrade.")
         if self.settings.os != 'Linux':
