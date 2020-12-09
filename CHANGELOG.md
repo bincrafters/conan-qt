@@ -2,7 +2,17 @@
 
 This changelog describes interface changes (options and requirements) in the conan package. For qt's changelogs, please go to https://wiki.qt.io/Template:Release_Information
 
+## [5.15.2](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/5.15.2%3Astable)
+- upgrade to `glib/2.67.0` [2020-11-14](https://github.com/bincrafters/conan-qt/commit/b5b8f20955d93ec0835416acefdb6cb1b647b9f3)
+- upgrade to `fontconfig/2.13.92` [2020-11-14](https://github.com/bincrafters/conan-qt/commit/b5b8f20955d93ec0835416acefdb6cb1b647b9f3)
+- upgrade to `icu/68.1` [2020-11-14](https://github.com/bincrafters/conan-qt/commit/b5b8f20955d93ec0835416acefdb6cb1b647b9f3)
 ## [5.15.1](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/5.15.1%3Astable)
+- upgrade to `xkbcommon/1.0.1` [2020-11-04](https://github.com/bincrafters/conan-qt/commit/52f848cd837a4fe90db0d8447215edcb6a17476b)
+- upgrade to `glib/2.66.2` [2020-10-30](https://github.com/bincrafters/conan-qt/commit/982a1b9ec6e53b2d1d54880e1adcfa131b7902fd)
+- upgrade to `freetype/2.10.4` [2020-10-30](https://github.com/bincrafters/conan-qt/commit/982a1b9ec6e53b2d1d54880e1adcfa131b7902fd)
+- add optional dependency on `libjpeg-turbo` [2020-10-28](https://github.com/bincrafters/conan-qt/commit/d504e0907eeb20c407e893f817df4c2c3c9fa08b)
+- upgrade to `harfbuzz/2.7.2` [2020-10-16](https://github.com/bincrafters/conan-qt/commit/481728f315c18fb544e34776d5ccc91a6fe79c12)
+- upgrade to `expat/2.2.10` [2020-10-11](https://github.com/bincrafters/conan-qt/commit/8e142d657dfcc7b6eca91eba0831bc80d6cacf8b)
 - upgrade to `openssl/1.1.1h` [2020-09-30](https://github.com/bincrafters/conan-qt/commit/a43350e71c19f1c7dec4cab41e0aa512024eee86)
 - upgrade to build requirement `ninja/1.10.1` [2020-09-30](https://github.com/bincrafters/conan-qt/commit/a43350e71c19f1c7dec4cab41e0aa512024eee86)
 - upgrade to `glib/2.66.0` [2020-09-23](https://github.com/bincrafters/conan-qt/commit/a8726297ac049b81b2cae2d2e17fb22e22ece582)
