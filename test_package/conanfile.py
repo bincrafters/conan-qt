@@ -7,9 +7,10 @@ from conans.errors import ConanException
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "qt", "cmake", "cmake_find_package_multi"
+    generators = "qt", "cmake", "cmake_find_package", "cmake_find_package_multi", "pkg_config"
 
     def build_requirements(self):
+        self.build_requires("cmake/3.19.1")
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
             self.build_requires("jom/1.1.3")
         if self._meson_supported():
@@ -62,7 +63,7 @@ class TestPackageConan(ConanFile):
                     else:
                         self.run("mingw32-make", run_environment=True)
                 else:
-                    self.run("make", run_environment=True)
+                    self.run("LIBRARY_PATH=$LD_LIBRARY_PATH make", run_environment=True)
 
     def _build_with_meson(self):
         if self._meson_supported():
