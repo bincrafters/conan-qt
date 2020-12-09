@@ -452,8 +452,7 @@ class QtConan(ConanFile):
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.generator = "Ninja"
+        self._cmake = CMake(self, generator="Ninja")
 
         # FIXME: port to cmake 
         # args = ["-confirm-license", "-silent"]
