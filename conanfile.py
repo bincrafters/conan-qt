@@ -608,8 +608,15 @@ class QtConan(ConanFile):
                                   self.settings.compiler.version, self.settings.arch))
         if self.options.cross_compile:
             self._cmake.definitions["QT_QMAKE_DEVICE_OPTIONS"] = "CROSS_COMPILE=%s" % self.options.cross_compile
+        
+        self._cmake.definitions["FEATURE_pkg_config"] = "ON"
 
-        self._cmake.configure(source_folder="qt6")
+        try:
+            self._cmake.configure(source_folder="qt6")
+        except:
+            self.output.info(tools.load(os.path.join(self.build_folder, "CMakeFiles", "CMakeError.log")))
+            self.output.info(tools.load(os.path.join(self.build_folder, "CMakeFiles", "CMakeOutput.log")))
+            raise
         return self._cmake
 
     def build(self):
