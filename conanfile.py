@@ -465,8 +465,6 @@ class QtConan(ConanFile):
         #    args.append("-commercial")
         #else:
         #    args.append("-opensource")
-        self._cmake.definitions["FEATURE_gui"] = ("ON" if self.options.GUI else "OFF")
-        self._cmake.definitions["FEATURE_widgets"] =  ("ON" if self.options.widgets else "OFF")
         if self.settings.compiler == "Visual Studio":
             if self.settings.compiler.runtime == "MT" or self.settings.compiler.runtime == "MTd":
                 self._cmake.definitions["FEATURE_static_runtime"] = "ON"
@@ -505,28 +503,32 @@ class QtConan(ConanFile):
             else:
                 self._cmake.definitions["INPUT_openssl"] = "linked"
 
-        self._cmake.definitions["FEATURE_sql_mysql"] = ("ON" if self.options.with_mysql else "OFF")
-        self._cmake.definitions["FEATURE_sql_psql"] = ("ON" if self.options.with_pq else "OFF")
-        self._cmake.definitions["FEATURE_sql_odbc"] = ("ON" if self.options.with_odbc else "OFF")
-
         # FIXME: port to cmake
         # args.append("--zstd=" + ("yes" if self.options.with_zstd else "no"))
         #
         #if self.options.qtmultimedia:
         #    args.append("--alsa=" + ("yes" if self.options.with_libalsa else "no"))
 
+        for opt, conf_arg in [("with_glib", "glib"),
+                              ("with_icu", "icu"),
+                              ("with_fontconfig", "fontconfig"),
+                              ("with_mysql", "sql_mysql"),
+                              ("with_pq", "sql_psql"),
+                              ("with_odbc", "sql_odbc"),
+                              ("GUI", "gui"),
+                              ("widgets", "widgets")]:
+            self._cmake.definitions["FEATURE_%s" % conf_arg] = ("ON" if getattr(self.options, opt) else "OFF")
+            
+
         for opt, conf_arg in [
                               # FIXME
                               #("with_doubleconversion", "doubleconversion"),
                               ("with_freetype", "freetype"),
                               ("with_harfbuzz", "harfbuzz"),
-                              ("with_libjpeg", "libjpeg"),
-                              ("with_libpng", "libpng"),
+                              ("with_libjpeg", "jpeg"),
+                              ("with_libpng", "png"),
                               ("with_sqlite3", "sqlite"),
-                              ("with_glib", "glib"),
-                              ("with_icu", "icu"),
-                              ("with_pcre2", "pcre2"),
-                              ("with_fontconfig", "fontconfig")]:
+                              ("with_pcre2", "pcre2"),]:
             if getattr(self.options, opt):
                 if self.options.multiconfiguration:
                     self._cmake.definitions["FEATURE_%s" % conf_arg] = "ON"
