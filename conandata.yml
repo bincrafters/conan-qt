@@ -109,3 +109,6 @@ patches:
       base_path: "qt5/qtwebengine/src/3rdparty"
     - patch_file: "patches/f830b86.diff"
       base_path: "qt5/qtwebengine/src/3rdparty"
+  "6.0.0":
+    - patch_file: "patches/effc8b5.diff"
+      base_path: "qt6/qtbase"
