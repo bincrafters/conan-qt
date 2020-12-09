@@ -113,7 +113,7 @@ class QtConan(ConanFile):
         # "with_sdl2": True,
         "with_libalsa": False,
         "with_openal": True,
-        "with_zstd": True,
+        "with_zstd": False,
 
         "GUI": True,
         "widgets": True,
