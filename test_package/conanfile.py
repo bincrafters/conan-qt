@@ -29,7 +29,12 @@ class TestPackageConan(ConanFile):
         return self.options["qt"].shared or\
             not self._is_mingw()
 
+    def _qmake_supported(self):
+        return not self.settings.compiler == "Visual Studio" or self.options["qt"].shared
+
     def _build_with_qmake(self):
+        if not self._qmake_supported():
+            return
         tools.mkdir("qmake_folder")
         with tools.chdir("qmake_folder"):
             self.output.info("Building with qmake")
@@ -108,6 +113,8 @@ class TestPackageConan(ConanFile):
         self._build_with_cmake_find_package_multi()
 
     def _test_with_qmake(self):
+        if not self._qmake_supported():
+            return
         self.output.info("Testing qmake")
         bin_path = os.path.join("qmake_folder", "bin")
         if tools.os_info.is_macos:
