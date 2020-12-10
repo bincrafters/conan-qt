@@ -1,5 +1,6 @@
- CONFIG += conan_basic_setup
- include($$OUT_PWD/../conanbuildinfo.pri)
+include($$OUT_PWD/../conanbuildinfo.pri)
+
+LIBS += $$CONAN_LIBDIRS
 
 SOURCES += test_package.cpp
 
