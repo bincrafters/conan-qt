@@ -50,3 +50,21 @@ jobs:
             source ./activate_run.sh
           fi
           conan create . qt/5.15.2@bincrafters/testing -b ${{ matrix.build }} -o qt:with_mysql=False -o qt:config="-xcb"
+
+  FreeBSD:
+    runs-on: macos-latest
+    name: FreeBSD
+    env:
+      CONAN_MAKE_PROGRAM: "gmake"
+      CC: clang
+      CXX: clang++
+    steps:
+    - uses: actions/checkout@v2
+    - name: run
+      id: test
+      uses: vmactions/freebsd-vm@v0.0.9
+      with:
+        envs: 'CONAN_MAKE_PROGRAM CC CXX'
+        usesh: true
+        prepare: pkg install -y cmake conan python2 sudo gmake perl5 pkgconf libunwind mesa-libs
+        run: conan create . qt/5.15.2@bincrafters/testing -b missing -o qt:with_mysql=False -o qt:config="-xcb" -o qt:with_glib=False -o fontconfig:shared=True -o harfbuzz:with_glib=False
