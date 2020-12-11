@@ -373,6 +373,8 @@ class QtConan(ConanFile):
             return "jom"
         elif tools.os_info.is_windows:
             return "mingw32-make"
+        elif self.settings.os == "FreeBSD":
+            return "gmake"
         else:
             return "make"
 
@@ -646,7 +648,10 @@ class QtConan(ConanFile):
             args.append(str(self.options.config))
 
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-            build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [os.getcwd()]}
+            build_env = {
+                "MAKEFLAGS": "-j%d" % tools.cpu_count(),
+                "JOMFLAGS": "j%d" % tools.cpu_count(),
+                "PKG_CONFIG_PATH": [os.getcwd()]}
             if self.settings.os == "Windows":
                 build_env["PATH"] = [os.path.join(self.source_folder, "qt5", "gnuwin32", "bin")]
                 
