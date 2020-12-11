@@ -131,7 +131,7 @@ class QtConan(ConanFile):
         self.build_requires("cmake/3.19.1")
         self.build_requires('pkgconf/1.7.3')
         if not tools.which("ninja"):
-            self.build_requires("ninja/1.10.1")
+            self.build_requires("ninja/1.10.2")
         # FIXME : is qtwebengine a qt6 module ?
         # if self.options.qtwebengine:
         #     # gperf, bison, flex, python >= 2.7.5 & < 3
@@ -290,7 +290,7 @@ class QtConan(ConanFile):
 
     def requirements(self):
         if self.options.openssl:
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1i")
         if self.options.with_pcre2:
             self.requires("pcre2/10.33")
 
@@ -309,7 +309,7 @@ class QtConan(ConanFile):
             self.requires("harfbuzz/2.7.2")
         if self.options.with_libjpeg and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/2.0.5")
+                self.requires("libjpeg-turbo/2.0.6")
             else:
                 self.requires("libjpeg/9d")
         if self.options.with_libpng and not self.options.multiconfiguration:
@@ -328,13 +328,13 @@ class QtConan(ConanFile):
         # if self.options.with_sdl2:
         #     self.requires("sdl2/2.0.10@bincrafters/stable")
         if self.options.with_openal:
-            self.requires("openal/1.19.1")
+            self.requires("openal/1.21.0")
         if self.options.with_libalsa:
             self.requires("libalsa/1.1.9")
         if self.options.GUI and self.settings.os == "Linux":
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.0.1")
+                self.requires("xkbcommon/1.0.3")
         if self.options.with_zstd:
             self.requires("zstd/1.4.4")
         # FIXME : is qtwebengine a qt6 module ?
