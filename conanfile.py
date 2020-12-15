@@ -131,7 +131,7 @@ class QtConan(ConanFile):
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
             self.build_requires("jom/1.1.3")
-        if self.settings.os == 'Linux':
+        if self.settings.os in ["Linux", "FreeBSD"]:
             if not tools.which('pkg-config'):
                 self.build_requires('pkgconf/1.7.3')
         if self.options.qtwebengine:
@@ -190,7 +190,7 @@ class QtConan(ConanFile):
                 _check_python_version()
 
     def config_options(self):
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             self.options.with_icu = False
         if self.settings.compiler == "apple-clang":
             if tools.Version(self.settings.compiler.version) < "10.0":
@@ -202,7 +202,7 @@ class QtConan(ConanFile):
                 raise ConanInvalidConfiguration("qt 5.15.0 is not support on GCC or clang before 5.0")
         if conan_version < Version("1.20.0"):
             raise ConanInvalidConfiguration("This recipe needs at least conan 1.20.0, please upgrade.")
-        if self.settings.os != 'Linux':
+        if self.settings.os not in ["Linux", "FreeBSD"]:
         #     self.options.with_libiconv = False
             self.options.with_fontconfig = False
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.3":
@@ -234,7 +234,7 @@ class QtConan(ConanFile):
         if self.options.qtmultimedia and not self.options.GUI:
             raise ConanInvalidConfiguration("Qt multimedia cannot be used without GUI")
 
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             self.options.with_libalsa = False
 
         if self.options.qtwebengine:
@@ -325,13 +325,13 @@ class QtConan(ConanFile):
             self.requires("openal/1.19.1")
         if self.options.with_libalsa:
             self.requires("libalsa/1.1.9")
-        if self.options.GUI and self.settings.os == "Linux":
+        if self.options.GUI and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
                 self.requires("xkbcommon/1.0.1")
         if self.options.with_zstd:
             self.requires("zstd/1.4.4")
-        if self.options.qtwebengine and self.settings.os == "Linux":
+        if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             self.requires("expat/2.2.10")
             #self.requires("ffmpeg/4.2@bincrafters/stable")
@@ -640,7 +640,7 @@ class QtConan(ConanFile):
         if tools.os_info.is_linux and self.settings.compiler == "clang":
             args += ['QMAKE_CXXFLAGS+="-ftemplate-depth=1024"']
 
-        if self.options.qtwebengine and self.settings.os == "Linux":
+        if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             args += ['-qt-webengine-ffmpeg',
                      '-system-webengine-opus']
 
