@@ -28,7 +28,7 @@ jobs:
 
       - name: enable powerTools(centos)
         if: ${{ matrix.distro == 'centos' }}
-        run: dnf -y install dnf-plugins-core && dnf config-manager --set-enabled PowerTools
+        run: yum -y install dnf-plugins-core && yum config-manager --set-enabled powertools
 
       - name: Install Python(centos/fedora)
         if: ${{ matrix.distro == 'fedora' || matrix.distro == 'centos' }}
