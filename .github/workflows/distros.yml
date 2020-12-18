@@ -67,5 +67,5 @@ jobs:
       with:
         envs: 'CONAN_MAKE_PROGRAM CC CXX CONAN_SYSREQUIRES_MODE'
         usesh: true
-        prepare: pkg install -y cmake conan python2 sudo gmake perl5 pkgconf libunwind mesa-libs
+        prepare: pkg install -y cmake conan python2 python3 sudo gmake perl5 pkgconf libunwind mesa-libs bash
         run: conan create . qt/5.15.2@bincrafters/testing -b missing -o qt:with_mysql=False -o qt:config="-xcb" -o qt:with_glib=False -o fontconfig:shared=True -o harfbuzz:with_glib=False
