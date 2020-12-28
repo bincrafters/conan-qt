@@ -658,7 +658,8 @@ class QtConan(ConanFile):
                 with tools.environment_append({
                     "BASH_ENV": os.path.abspath("bash_env")
                     }) if tools.os_info.is_macos else tools.no_op():
-                    cmake.build()
+                    with tools.run_environment(self):
+                        cmake.build()
 
     def package(self):
         cmake = self._configure_cmake()
