@@ -370,7 +370,7 @@ class QtConan(ConanFile):
 
         tools.replace_in_file(os.path.join("qt6", "CMakeLists.txt"),
                               "enable_testing()",
-                              "include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)\nconan_basic_setup()\nenable_testing()")
+                              "include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)\nconan_basic_setup(KEEP_RPATHS)\nenable_testing()")
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
