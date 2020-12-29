@@ -42,7 +42,7 @@ class QtConan(ConanFile):
 
     _submodules = _getsubmodules()
 
-    generators = "pkg_config", "cmake_find_package"
+    generators = "pkg_config", "cmake_find_package", "cmake"
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
     topics = ("conan", "qt", "ui")
@@ -366,6 +366,10 @@ class QtConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         shutil.move("qt-everywhere-src-%s" % self.version, "qt6")
+
+        tools.replace_in_file(os.path.join("qt6", "CMakeLists.txt"),
+                              "enable_testing()",
+                              "include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)\nconan_basic_setup()\nenable_testing()")
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
