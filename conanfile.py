@@ -205,7 +205,7 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration("qt 6 does not support apple-clang before 11")
         if conan_version < Version("1.20.0"):
             raise ConanInvalidConfiguration("This recipe needs at least conan 1.20.0, please upgrade.")
-        if self.settings.os != 'Linux':
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             self.options.with_fontconfig = False
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.3":
             self.options.with_mysql = False
@@ -238,7 +238,7 @@ class QtConan(ConanFile):
         # if self.options.qtmultimedia and not self.options.GUI:
         #     raise ConanInvalidConfiguration("Qt multimedia cannot be used without GUI")
 
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             self.options.with_libalsa = False
 
         # FIXME : is qtwebengine a qt6 module?
@@ -273,7 +273,7 @@ class QtConan(ConanFile):
         #                                     'Either enable qt:with_doubleconversion or switch to libc++')
 
         # FIXME : is qtwebengine a qt6 module ?
-        # if tools.os_info.is_linux:
+        # if self.settings.os in ["Linux", "FreeBSD"]:
         #     if self.options.qtwebengine:
         #         self.options.with_fontconfig = True
 
@@ -332,14 +332,14 @@ class QtConan(ConanFile):
             self.requires("openal/1.21.0")
         if self.options.with_libalsa:
             self.requires("libalsa/1.1.9")
-        if self.options.GUI and self.settings.os == "Linux":
+        if self.options.GUI and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
                 self.requires("xkbcommon/1.0.3")
         if self.options.with_zstd:
             self.requires("zstd/1.4.4")
         # FIXME : is qtwebengine a qt6 module ?
-        # if self.options.qtwebengine and self.settings.os == "Linux":
+        # if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
         #     self.requires("xorg/system")
         #     self.requires("expat/2.2.10")
         #     #self.requires("ffmpeg/4.2@bincrafters/stable")
