@@ -619,7 +619,8 @@ class QtConan(ConanFile):
             self._cmake.definitions["QT_QMAKE_DEVICE_OPTIONS"] = "CROSS_COMPILE=%s" % self.options.cross_compile
         
         self._cmake.definitions["FEATURE_pkg_config"] = "ON"
-        self._cmake.definitions["BUILD_WITH_PCH"]= "OFF"
+        if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
+            self._cmake.definitions["BUILD_WITH_PCH"]= "OFF" # disabling PCH to save disk space
 
         try:
             self._cmake.configure(source_folder="qt6")
