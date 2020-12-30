@@ -2,6 +2,12 @@
 
 This changelog describes interface changes (options and requirements) in the conan package. For qt's changelogs, please go to https://wiki.qt.io/Template:Release_Information
 
+## [6.0.0](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/6.0.0%3Astable)
+- upgrade to build requirement `ninja/1.10.2` [2020-12-11](https://github.com/bincrafters/conan-qt/commit/972f0489953f90d598c6c4d5ab9a7e30a7a1c043)
+- upgrade to `openssl/1.1.1i` [2020-12-11](https://github.com/bincrafters/conan-qt/commit/972f0489953f90d598c6c4d5ab9a7e30a7a1c043)
+- upgrade to `libjpeg-turbo/2.0.6` [2020-12-11](https://github.com/bincrafters/conan-qt/commit/972f0489953f90d598c6c4d5ab9a7e30a7a1c043)
+- upgrade to `openal/1.21.0` [2020-12-11](https://github.com/bincrafters/conan-qt/commit/972f0489953f90d598c6c4d5ab9a7e30a7a1c043)
+- upgrade to `xkbcommon/1.0.3` [2020-12-11](https://github.com/bincrafters/conan-qt/commit/972f0489953f90d598c6c4d5ab9a7e30a7a1c043)
 ## [5.15.2](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/5.15.2%3Astable)
 - upgrade to `glib/2.67.0` [2020-11-14](https://github.com/bincrafters/conan-qt/commit/b5b8f20955d93ec0835416acefdb6cb1b647b9f3)
 - upgrade to `fontconfig/2.13.92` [2020-11-14](https://github.com/bincrafters/conan-qt/commit/b5b8f20955d93ec0835416acefdb6cb1b647b9f3)
