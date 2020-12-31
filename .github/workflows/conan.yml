@@ -16,6 +16,8 @@ env:
 
 on: [push, pull_request]
 
+name: conan
+
 jobs:
   generate-matrix:
     name: Generate Job Matrix
@@ -24,12 +26,14 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: "0"
       - uses: actions/setup-python@v1
         with:
           python-version: "3.8"
       - name: Install Package Tools
         run: |
-          pip install bincrafters_package_tools
+          pip install git+https://github.com/bincrafters/bincrafters-package-tools@develop
           conan user
       - name: Generate Job Matrix
         id: set-matrix
@@ -47,16 +51,9 @@ jobs:
       matrix: ${{fromJson(needs.generate-matrix.outputs.matrix)}}
     name: ${{ matrix.config.name }}
     steps:
-      - name: Run
-        run: |
-          docker system prune --all --force --volumes
-          sudo rm -rf "/usr/local/share/boost"
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY/CodeQL"
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY/Ruby"
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY/boost"
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY/go"
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY/node"
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: "0"
       - uses: actions/setup-python@v1
         with:
           python-version: "3.8"
@@ -64,7 +61,7 @@ jobs:
         env:
           BPT_MATRIX: ${{toJson(matrix.config)}}
         run: |
-          pip install bincrafters_package_tools
+          pip install git+https://github.com/bincrafters/bincrafters-package-tools@develop
           # remove newlines from matrix first
           matrix=$(echo ${BPT_MATRIX})
           bincrafters-package-tools prepare-env --platform gha --config "${matrix}"
