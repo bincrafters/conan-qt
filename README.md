@@ -1,8 +1,8 @@
 ## Package Status
 
-| Bintray | Windows | Linux & macOS |
+| Bintray | Windows & macOS | Linux |
 |:--------:|:---------:|:-----------------:|
-|[![Download](https://api.bintray.com/packages/bincrafters/public-conan/qt%3Abincrafters/images/download.svg) ](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/_latestVersion)|[![Build status](https://ci.appveyor.com/api/projects/status/github/bincrafters/conan-qt?svg=true)](https://ci.appveyor.com/project/bincrafters/conan-qt)|[![Build Status](https://travis-ci.com/bincrafters/conan-qt.svg)](https://travis-ci.com/bincrafters/conan-qt)|
+|[![Download](https://api.bintray.com/packages/bincrafters/public-conan/qt%3Abincrafters/images/download.svg) ](https://bintray.com/bincrafters/public-conan/qt%3Abincrafters/_latestVersion)|[![Build status](https://dev.azure.com/bincrafters/packages/_apis/build/status/bincrafters.conan-qt)](https://dev.azure.com/bincrafters/packages/_build?definitionId=7&_a=summary)|[![Build Status](https://github.com/bincrafters/conan-qt/workflows/conan/badge.svg)](https://github.com/bincrafters/conan-qt/actions?query=workflow%3Aconan)|
 
 [Changelog](CHANGELOG.md)
 
