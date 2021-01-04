@@ -574,13 +574,9 @@ class QtConan(ConanFile):
         #             args.append("\"%s_INCDIR=%s\"" % (var, self.deps_cpp_info[package].include_paths[-1]))
         #         args.append("\"%s_LIBS=%s\"" % (var, " ".join(self._gather_libs(package))))
 
-        self._cmake.definitions["QT_EXTRA_INCLUDEPATHS"] = ""
-        self._cmake.definitions["QT_EXTRA_DEFINES"] = ""
-        self._cmake.definitions["QT_EXTRA_LIBDIRS"] = ""
-        for package in self.deps_cpp_info.deps:
-            self._cmake.definitions["QT_EXTRA_INCLUDEPATHS"] += "".join(["%s;" % s for s in self.deps_cpp_info[package].include_paths])
-            self._cmake.definitions["QT_EXTRA_DEFINES"] += "".join(["%s;" % s for s in self.deps_cpp_info[package].defines])
-            self._cmake.definitions["QT_EXTRA_LIBDIRS"] += "".join(["%s;" % s for s in self.deps_cpp_info[package].lib_paths])
+        self._cmake.definitions["QT_EXTRA_INCLUDEPATHS"] = "${CONAN_INCLUDE_DIRS}"
+        self._cmake.definitions["QT_EXTRA_DEFINES"] = "${CONAN_DEFINES}"
+        self._cmake.definitions["QT_EXTRA_LIBDIRS"] = "${CONAN_LIB_DIRS}"
 
         # FIXME: port to cmake
         # if 'libmysqlclient' in self.deps_cpp_info.deps:
