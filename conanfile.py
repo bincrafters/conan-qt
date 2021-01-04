@@ -3,6 +3,7 @@ import shutil
 import itertools
 import glob
 import configparser
+import pathlib
 from conans import ConanFile, tools, __version__ as conan_version, RunEnvironment, CMake
 from conans.errors import ConanInvalidConfiguration
 from conans.model import Generator
@@ -578,9 +579,9 @@ class QtConan(ConanFile):
         self._cmake.definitions["QT_EXTRA_DEFINES"] = ""
         self._cmake.definitions["QT_EXTRA_LIBDIRS"] = ""
         for package in self.deps_cpp_info.deps:
-            self._cmake.definitions["QT_EXTRA_INCLUDEPATHS"] += "".join(["%s;" % s for s in self.deps_cpp_info[package].include_paths])
-            self._cmake.definitions["QT_EXTRA_DEFINES"] += "".join(["%s;" % s for s in self.deps_cpp_info[package].defines])
-            self._cmake.definitions["QT_EXTRA_LIBDIRS"] += "".join(["%s;" % s for s in self.deps_cpp_info[package].lib_paths])
+            self._cmake.definitions["QT_EXTRA_INCLUDEPATHS"] += "".join(["%s;" % pathlib.Path(s).as_posix() for s in self.deps_cpp_info[package].include_paths])
+            self._cmake.definitions["QT_EXTRA_DEFINES"] += "".join(["%s;" % pathlib.Path(s).as_posix() for s in self.deps_cpp_info[package].defines])
+            self._cmake.definitions["QT_EXTRA_LIBDIRS"] += "".join(["%s;" % pathlib.Path(s).as_posix() for s in self.deps_cpp_info[package].lib_paths])
 
         # FIXME: port to cmake
         # if 'libmysqlclient' in self.deps_cpp_info.deps:
