@@ -713,21 +713,21 @@ class QtConan(ConanFile):
                 self.cpp_info.frameworks.extend(["Cocoa"])    # 'libQt5Core.a' require '_OBJC_CLASS_$_NSApplication' and more, which are in 'Cocoa' framework
                 self.cpp_info.frameworks.extend(["Security"]) # 'libQt5Core.a' require '_SecRequirementCreateWithString' and more, which are in 'Security' framework
 
-    @staticmethod
-    def _remove_duplicate(l):
-        seen = set()
-        seen_add = seen.add
-        for element in itertools.filterfalse(seen.__contains__, l):
-            seen_add(element)
-            yield element
+    # @staticmethod
+    # def _remove_duplicate(l):
+    #     seen = set()
+    #     seen_add = seen.add
+    #     for element in itertools.filterfalse(seen.__contains__, l):
+    #         seen_add(element)
+    #         yield element
 
-    def _gather_libs(self, p):
-        if not p in self.deps_cpp_info.deps:
-            return []
-        libs = ["-l" + i for i in self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs]
-        if tools.is_apple_os(self.settings.os):
-            libs += ["-framework " + i for i in self.deps_cpp_info[p].frameworks]
-        libs += self.deps_cpp_info[p].sharedlinkflags
-        for dep in self.deps_cpp_info[p].public_deps:
-            libs += self._gather_libs(dep)
-        return self._remove_duplicate(libs)
+    # def _gather_libs(self, p):
+    #     if not p in self.deps_cpp_info.deps:
+    #         return []
+    #     libs = ["-l" + i for i in self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs]
+    #     if tools.is_apple_os(self.settings.os):
+    #         libs += ["-framework " + i for i in self.deps_cpp_info[p].frameworks]
+    #     libs += self.deps_cpp_info[p].sharedlinkflags
+    #     for dep in self.deps_cpp_info[p].public_deps:
+    #         libs += self._gather_libs(dep)
+    #     return self._remove_duplicate(libs)
