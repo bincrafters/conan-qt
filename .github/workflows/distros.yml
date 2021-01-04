@@ -67,5 +67,5 @@ jobs:
       with:
         envs: 'CONAN_MAKE_PROGRAM CC CXX CONAN_SYSREQUIRES_MODE'
         usesh: true
-        prepare: pkg install -y cmake py37-pip py37-sqlite3 python3 sudo gmake perl5 pkgconf libunwind mesa-libs bash
+        prepare: pkg install -y cmake py37-pip py37-sqlite3 python3 sudo gmake perl5 pkgconf libunwind mesa-libs bash && ln -s /usr/local/bin/perl /usr/bin/perl
         run: pip install conan && conan create . qt/5.15.2@bincrafters/testing -b missing -o qt:config="-xcb"
