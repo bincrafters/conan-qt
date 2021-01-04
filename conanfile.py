@@ -370,7 +370,11 @@ class QtConan(ConanFile):
 
         tools.replace_in_file(os.path.join("qt6", "CMakeLists.txt"),
                               "enable_testing()",
-                              "include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)\nconan_basic_setup(KEEP_RPATHS)\nenable_testing()")
+                              "include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)\nconan_basic_setup(KEEP_RPATHS)\n"
+                               "set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS}\n"
+                               "setQT_EXTRA_DEFINES ${CONAN_DEFINES}\n"
+                               "set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS}\n"
+                               "enable_testing()")
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
@@ -574,13 +578,6 @@ class QtConan(ConanFile):
         #             args.append("\"%s_INCDIR=%s\"" % (var, self.deps_cpp_info[package].include_paths[-1]))
         #         args.append("\"%s_LIBS=%s\"" % (var, " ".join(self._gather_libs(package))))
 
-        self._cmake.definitions["QT_EXTRA_INCLUDEPATHS"] = ""
-        self._cmake.definitions["QT_EXTRA_DEFINES"] = ""
-        self._cmake.definitions["QT_EXTRA_LIBDIRS"] = ""
-        for package in self.deps_cpp_info.deps:
-            self._cmake.definitions["QT_EXTRA_INCLUDEPATHS"] += "".join(["%s;" % s for s in self.deps_cpp_info[package].include_paths])
-            self._cmake.definitions["QT_EXTRA_DEFINES"] += "".join(["%s;" % s for s in self.deps_cpp_info[package].defines])
-            self._cmake.definitions["QT_EXTRA_LIBDIRS"] += "".join(["%s;" % s for s in self.deps_cpp_info[package].lib_paths])
 
         # FIXME: port to cmake
         # if 'libmysqlclient' in self.deps_cpp_info.deps:
