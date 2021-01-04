@@ -371,9 +371,9 @@ class QtConan(ConanFile):
         tools.replace_in_file(os.path.join("qt6", "CMakeLists.txt"),
                               "enable_testing()",
                               "include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)\nconan_basic_setup(KEEP_RPATHS)\n"
-                               "set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS}\n"
-                               "setQT_EXTRA_DEFINES ${CONAN_DEFINES}\n"
-                               "set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS}\n"
+                               "set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
+                               "set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
+                               "set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS})\n"
                                "enable_testing()")
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
