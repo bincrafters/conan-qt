@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.1.0)
 project(test_package)
 
-set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

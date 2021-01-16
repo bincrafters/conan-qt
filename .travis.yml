@@ -3,4 +3,4 @@ env:
     - splitByBuildTypes=true
     - CONAN_TOTAL_PAGES=2
 
-import: bincrafters/templates:.ci/travis-macos.yml@master
+import: bincrafters/templates:.ci/travis-macos.yml@12f4883f65fcbc521d7425636083ce9bba4be5cd

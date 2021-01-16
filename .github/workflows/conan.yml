@@ -1,7 +1,7 @@
 env:
   splitByBuildTypes: "true"
 
-# bincrafters-conventions:gha-workflow-version:6
+# bincrafters-conventions:gha-workflow-version:8
 # You can add custom environment variables above the version tag
 # Do not modify the tag or anything below the tag
 # This script gets automatically updated
@@ -17,7 +17,7 @@ on: [push, pull_request]
 jobs:
   generate-matrix:
     name: Generate Job Matrix
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
@@ -50,32 +50,13 @@ jobs:
         with:
           python-version: "3.8"
       - name: Install Conan
+        env:
+          BPT_MATRIX: ${{toJson(matrix.config)}}
         run: |
           pip install bincrafters_package_tools
-          conan user
-          echo "::set-env name=CONAN_${{ matrix.config.compiler }}_VERSIONS::${{ matrix.config.version }}"
-          echo "export CONAN_${{ matrix.config.compiler }}_VERSIONS=${{ matrix.config.version }}"
-          compiler="${{ matrix.config.compiler }}"
-          version="${{ matrix.config.version }}"
-          docker_image="${{ matrix.config.dockerImage }}"
-          if [[ "${compiler}" == "GCC" ]] || [[ "${compiler}" == "CLANG" ]]; then
-            if [[ "${docker_image}" == "" ]]; then
-              compiler_lower="${compiler,,}"
-              version_withoutdot="${version//./}"
-              docker_image="conanio/${compiler_lower}${version_withoutdot}"
-            fi
-            echo "::set-env name=CONAN_DOCKER_IMAGE::${docker_image}"
-            echo "export CONAN_DOCKER_IMAGE=${docker_image}"
-          fi
-          build_type="${{ matrix.config.buildType }}"
-          if ! [[ "${build_type}" == "" ]]; then
-            echo "::set-env name=CONAN_BUILD_TYPES::${build_type}"
-            echo "export CONAN_BUILD_TYPES=${build_type}"
-          fi
-          if [[ "${compiler}" == "APPLE_CLANG" ]] && [[ "${version}" == "11.0" ]]; then
-            sudo xcode-select -switch "/Applications/Xcode_11.3.1.app"
-            clang++ --version
-          fi
+          # remove newlines from matrix first
+          matrix=$(echo ${BPT_MATRIX})
+          bincrafters-package-tools prepare-env --platform gha --config "${matrix}"
         shell: bash
       - name: Run
         env:
