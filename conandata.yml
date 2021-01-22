@@ -48,7 +48,11 @@ sources:
     url: "http://download.qt.io/development_releases/qt/6.0/6.0.0-beta2/single/qt-everywhere-src-6.0.0-beta2.tar.xz"
     sha256: "9c4cc2fb781d682e86d8b3754a18a4d8969e02fa8509da31e5343065ead5fbd5"
   "6.0.0":
-    url: "https://download.qt.io/archive/qt/6.0/6.0.0/single/qt-everywhere-src-6.0.0.tar.xz"
+    url:
+      - "https://download.qt.io/archive/qt/6.0/6.0.0/single/qt-everywhere-src-6.0.0.tar.xz"
+      - "https://qt-mirror.dannhauer.de/archive/qt/6.0/6.0.0/single/qt-everywhere-src-6.0.0.tar.xz"
+      - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/6.0/6.0.0/single/qt-everywhere-src-6.0.0.tar.xz"
+      - "https://ftp.fau.de/qtproject/archive/qt/6.0/6.0.0/single/qt-everywhere-src-6.0.0.tar.xz"
     sha256: "d39a1a557a0dc8dc5ea2eaaee0fa015c71dcbb79c25a6aea421c594227565296"
 patches:
   "5.13.1":
