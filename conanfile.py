@@ -296,7 +296,7 @@ class QtConan(ConanFile):
             self.requires("pcre2/10.33")
 
         if self.options.with_glib:
-            self.requires("glib/2.67.0")
+            self.requires("glib/2.67.1")
         # FIXME
         #if self.options.with_doubleconversion and not self.options.multiconfiguration:
         #    self.requires("double-conversion/3.1.5")
@@ -305,9 +305,9 @@ class QtConan(ConanFile):
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.92")
         if self.options.with_icu:
-            self.requires("icu/68.1")
+            self.requires("icu/68.2")
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
-            self.requires("harfbuzz/2.7.2")
+            self.requires("harfbuzz/2.7.4")
         if self.options.with_libjpeg and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/2.0.6")
@@ -327,7 +327,7 @@ class QtConan(ConanFile):
                 self.requires("odbc/2.3.7")
         # FIXME : not needed if qtgamepad is not a qt module ?
         # if self.options.with_sdl2:
-        #     self.requires("sdl2/2.0.10@bincrafters/stable")
+        #     self.requires("sdl2/2.0.14@bincrafters/stable")
         if self.options.with_openal:
             self.requires("openal/1.21.0")
         if self.options.with_libalsa:
@@ -337,7 +337,7 @@ class QtConan(ConanFile):
             if not tools.cross_building(self, skip_x64_x86=True):
                 self.requires("xkbcommon/1.0.3")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.4")
+            self.requires("zstd/1.4.8")
         # FIXME : is qtwebengine a qt6 module ?
         # if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
         #     self.requires("xorg/system")
