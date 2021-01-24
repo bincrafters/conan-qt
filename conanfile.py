@@ -132,6 +132,13 @@ class QtConan(ConanFile):
         self.build_requires('pkgconf/1.7.3')
         if not tools.which("ninja"):
             self.build_requires("ninja/1.10.2")
+
+        if self.settings.os == "Emscripten" or self.settings.arch == "wasm":
+            # https://www.qt.io/blog/qt-6-build-system
+            # For cross compile you need the native tools, so you can use them
+            # during the build ...
+            self.build_requires("qt/6.0.0@bincrafters/stable")
+
         # FIXME : is qtwebengine a qt6 module ?
         # if self.options.qtwebengine:
         #     # gperf, bison, flex, python >= 2.7.5 & < 3
@@ -378,6 +385,12 @@ class QtConan(ConanFile):
 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
+        if self.settings.os == "Emscripten" or self.settings.arch == "wasm":
+            # https://bugreports.qt.io/browse/QTBUG-89773
+            # https://bugreports.qt.io/browse/QTBUG-78647
+            tools.patch(base_path="qt6/qtbase", patch_file="patches/82d0075.diff")
+
         # FIXME: is qtwebengine a qt6 module?
         # for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
         #     tools.replace_in_file(os.path.join(self.source_folder, "qt5", "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
@@ -457,7 +470,7 @@ class QtConan(ConanFile):
                     "armv7k": "qnx-armle-v7-qcc",
                     "x86": "qnx-x86-qcc",
                     "x86_64": "qnx-x86-64-qcc"}.get(str(self.settings.arch))
-        elif self.settings.os == "Emscripten" and self.settings.arch == "wasm":
+        elif self.settings.os == "Emscripten" or self.settings.arch == "wasm":
             return "wasm-emscripten"
 
         return None
@@ -608,6 +621,9 @@ class QtConan(ConanFile):
             xplatform_val = self._xplatform()
             if xplatform_val:
                 self._cmake.definitions["QT_QMAKE_TARGET_MKSPEC"] = xplatform_val
+
+                if self.settings.os == "Emscripten" or self.settings.arch == "wasm":
+                    self._cmake.definitions["QT_HOST_PATH"] = self.deps_env_info["qt"].CMAKE_PREFIX_PATH[0]
             else:
                 self.output.warn("host not supported: %s %s %s %s" %
                                  (self.settings.os, self.settings.compiler,
@@ -674,6 +690,33 @@ class QtConan(ConanFile):
         for module in self._submodules:
             if module != 'qtbase' and not getattr(self.options, module):
                 tools.rmdir(os.path.join(self.package_folder, "licenses", module))
+
+
+        # Lalalala. It makes sense to need the native tools for the 
+        # generation of the code. But that could create problems.
+        # Currently I am building in x86_64 platform, but if someone
+        # downloads this package from e.g. an arm platform, 
+        # then it will not work.
+        # https://bugreports.qt.io/browse/QTBUG-74133
+        if self.settings.os == "Emscripten" or self.settings.arch == "wasm":
+            native_bin_path = self.deps_env_info["qt"].PATH[0]
+            self.output.info("native_bin_path: %s" % native_bin_path)
+            host_bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("host_bin_path: %s" % host_bin_path)
+            self.copy("*moc*", src=native_bin_path, dst=host_bin_path)
+            self.copy("*rcc*", src=native_bin_path, dst=host_bin_path)
+            self.copy("*tracegen*", src=native_bin_path, dst=host_bin_path)
+            self.copy("*cmake_automoc_parser*", src=native_bin_path, dst=host_bin_path)
+            self.copy("*qlalr*", src=native_bin_path, dst=host_bin_path)
+            self.copy("*qmake*", src=native_bin_path, dst=host_bin_path)
+
+            native_lib_path = os.path.join(self.deps_env_info["qt"].LD_LIBRARY_PATH[0], "cmake","Qt6CoreTools")            
+            self.output.info("native_lib_path: %s" % native_lib_path)
+            host_lib_path = os.path.join(self.package_folder,"lib","cmake","Qt6CoreTools")  
+            self.output.info("host_lib_path: %s" % host_lib_path)
+            self.copy("*.cmake", src=native_lib_path, dst=host_lib_path)
+
+
 
     def package_id(self):
         del self.info.options.cross_compile

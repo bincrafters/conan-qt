@@ -83,10 +83,10 @@ diff --git a/cmake/QtBaseGlobalTargets.cmake b/cmake/QtBaseGlobalTargets.cmake
 index 03f4b4d..b5a891a 100644
 --- a/cmake/QtBaseGlobalTargets.cmake
 +++ b/cmake/QtBaseGlobalTargets.cmake
-@@ -244,3 +244,109 @@
- qt_path_join(__qt_libexec_install_dir "${QT_INSTALL_DIR}" "${INSTALL_LIBEXECDIR}")
- qt_copy_or_install(FILES coin/instructions/qmake/ensure_pro_file.cmake
-     DESTINATION "${__qt_libexec_install_dir}")
+@@ -240,3 +240,109 @@ if(MACOS)
+         DESTINATION "${__GlobalConfig_install_dir}/macos"
+     )
+ endif()
 +
 +if(WASM)
 +
@@ -210,7 +210,7 @@ diff --git a/cmake/QtBuildInternals/QtBuildInternalsConfig.cmake b/cmake/QtBuild
 index 1663e76..0e7d75a 100644
 --- a/cmake/QtBuildInternals/QtBuildInternalsConfig.cmake
 +++ b/cmake/QtBuildInternals/QtBuildInternalsConfig.cmake
-@@ -71,7 +71,7 @@
+@@ -72,7 +72,7 @@ function(qt_build_internals_disable_pkg_config_if_needed)
      set(pkg_config_enabled ON)
      qt_build_internals_find_pkg_config_executable()
  
@@ -272,12 +272,10 @@ diff --git a/cmake/QtPlugins.cmake.in b/cmake/QtPlugins.cmake.in
 index ce077a9..38fce6a 100644
 --- a/cmake/QtPlugins.cmake.in
 +++ b/cmake/QtPlugins.cmake.in
-@@ -51,7 +51,10 @@
-     endif()
+@@ -36,6 +36,9 @@ if(NOT @BUILD_SHARED_LIBS@)
  
      # The code in here uses the properties defined in qt_import_plugins (Qt6CoreMacros.cmake)
--    foreach(target ${_qt_plugins})
-+    foreach(target @qt_plugins@)
+     foreach(target @qt_plugins@)
 +        if("${target}" STREQUAL "qt_plugins-NOTFOUND")
 +            continue()
 +        endif()
@@ -288,124 +286,29 @@ diff --git a/cmake/QtPriHelpers.cmake b/cmake/QtPriHelpers.cmake
 index 47be8a6..e425a4e 100644
 --- a/cmake/QtPriHelpers.cmake
 +++ b/cmake/QtPriHelpers.cmake
-@@ -563,7 +563,6 @@
+@@ -534,8 +534,7 @@ QT_PATCH_VERSION = ${PROJECT_VERSION_PATCH}
+     if(QT_LIBINFIX)
          list(APPEND extra_statements "QT_LIBINFIX = ${QT_LIBINFIX}")
      endif()
- 
+-
 -    # TODO: Add QT_EMCC_VERSION when WASM is ported over.
++
      if(APPLECLANG)
          set(compiler_version_major_var_name "QT_APPLE_CLANG_MAJOR_VERSION")
          set(compiler_version_minor_var_name "QT_APPLE_CLANG_MINOR_VERSION")
-@@ -603,6 +602,10 @@
+@@ -574,6 +573,11 @@ QT_PATCH_VERSION = ${PROJECT_VERSION_PATCH}
+     endif()
  
      list(APPEND extra_statements "QT_EDITION = Open Source")
- 
++
 +    if(WASM)
 +        list(APPEND extra_statements
 +            "QT_EMCC_VERSION = ${EMCC_VERSION}")
 +    endif()
+
      if(extra_statements)
          string(REPLACE ";" "\n" extra_statements "${extra_statements}")
          string(APPEND content "\n${extra_statements}\n")
-diff --git a/configure.cmake b/configure.cmake
-index d076790..7f5757d 100644
---- a/configure.cmake
-+++ b/configure.cmake
-@@ -378,7 +378,7 @@
- qt_feature_config("shared" QMAKE_PUBLIC_QT_CONFIG)
- qt_feature_config("shared" QMAKE_PUBLIC_CONFIG)
- qt_feature("static" PUBLIC
--    CONDITION NOT QT_FEATURE_shared
-+    CONDITION AND NOT QT_FEATURE_shared
- )
- qt_feature_config("static" QMAKE_PUBLIC_QT_CONFIG)
- qt_feature_config("static" QMAKE_PUBLIC_CONFIG)
-@@ -422,7 +422,7 @@
- qt_feature("optimize_debug"
-     LABEL "Optimize debug build"
-     AUTODETECT NOT QT_FEATURE_developer_build
--    CONDITION NOT MSVC AND NOT CLANG AND ( QT_FEATURE_debug OR QT_FEATURE_debug_and_release ) AND TEST_optimize_debug
-+    CONDITION NOT WASM AND NOT MSVC AND NOT CLANG AND ( QT_FEATURE_debug OR QT_FEATURE_debug_and_release ) AND TEST_optimize_debug
- )
- qt_feature_config("optimize_debug" QMAKE_PRIVATE_CONFIG)
- qt_feature("optimize_size"
-@@ -498,7 +498,7 @@
- qt_feature("rpath" PUBLIC
-     LABEL "Build with RPATH"
-     AUTODETECT 1
--    CONDITION BUILD_SHARED_LIBS AND UNIX AND NOT WIN32 AND NOT ANDROID
-+    CONDITION BUILD_SHARED_LIBS AND UNIX AND NOT WIN32 AND NOT ANDROID AND NOT WASM
- )
- qt_feature_config("rpath" QMAKE_PUBLIC_QT_CONFIG)
- qt_feature("force_asserts" PUBLIC
-@@ -857,8 +857,9 @@
-     SECTION "Kernel"
-     LABEL "Thread support"
-     PURPOSE "Provides QThread and related classes."
--    AUTODETECT NOT WASM
-+    CONDITION NOT WASM OR FEATURE_thread
- )
-+
- qt_feature("future" PUBLIC
-     SECTION "Kernel"
-     LABEL "QFuture"
-@@ -874,7 +875,7 @@
- qt_feature_definition("concurrent" "QT_NO_CONCURRENT" NEGATE VALUE "1")
- qt_feature("dbus" PUBLIC PRIVATE
-     LABEL "Qt D-Bus"
--    AUTODETECT NOT UIKIT AND NOT ANDROID
-+    AUTODETECT NOT UIKIT AND NOT ANDROID AND NOT WASM
-     CONDITION QT_FEATURE_thread
- )
- qt_feature_definition("dbus" "QT_NO_DBUS" NEGATE VALUE "1")
-@@ -900,7 +901,7 @@
- )
- qt_feature("sql" PRIVATE
-     LABEL "Qt Sql"
--    CONDITION QT_FEATURE_thread
-+    CONDITION QT_FEATURE_thread AND NOT WASM
- )
- qt_feature("testlib" PRIVATE
-     LABEL "Qt Testlib"
-@@ -948,6 +949,7 @@
-     LABEL "Using Intel CET"
-     CONDITION TEST_intelcet
- )
-+
- qt_configure_add_summary_build_type_and_config()
- qt_configure_add_summary_section(NAME "Build options")
- qt_configure_add_summary_build_mode(Mode)
-@@ -1071,6 +1073,7 @@
- qt_configure_add_summary_entry(ARGS "libudev")
- qt_configure_add_summary_entry(ARGS "system-zlib")
- qt_configure_add_summary_entry(ARGS "zstd")
-+qt_configure_add_summary_entry(ARGS "thread")
- qt_configure_end_summary_section() # end of "Support enabled for" section
- qt_configure_add_report_entry(
-     TYPE NOTE
-@@ -1109,8 +1112,21 @@
-     MESSAGE "Command line option -sanitize fuzzer-no-link is only supported with clang compilers."
-     CONDITION QT_FEATURE_sanitize_fuzzer_no_link AND NOT CLANG
- )
--
-+qt_configure_add_report_entry(
-+    TYPE NOTE
-+    MESSAGE "Using pthreads"
-+    CONDITION QT_FEATURE_thread
-+)
-+qt_configure_add_report_entry(
-+    TYPE WARNING
-+    MESSAGE "You should use the recommended Wasm version ${QT_EMCC_RECOMMENDED_VERSION} with this Qt. You have ${EMCC_VERSION}."
-+    CONDITION WASM AND NOT ${EMCC_VERSION} MATCHES ${QT_EMCC_RECOMMENDED_VERSION}
-+)
- qt_extra_definition("QT_VERSION_STR" "\"${PROJECT_VERSION}\"" PUBLIC)
- qt_extra_definition("QT_VERSION_MAJOR" ${PROJECT_VERSION_MAJOR} PUBLIC)
- qt_extra_definition("QT_VERSION_MINOR" ${PROJECT_VERSION_MINOR} PUBLIC)
- qt_extra_definition("QT_VERSION_PATCH" ${PROJECT_VERSION_PATCH} PUBLIC)
-+
-+if(WASM)
-+    qt_extra_definition("QT_EMCC_VERSION" "\"${EMCC_VERSION}\"" PUBLIC)
-+endif()
 diff --git a/mkspecs/features/wasm/wasm.prf b/mkspecs/features/wasm/wasm.prf
 index 2e886fc..114cf49 100644
 --- a/mkspecs/features/wasm/wasm.prf
@@ -467,9 +370,9 @@ diff --git a/src/corelib/Qt6CoreMacros.cmake b/src/corelib/Qt6CoreMacros.cmake
 index 2a178de..caba050 100644
 --- a/src/corelib/Qt6CoreMacros.cmake
 +++ b/src/corelib/Qt6CoreMacros.cmake
-@@ -481,6 +481,9 @@
-         qt6_android_generate_deployment_settings("${target}")
-         qt6_android_add_apk_target("${target}")
+@@ -449,6 +449,9 @@ function(qt6_add_executable target)
+         qt_android_generate_deployment_settings("${target}")
+         qt_android_add_apk_target("${target}")
      endif()
 +     if(WASM)
 +         qt_wasm_add_target_helpers("${target}")
@@ -477,11 +380,10 @@ index 2a178de..caba050 100644
  endfunction()
  
  if(NOT QT_NO_CREATE_VERSIONLESS_FUNCTIONS)
-@@ -1434,3 +1437,127 @@
-         endif()
-     endif()
- endfunction()
-+
+@@ -1370,6 +1373,130 @@ if(NOT QT_NO_CREATE_VERSIONLESS_FUNCTIONS)
+     endfunction()
+ endif()
+ 
 +# Sets up auto-linkage of platform-specific entry points.
 +#
 +# See qt_internal_setup_startup_target() in qtbase/cmake/QtStartupHelpers.cmake for the internal
@@ -605,11 +507,15 @@ index 2a178de..caba050 100644
 +        endif()
 +    endif()
 +endfunction()
++
+ function(_qt_internal_apply_strict_cpp target)
+     # Disable C, Obj-C and C++ GNU extensions aka no "-std=gnu++11".
+     # Similar to mkspecs/features/default_post.prf's CONFIG += strict_cpp.
 diff --git a/src/gui/.prev_configure.cmake b/src/gui/.prev_configure.cmake
 index cd962e8..679017b 100644
 --- a/src/gui/.prev_configure.cmake
 +++ b/src/gui/.prev_configure.cmake
-@@ -648,7 +648,7 @@
+@@ -654,7 +654,7 @@ qt_feature("vsp2" PRIVATE
  qt_feature("vnc" PRIVATE
      SECTION "Platform plugins"
      LABEL "VNC"
@@ -618,7 +524,7 @@ index cd962e8..679017b 100644
  )
  qt_feature("mtdev" PRIVATE
      LABEL "mtdev"
-@@ -676,7 +676,7 @@
+@@ -682,7 +682,7 @@ qt_feature("opengles32" PUBLIC
  qt_feature("opengl-desktop"
      LABEL "Desktop OpenGL"
      AUTODETECT NOT WIN32
@@ -627,7 +533,7 @@ index cd962e8..679017b 100644
      ENABLE INPUT_opengl STREQUAL 'desktop'
      DISABLE INPUT_opengl STREQUAL 'es2' OR INPUT_opengl STREQUAL 'dynamic' OR INPUT_opengl STREQUAL 'no'
  )
-@@ -720,7 +720,7 @@
+@@ -726,7 +726,7 @@ qt_feature("egl_x11" PRIVATE
  qt_feature("eglfs" PRIVATE
      SECTION "Platform plugins"
      LABEL "EGLFS"
@@ -640,7 +546,7 @@ diff --git a/src/gui/configure.cmake b/src/gui/configure.cmake
 index 12b7e55..af55d7a 100644
 --- a/src/gui/configure.cmake
 +++ b/src/gui/configure.cmake
-@@ -35,7 +35,9 @@
+@@ -35,7 +35,9 @@ set_package_properties(WrapFreetype PROPERTIES TYPE REQUIRED)
  if(QT_FEATURE_system_zlib)
      qt_add_qmake_lib_dependency(freetype zlib)
  endif()
@@ -651,7 +557,7 @@ index 12b7e55..af55d7a 100644
  qt_add_qmake_lib_dependency(fontconfig freetype)
  qt_find_package(gbm PROVIDED_TARGETS gbm::gbm MODULE_NAME gui QMAKE_LIB gbm)
  qt_find_package(WrapSystemHarfbuzz 2.6.0 PROVIDED_TARGETS WrapSystemHarfbuzz::WrapSystemHarfbuzz MODULE_NAME gui QMAKE_LIB harfbuzz)
-@@ -409,32 +411,63 @@
+@@ -413,34 +415,66 @@ ioctl(fd, FBIOGET_VSCREENINFO, &vinfo);
  ")
  
  # opengles3
@@ -680,20 +586,6 @@ index 12b7e55..af55d7a 100644
 +    #  include <GLES3/gl3.h>
 +    #endif
  
- 
--int main(int argc, char **argv)
--{
--    (void)argc; (void)argv;
--    /* BEGIN TEST: */
--static GLfloat f[6];
--glGetStringi(GL_EXTENSIONS, 0);
--glReadBuffer(GL_COLOR_ATTACHMENT1);
--glUniformMatrix2x3fv(0, 0, GL_FALSE, f);
--glMapBufferRange(GL_ARRAY_BUFFER, 0, 0, GL_MAP_READ_BIT);
--    /* END TEST: */
--    return 0;
--}
--")
 +    int main(int argc, char **argv)
 +    {
 +        (void)argc; (void)argv;
@@ -719,7 +611,20 @@ index 12b7e55..af55d7a 100644
 +    #  define GL_GLEXT_PROTOTYPES
 +    #  include <GLES3/gl3.h>
 +    #endif
-+
+
+-int main(int argc, char **argv)
+-{
+-    (void)argc; (void)argv;
+-    /* BEGIN TEST: */
+-static GLfloat f[6];
+-glGetStringi(GL_EXTENSIONS, 0);
+-glReadBuffer(GL_COLOR_ATTACHMENT1);
+-glUniformMatrix2x3fv(0, 0, GL_FALSE, f);
+-glMapBufferRange(GL_ARRAY_BUFFER, 0, 0, GL_MAP_READ_BIT);
+-    /* END TEST: */
+-    return 0;
+-}
+-")
 +
 +    int main(int argc, char **argv)
 +    {
@@ -738,7 +643,11 @@ index 12b7e55..af55d7a 100644
 +endif()
  
  # opengles31
++
++
  qt_config_compile_test(opengles31
+     LABEL "OpenGL ES 3.1"
+     LIBRARIES
 diff --git a/src/platformsupport/CMakeLists.txt b/src/platformsupport/CMakeLists.txt
 index b9d99ed..eaf2d07 100644
 --- a/src/platformsupport/CMakeLists.txt
