@@ -1,0 +1,877 @@
+From 82d0075db9095f1039d6f3dcc361f13a81346b99 Mon Sep 17 00:00:00 2001
+From: Lorn Potter <lorn.potter@gmail.com>
+Date: Thu, 03 Sep 2020 18:29:41 +1000
+Subject: [PATCH] wasm: add cmake build support
+
+A few configure defines get changed:
+QMAKE_WASM_PTHREAD_POOL_SIZE is now QT_WASM_PTHREAD_POOL_SIZE
+QMAKE_WASM_TOTAL_MEMORY is now QT_WASM_TOTAL_MEMORY
+QMAKE_WASM_SOURCE_MAP_BASE is now QT_WASM_SOURCE_MAP_BASE
+
+Task-number: QTBUG-78647
+Change-Id: If9f30cd7fb408c386d6d69b5f7b1beecf1ab44b5
+---
+
+diff --git a/cmake/QtAutoDetect.cmake b/cmake/QtAutoDetect.cmake
+index 4518078..593175d 100644
+--- a/cmake/QtAutoDetect.cmake
++++ b/cmake/QtAutoDetect.cmake
+@@ -5,6 +5,30 @@
+ # Make sure to not run detection when building standalone tests, because the detection was already
+ # done when initially configuring qtbase.
+ 
++
++function(qt_auto_detect_wasm)
++    if(NOT DEFINED QT_AUTODETECT_WASM)
++        set(QT_AUTODETECT_WASM TRUE CACHE STRING "")
++        if(DEFINED ENV{EM_CONFIG})
++            set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build Qt statically or dynamically" FORCE)
++            set(BUILD_WITH_PCH OFF CACHE BOOL "Build Qt using precompiled headers" FORCE)
++
++            set(QT_EMCC_RECOMMENDED_VERSION 2.0.11 PARENT_SCOPE)
++            execute_process(COMMAND $ENV{EMSDK}/upstream/emscripten/emcc --version COMMAND head -n 1 COMMAND awk "{ print $5 }"
++                OUTPUT_VARIABLE emOutput
++                OUTPUT_STRIP_TRAILING_WHITESPACE)
++
++            set(EMCC_VERSION "${emOutput}" PARENT_SCOPE)
++
++            if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
++                    set(wasm_toolchain_file "$ENV{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake")
++                    set(CMAKE_TOOLCHAIN_FILE "${wasm_toolchain_file}" CACHE STRING "" FORCE)
++            endif()
++            message(STATUS "Emscripten toolchain file detected")
++        endif()
++    endif()
++endfunction()
++
+ function(qt_auto_detect_cmake_generator)
+     if(NOT CMAKE_GENERATOR MATCHES "Ninja" AND NOT QT_SILENCE_CMAKE_GENERATOR_WARNING)
+         message(WARNING
+@@ -288,8 +312,11 @@
+ endfunction()
+ 
+ function(qt_auto_detect_pch)
+-    set(default_value "ON")
+-
++    if(WASM)
++        set(default_value "OFF")
++    else()
++        set(default_value "ON")
++    endif()
+     if(CMAKE_OSX_ARCHITECTURES AND CMAKE_VERSION VERSION_LESS 3.18.0 AND NOT QT_FORCE_PCH)
+         list(LENGTH CMAKE_OSX_ARCHITECTURES arch_count)
+         # CMake versions lower than 3.18 don't support PCH when multiple architectures are set.
+@@ -311,3 +338,4 @@
+ qt_auto_detect_android()
+ qt_auto_detect_vpckg()
+ qt_auto_detect_pch()
++qt_auto_detect_wasm()
+diff --git a/cmake/QtBaseConfigureTests.cmake b/cmake/QtBaseConfigureTests.cmake
+index af18131..b1a6e7b 100644
+--- a/cmake/QtBaseConfigureTests.cmake
++++ b/cmake/QtBaseConfigureTests.cmake
+@@ -25,7 +25,7 @@
+     # With emscripten the application entry point is a .js file (to be run with node for example),
+     # but the real "data" is in the .wasm file, so that's where we need to look for the ABI, etc.
+     # information.
+-    if (EMSCRIPTEN)
++    if (WASM)
+         set(_arch_file_suffix ".wasm")
+     endif()
+ 
+diff --git a/cmake/QtBaseGlobalTargets.cmake b/cmake/QtBaseGlobalTargets.cmake
+index 03f4b4d..b5a891a 100644
+--- a/cmake/QtBaseGlobalTargets.cmake
++++ b/cmake/QtBaseGlobalTargets.cmake
+@@ -244,3 +244,109 @@
+ qt_path_join(__qt_libexec_install_dir "${QT_INSTALL_DIR}" "${INSTALL_LIBEXECDIR}")
+ qt_copy_or_install(FILES coin/instructions/qmake/ensure_pro_file.cmake
+     DESTINATION "${__qt_libexec_install_dir}")
++
++if(WASM)
++
++    target_link_options(Platform INTERFACE "SHELL:-s EXIT_RUNTIME=1"
++        "SHELL:-s ERROR_ON_UNDEFINED_SYMBOLS=1"
++        "SHELL:-s EXTRA_EXPORTED_RUNTIME_METHODS=[UTF16ToString,stringToUTF16]"
++        "SHELL:-s USE_WEBGL2=1"
++        "--bind"
++        "SHELL:-s FETCH=1")
++
++    target_compile_options(Platform INTERFACE "--bind")
++
++ #   set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build Qt statically or dynamically" FORCE)
++ #   set(BUILD_WITH_PCH OFF CACHE BOOL "Build Qt using precompiled headers" FORCE)
++
++    if (DEFINED QT_WASM_TOTAL_MEMORY)
++        # Hardcode wasm memory size. Emscripten does not currently support memory growth
++        # (ALLOW_MEMORY_GROWTH) in pthreads mode, and requires specifying the memory size
++        # at build time. Further, browsers limit the maximum initial memory size to 1GB.
++        # QT_WASM_TOTAL_MEMORY must be a multiple of 64KB
++        target_link_options(Platform INTERFACE "SHELL:-s TOTAL_MEMORY=${QT_WASM_TOTAL_MEMORY}")
++        message("Setting TOTAL_MEMORY to ${QT_WASM_TOTAL_MEMORY}")
++    else()
++        if (QT_FEATURE_thread)
++            target_link_options(Platform INTERFACE "SHELL:-s TOTAL_MEMORY=1GB")
++            message("Setting TOTAL_MEMORY to 1GB")
++        endif()
++    endif()
++
++    if (QT_FEATURE_opengles3)
++        add_compile_options("SHELL:-s  FULL_ES3=1")
++
++        target_link_options(Platform INTERFACE "SHELL:-s FULL_ES3=1"
++            "SHELL:-s MAX_WEBGL_VERSION=2"
++            "SHELL:-s WEBGL2_BACKWARDS_COMPATIBILITY_EMULATION=1")
++    else()
++        target_link_options(Platform INTERFACE "SHELL:-s FULL_ES2=1")
++  #      target_link_options(Platform INTERFACE "SHELL:-s MAX_WEBGL_VERSION=1")
++    endif()
++
++
++    if (QT_FEATURE_exceptions)
++        target_compile_options(Platform INTERFACE "SHELL:-s DISABLE_EXCEPTION_CATCHING=0")
++        target_link_options(Platform INTERFACE "SHELL:-s DISABLE_EXCEPTION_CATCHING=0")
++     else()
++        target_compile_options(Platform INTERFACE "SHELL:-s DISABLE_EXCEPTION_CATCHING=1")
++        target_link_options(Platform INTERFACE "SHELL:-s DISABLE_EXCEPTION_CATCHING=1")
++    #     target_compile_definitions(Platform INTERFACE PRIVATE "QT_NO_EXCEPTIONS")
++    #     target_compile_options(Platform INTERFACE PRIVATE "-fno-exceptions")
++    endif()
++
++    if (QT_FEATURE_thread)
++        target_compile_options(Platform INTERFACE "SHELL:-s USE_PTHREADS=1")
++        add_compile_options("SHELL:-s USE_PTHREADS=1") # harfbuz fails to link without this
++
++        target_link_options(Platform INTERFACE "SHELL:-s USE_PTHREADS=1")
++
++        if(DEFINED QT_WASM_PTHREAD_POOL_SIZE)
++            target_link_options(Platform INTERFACE "SHELL:-s PTHREAD_POOL_SIZE=${QT_WASM_PTHREAD_POOL_SIZE}")
++            message("Setting PTHREAD_POOL_SIZE to ${QT_WASM_PTHREAD_POOL_SIZE}")
++        endif()
++    else()
++        target_link_options(Platform INTERFACE "SHELL:-s ALLOW_MEMORY_GROWTH=1")
++  #add_link_options("SHELL:-s MAXIMUM_MEMORY=1GB") # required when combining USE_PTHREADS with ALLOW_MEMORY_GROWTH
++      endif()
++
++    ### debug add_compile_options
++    if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR "RelWithDebInfo")
++        ## to make source maps for debugging, you need -g4 here
++        set(GCC_EMCC_CODE_MAPS_FLAGS "-g2")
++        set(CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} ${GCC_EMCC_CODE_MAPS_FLAGS}")
++        set(CMAKE_C_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG} ${GCC_EMCC_CODE_MAPS_FLAGS}")
++       # target_compile_options(Platform INTERFACE "$<$<CONFIG:Debug>:${GCC_EMCC_CODE_MAPS_FLAGS}>")
++
++        target_link_options(Platform INTERFACE "SHELL:-s DEMANGLE_SUPPORT=1"
++            "SHELL:-s GL_DEBUG=1"
++            "SHELL:-s ASSERTIONS=2"
++            "SHELL:--profiling-funcs")
++
++        # target_link_options(Platform INTERFACE "SHELL:-s LIBRARY_DEBUG=1") # print out library calls, verbose
++        # target_link_options(Platform INTERFACE "SHELL:-s SYSCALL_DEBUG=1") # print out sys calls, verbose
++        # target_link_options(Platform INTERFACE "SHELL:-s FS_LOG=1") # print out filesystem ops, verbose
++        # target_link_options(Platform INTERFACE "SHELL:-s SOCKET_DEBUG") # print out socket,network data transfer
++
++        if(DEFINED QT_WASM_SOURCE_MAP_BASE)
++            target_link_options(Platform INTERFACE "SHELL:--source-map-base ${QT_WASM_SOURCE_MAP_BASE}")
++        else()
++            target_link_options(Platform INTERFACE "SHELL:--source-map-base http://localhost:8000/")
++        endif()
++
++    endif()
++
++    if (DEFINED QT_EMSCRIPTEN_ASYNCIFY)
++        target_link_options(Platform INTERFACE "SHELL:-s ASYNCIFY")
++        add_definitions(-DQT_HAVE_EMSCRIPTEN_ASYNCIFY)
++
++        # Emscripten recommends building with optimizations when using asyncify
++        # in order to reduce wasm file size, and may also generate broken wasm
++        # (with "wasm validation error: too many locals" type errors) if optimizations
++        # are omitted. Enable optimizations also for debug builds.
++        if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR "RelWithDebInfo")
++            target_link_options(Platform INTERFACE "$<$<CONFIG:Debug>:-Os>")
++        endif()
++    endif()
++
++endif()
+diff --git a/cmake/QtBuild.cmake b/cmake/QtBuild.cmake
+index cc15d91..dc5151d 100644
+--- a/cmake/QtBuild.cmake
++++ b/cmake/QtBuild.cmake
+@@ -313,7 +313,7 @@
+     set(QT_DEFAULT_MKSPEC macx-ios-clang)
+ elseif(APPLE)
+     set(QT_DEFAULT_MKSPEC macx-clang)
+-elseif(EMSCRIPTEN)
++elseif(WASM)
+     set(QT_DEFAULT_MKSPEC wasm-emscripten)
+ elseif(QNX)
+     # Certain POSIX defines are not set if we don't compile with -std=gnuXX
+diff --git a/cmake/QtBuildInternals/QtBuildInternalsConfig.cmake b/cmake/QtBuildInternals/QtBuildInternalsConfig.cmake
+index 1663e76..0e7d75a 100644
+--- a/cmake/QtBuildInternals/QtBuildInternalsConfig.cmake
++++ b/cmake/QtBuildInternals/QtBuildInternalsConfig.cmake
+@@ -71,7 +71,7 @@
+     set(pkg_config_enabled ON)
+     qt_build_internals_find_pkg_config_executable()
+ 
+-    if(APPLE OR WIN32 OR QNX OR ANDROID OR (NOT PKG_CONFIG_EXECUTABLE))
++    if(APPLE OR WIN32 OR QNX OR ANDROID OR WASM OR (NOT PKG_CONFIG_EXECUTABLE))
+         set(pkg_config_enabled OFF)
+     endif()
+ 
+diff --git a/cmake/QtExecutableHelpers.cmake b/cmake/QtExecutableHelpers.cmake
+index db4cc06..1e06539 100644
+--- a/cmake/QtExecutableHelpers.cmake
++++ b/cmake/QtExecutableHelpers.cmake
+@@ -33,6 +33,9 @@
+             PROPERTY EXCLUDE_FROM_ALL "$<NOT:$<CONFIG:${QT_MULTI_CONFIG_FIRST_CONFIG}>>")
+     endif()
+ 
++if(WASM)
++    qt_wasm_add_target_helpers("${name}")
++endif()
+     if (arg_VERSION)
+         if(arg_VERSION MATCHES "[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+")
+             # nothing to do
+diff --git a/cmake/QtFlagHandlingHelpers.cmake b/cmake/QtFlagHandlingHelpers.cmake
+index 51491da..365ee58 100644
+--- a/cmake/QtFlagHandlingHelpers.cmake
++++ b/cmake/QtFlagHandlingHelpers.cmake
+@@ -92,7 +92,7 @@
+         message(FATAL_ERROR "Visibitily setting must be one of PRIVATE, INTERFACE or PUBLIC.")
+     endif()
+ 
+-    if ((GCC OR CLANG) AND NOT EMSCRIPTEN AND NOT UIKIT AND NOT MSVC)
++    if ((GCC OR CLANG) AND NOT WASM AND NOT UIKIT AND NOT MSVC)
+         if(APPLE)
+             set(gc_sections_flag "-Wl,-dead_strip")
+         elseif(SOLARIS)
+@@ -105,7 +105,7 @@
+         target_link_options("${target}" ${visibility} "${gc_sections_flag}")
+     endif()
+ 
+-    if((GCC OR CLANG OR ICC) AND NOT EMSCRIPTEN AND NOT UIKIT AND NOT MSVC)
++    if((GCC OR CLANG OR ICC) AND NOT WASM AND NOT UIKIT AND NOT MSVC)
+         set(split_sections_flags "-ffunction-sections" "-fdata-sections")
+     endif()
+     if(split_sections_flags)
+diff --git a/cmake/QtPlatformSupport.cmake b/cmake/QtPlatformSupport.cmake
+index 1c428af..aff8f73 100644
+--- a/cmake/QtPlatformSupport.cmake
++++ b/cmake/QtPlatformSupport.cmake
+@@ -16,7 +16,7 @@
+ qt_set01(OPENBSD CMAKE_SYSTEM_NAME STREQUAL "OpenBSD") # FIXME: How to identify this?
+ qt_set01(FREEBSD CMAKE_SYSTEM_NAME STREQUAL "FreeBSD") # FIXME: How to identify this?
+ qt_set01(NETBSD CMAKE_SYSTEM_NAME STREQUAL "NetBSD") # FIXME: How to identify this?
+-qt_set01(WASM CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
++qt_set01(WASM CMAKE_SYSTEM_NAME STREQUAL "Emscripten" OR EMSCRIPTEN)
+ 
+ qt_set01(BSD APPLE OR OPENBSD OR FREEBSD OR NETBSD)
+ 
+diff --git a/cmake/QtPlugins.cmake.in b/cmake/QtPlugins.cmake.in
+index ce077a9..38fce6a 100644
+--- a/cmake/QtPlugins.cmake.in
++++ b/cmake/QtPlugins.cmake.in
+@@ -51,7 +51,10 @@
+     endif()
+ 
+     # The code in here uses the properties defined in qt_import_plugins (Qt6CoreMacros.cmake)
+-    foreach(target ${_qt_plugins})
++    foreach(target @qt_plugins@)
++        if("${target}" STREQUAL "qt_plugins-NOTFOUND")
++            continue()
++        endif()
+         set(_plugin_target "@INSTALL_CMAKE_NAMESPACE@::${target}")
+         set(_plugin_target_versionless "Qt::${target}")
+         get_target_property(_classname "${_plugin_target}" QT_PLUGIN_CLASS_NAME)
+diff --git a/cmake/QtPriHelpers.cmake b/cmake/QtPriHelpers.cmake
+index 47be8a6..e425a4e 100644
+--- a/cmake/QtPriHelpers.cmake
++++ b/cmake/QtPriHelpers.cmake
+@@ -563,7 +563,6 @@
+         list(APPEND extra_statements "QT_LIBINFIX = ${QT_LIBINFIX}")
+     endif()
+ 
+-    # TODO: Add QT_EMCC_VERSION when WASM is ported over.
+     if(APPLECLANG)
+         set(compiler_version_major_var_name "QT_APPLE_CLANG_MAJOR_VERSION")
+         set(compiler_version_minor_var_name "QT_APPLE_CLANG_MINOR_VERSION")
+@@ -603,6 +602,10 @@
+ 
+     list(APPEND extra_statements "QT_EDITION = Open Source")
+ 
++    if(WASM)
++        list(APPEND extra_statements
++            "QT_EMCC_VERSION = ${EMCC_VERSION}")
++    endif()
+     if(extra_statements)
+         string(REPLACE ";" "\n" extra_statements "${extra_statements}")
+         string(APPEND content "\n${extra_statements}\n")
+diff --git a/configure.cmake b/configure.cmake
+index d076790..7f5757d 100644
+--- a/configure.cmake
++++ b/configure.cmake
+@@ -378,7 +378,7 @@
+ qt_feature_config("shared" QMAKE_PUBLIC_QT_CONFIG)
+ qt_feature_config("shared" QMAKE_PUBLIC_CONFIG)
+ qt_feature("static" PUBLIC
+-    CONDITION NOT QT_FEATURE_shared
++    CONDITION AND NOT QT_FEATURE_shared
+ )
+ qt_feature_config("static" QMAKE_PUBLIC_QT_CONFIG)
+ qt_feature_config("static" QMAKE_PUBLIC_CONFIG)
+@@ -422,7 +422,7 @@
+ qt_feature("optimize_debug"
+     LABEL "Optimize debug build"
+     AUTODETECT NOT QT_FEATURE_developer_build
+-    CONDITION NOT MSVC AND NOT CLANG AND ( QT_FEATURE_debug OR QT_FEATURE_debug_and_release ) AND TEST_optimize_debug
++    CONDITION NOT WASM AND NOT MSVC AND NOT CLANG AND ( QT_FEATURE_debug OR QT_FEATURE_debug_and_release ) AND TEST_optimize_debug
+ )
+ qt_feature_config("optimize_debug" QMAKE_PRIVATE_CONFIG)
+ qt_feature("optimize_size"
+@@ -498,7 +498,7 @@
+ qt_feature("rpath" PUBLIC
+     LABEL "Build with RPATH"
+     AUTODETECT 1
+-    CONDITION BUILD_SHARED_LIBS AND UNIX AND NOT WIN32 AND NOT ANDROID
++    CONDITION BUILD_SHARED_LIBS AND UNIX AND NOT WIN32 AND NOT ANDROID AND NOT WASM
+ )
+ qt_feature_config("rpath" QMAKE_PUBLIC_QT_CONFIG)
+ qt_feature("force_asserts" PUBLIC
+@@ -857,8 +857,9 @@
+     SECTION "Kernel"
+     LABEL "Thread support"
+     PURPOSE "Provides QThread and related classes."
+-    AUTODETECT NOT WASM
++    CONDITION NOT WASM OR FEATURE_thread
+ )
++
+ qt_feature("future" PUBLIC
+     SECTION "Kernel"
+     LABEL "QFuture"
+@@ -874,7 +875,7 @@
+ qt_feature_definition("concurrent" "QT_NO_CONCURRENT" NEGATE VALUE "1")
+ qt_feature("dbus" PUBLIC PRIVATE
+     LABEL "Qt D-Bus"
+-    AUTODETECT NOT UIKIT AND NOT ANDROID
++    AUTODETECT NOT UIKIT AND NOT ANDROID AND NOT WASM
+     CONDITION QT_FEATURE_thread
+ )
+ qt_feature_definition("dbus" "QT_NO_DBUS" NEGATE VALUE "1")
+@@ -900,7 +901,7 @@
+ )
+ qt_feature("sql" PRIVATE
+     LABEL "Qt Sql"
+-    CONDITION QT_FEATURE_thread
++    CONDITION QT_FEATURE_thread AND NOT WASM
+ )
+ qt_feature("testlib" PRIVATE
+     LABEL "Qt Testlib"
+@@ -948,6 +949,7 @@
+     LABEL "Using Intel CET"
+     CONDITION TEST_intelcet
+ )
++
+ qt_configure_add_summary_build_type_and_config()
+ qt_configure_add_summary_section(NAME "Build options")
+ qt_configure_add_summary_build_mode(Mode)
+@@ -1071,6 +1073,7 @@
+ qt_configure_add_summary_entry(ARGS "libudev")
+ qt_configure_add_summary_entry(ARGS "system-zlib")
+ qt_configure_add_summary_entry(ARGS "zstd")
++qt_configure_add_summary_entry(ARGS "thread")
+ qt_configure_end_summary_section() # end of "Support enabled for" section
+ qt_configure_add_report_entry(
+     TYPE NOTE
+@@ -1109,8 +1112,21 @@
+     MESSAGE "Command line option -sanitize fuzzer-no-link is only supported with clang compilers."
+     CONDITION QT_FEATURE_sanitize_fuzzer_no_link AND NOT CLANG
+ )
+-
++qt_configure_add_report_entry(
++    TYPE NOTE
++    MESSAGE "Using pthreads"
++    CONDITION QT_FEATURE_thread
++)
++qt_configure_add_report_entry(
++    TYPE WARNING
++    MESSAGE "You should use the recommended Wasm version ${QT_EMCC_RECOMMENDED_VERSION} with this Qt. You have ${EMCC_VERSION}."
++    CONDITION WASM AND NOT ${EMCC_VERSION} MATCHES ${QT_EMCC_RECOMMENDED_VERSION}
++)
+ qt_extra_definition("QT_VERSION_STR" "\"${PROJECT_VERSION}\"" PUBLIC)
+ qt_extra_definition("QT_VERSION_MAJOR" ${PROJECT_VERSION_MAJOR} PUBLIC)
+ qt_extra_definition("QT_VERSION_MINOR" ${PROJECT_VERSION_MINOR} PUBLIC)
+ qt_extra_definition("QT_VERSION_PATCH" ${PROJECT_VERSION_PATCH} PUBLIC)
++
++if(WASM)
++    qt_extra_definition("QT_EMCC_VERSION" "\"${EMCC_VERSION}\"" PUBLIC)
++endif()
+diff --git a/mkspecs/features/wasm/wasm.prf b/mkspecs/features/wasm/wasm.prf
+index 2e886fc..114cf49 100644
+--- a/mkspecs/features/wasm/wasm.prf
++++ b/mkspecs/features/wasm/wasm.prf
+@@ -13,8 +13,8 @@
+         # Create worker threads at startup. This is supposed to be an optimization,
+         # however exceeding the pool size has been obesverved to hang the application.
+         POOL_SIZE = 4
+-        !isEmpty(QMAKE_WASM_PTHREAD_POOL_SIZE) {
+-            POOL_SIZE = $$QMAKE_WASM_PTHREAD_POOL_SIZE
++        !isEmpty(QT_WASM_PTHREAD_POOL_SIZE) {
++            POOL_SIZE = $$QT_WASM_PTHREAD_POOL_SIZE
+         }
+ 
+         message("Setting PTHREAD_POOL_SIZE to" $$POOL_SIZE)
+@@ -23,15 +23,15 @@
+         EMCC_THREAD_LFLAGS += -s ALLOW_MEMORY_GROWTH=1
+     }
+ 
+-     qtConfig(thread) | !isEmpty(QMAKE_WASM_TOTAL_MEMORY) {
++     qtConfig(thread) | !isEmpty(QT_WASM_TOTAL_MEMORY) {
+ 
+             # Hardcode wasm memory size. Emscripten does not currently support memory growth
+             # (ALLOW_MEMORY_GROWTH) in pthreads mode, and requires specifying the memory size
+             # at build time. Further, browsers limit the maximum initial memory size to 1GB.
+-            # QMAKE_WASM_TOTAL_MEMORY must be a multiple of 64KB
++            # QT_WASM_TOTAL_MEMORY must be a multiple of 64KB
+             TOTAL_MEMORY = 1GB
+-            !isEmpty(QMAKE_WASM_TOTAL_MEMORY) {
+-                TOTAL_MEMORY = $$QMAKE_WASM_TOTAL_MEMORY
++            !isEmpty(QT_WASM_TOTAL_MEMORY) {
++                TOTAL_MEMORY = $$QT_WASM_TOTAL_MEMORY
+             }
+             message("Setting TOTAL_MEMORY to" $$TOTAL_MEMORY)
+             EMCC_THREAD_LFLAGS += -s TOTAL_MEMORY=$$TOTAL_MEMORY
+diff --git a/src/corelib/.prev_configure.cmake b/src/corelib/.prev_configure.cmake
+index 1218f55..3562134 100644
+--- a/src/corelib/.prev_configure.cmake
++++ b/src/corelib/.prev_configure.cmake
+@@ -557,7 +557,7 @@
+ )
+ qt_feature("eventfd" PUBLIC
+     LABEL "eventfd"
+-    CONDITION NOT WASM AND TEST_eventfd
++    CONDITION NOT EMSCRIPTEN AND TEST_eventfd
+ )
+ qt_feature_definition("eventfd" "QT_NO_EVENTFD" NEGATE VALUE "1")
+ qt_feature("futimens" PRIVATE
+@@ -649,7 +649,7 @@
+ )
+ qt_feature("poll_ppoll" PRIVATE
+     LABEL "Native ppoll()"
+-    CONDITION NOT WASM AND TEST_ppoll
++    CONDITION NOT EMSCRIPTEN AND TEST_ppoll
+     EMIT_IF NOT WIN32
+ )
+ qt_feature("poll_pollts" PRIVATE
+diff --git a/src/corelib/Qt6CoreMacros.cmake b/src/corelib/Qt6CoreMacros.cmake
+index 2a178de..caba050 100644
+--- a/src/corelib/Qt6CoreMacros.cmake
++++ b/src/corelib/Qt6CoreMacros.cmake
+@@ -481,6 +481,9 @@
+         qt6_android_generate_deployment_settings("${target}")
+         qt6_android_add_apk_target("${target}")
+     endif()
++     if(WASM)
++         qt_wasm_add_target_helpers("${target}")
++     endif()
+ endfunction()
+ 
+ if(NOT QT_NO_CREATE_VERSIONLESS_FUNCTIONS)
+@@ -1434,3 +1437,127 @@
+         endif()
+     endif()
+ endfunction()
++
++# Sets up auto-linkage of platform-specific entry points.
++#
++# See qt_internal_setup_startup_target() in qtbase/cmake/QtStartupHelpers.cmake for the internal
++# implementation counterpart.
++#
++# A project that uses Qt can opt-out of this auto-linking behavior by either setting the
++# QT_NO_LINK_QTMAIN property to TRUE on a target, or by setting the
++# QT_NO_LINK_QTMAIN variable to TRUE before the find_package(Qt6) call.
++#
++# QT_NO_LINK_QTMAIN replaces the old Qt5_NO_LINK_QTMAIN name for both the property and variable
++#name.
++#
++# This function is called by Qt6CoreConfigExtras.cmake at find_package(Qt6Core) time.
++# The reason the linkage is done at find_package() time instead of Qt build time is to allow
++# opting out via a variable. This ensures compatibility with Qt5 behavior.
++# If it was done at build time, opt-out could only be achieved via the property.
++function(_qt_internal_setup_startup_target)
++    set(target "${QT_CMAKE_EXPORT_NAMESPACE}::Startup")
++    set(dependent_target "${QT_CMAKE_EXPORT_NAMESPACE}::Core")
++
++    # Get actual Core target name.
++    get_target_property(dependent_aliased_target "${dependent_target}" ALIASED_TARGET)
++    if(dependent_aliased_target)
++        set(dependent_target "${dependent_aliased_target}")
++    endif()
++
++    # Check if Core is being built as part of current CMake invocation.
++    # If it is, that means the Core target scope is global and the same scope should be set for the
++    # to-be-created Startup target, to avoid creating 100s of local IMPORTED Startup targets
++    # when building with -DBUILD_TESTING=ON and -DBUILD_EXAMPLES=ON due to multiple
++    # find_package(Qt6Core) calls.
++    get_target_property(core_imported "${dependent_target}" IMPORTED)
++    set(create_global "")
++    if(NOT core_imported)
++        set(create_global "GLOBAL")
++    endif()
++
++    # Create Startup only if it's not available in the current scope.
++    # Guards against multiple find_package(Qt6Core) calls.
++    if(NOT TARGET "${target}")
++        add_library("${target}" INTERFACE IMPORTED ${create_global})
++    endif()
++
++    # Allow variable opt-out. Has to be after target creation, because Core always links against
++    # Startup.
++    if(QT_NO_LINK_QTMAIN)
++        return()
++    endif()
++
++    # find_package(Qt6Core) can be called multiple times, but we only want to set the flags once.
++    set(initialized_prop "_qt_startup_target_initialized")
++    get_target_property(initialized "${target}" "${initialized_prop}")
++    if(initialized)
++        return()
++    else()
++        set_target_properties("${target}" PROPERTIES "${initialized_prop}" TRUE)
++    endif()
++
++    # On Windows this enables automatic linkage to QtEntryPoint.
++    # On iOS this enables automatic passing of a linker flag that will change the default
++    # entry point of the linked executable.
++    set(isExe "$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>")
++    set(isNotExcluded "$<NOT:$<BOOL:$<TARGET_PROPERTY:QT_NO_LINK_QTMAIN>>>")
++    if(WIN32)
++        set(isWin32 "$<BOOL:$<TARGET_PROPERTY:WIN32_EXECUTABLE>>")
++        set(isPolicyNEW "$<TARGET_POLICY:CMP0020>")
++        set(finalGenex "$<$<AND:${isExe},${isWin32},${isNotExcluded},${isPolicyNEW}>:Qt::EntryPoint>")
++
++        # Use set_target_properties instead of target_link_libraries because the latter has some
++        # weird additional behavior of checking which project the target belongs to, and might
++        # error out when called multiple times from different scopes.
++        set_target_properties("${target}" PROPERTIES INTERFACE_LINK_LIBRARIES "${finalGenex}")
++    elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
++        set(flag "-Wl,-e,_qt_main_wrapper")
++        set(finalGenex "$<$<AND:${isExe},${isNotExcluded}>:${flag}>")
++
++        set_target_properties("${target}" PROPERTIES INTERFACE_LINK_OPTIONS "${finalGenex}")
++    endif()
++
++    # Set up the dependency on Startup for the local Core target, if it hasn't been set yet.
++    set(initialized_prop "_qt_core_startup_dependency_initialized")
++    get_target_property(initialized "${dependent_target}" "${initialized_prop}")
++    if(initialized)
++        get_target_property(thelibs "${dependent_target}" INTERFACE_LINK_LIBRARIES)
++        return()
++    else()
++        set_target_properties("${dependent_target}" PROPERTIES "${initialized_prop}" TRUE)
++
++        # Export the initialized property on Core, to ensure that Core links against Startup
++        # only once in a non-qtbase project.
++        if(NOT core_imported)
++            set_property(TARGET "${dependent_target}" APPEND PROPERTY
++                                 EXPORT_PROPERTIES "${initialized_prop}")
++        endif()
++    endif()
++
++    target_link_libraries("${dependent_target}" INTERFACE "${target}")
++    get_target_property(thelibs "${dependent_target}" INTERFACE_LINK_LIBRARIES)
++endfunction()
++function(qt_wasm_add_target_helpers target)
++    # copy in Qt HTML/JS launch files for apps
++    get_target_property(targetType "${target}" TYPE)
++    if("${targetType}" STREQUAL "EXECUTABLE")
++
++        set(APPNAME ${target})
++
++        if(QT6_INSTALL_PREFIX)
++            configure_file("${QT6_INSTALL_PREFIX}/plugins/platforms/wasm_shell.html"
++                "${target}.html")
++            configure_file("${QT6_INSTALL_PREFIX}/plugins/platforms/qtloader.js"
++                qtloader.js COPYONLY)
++            configure_file("${QT6_INSTALL_PREFIX}/plugins/platforms/qtlogo.svg"
++                qtlogo.svg COPYONLY)
++        elseif(QT_BUILD_DIR)
++            configure_file("${QT_BUILD_DIR}/plugins/platforms/wasm_shell.html"
++                "${target}.html")
++            configure_file("${QT_BUILD_DIR}/plugins/platforms/qtloader.js"
++                qtloader.js COPYONLY)
++            configure_file("${QT_BUILD_DIR}/plugins/platforms/qtlogo.svg"
++                qtlogo.svg COPYONLY)
++        endif()
++    endif()
++endfunction()
+diff --git a/src/gui/.prev_configure.cmake b/src/gui/.prev_configure.cmake
+index cd962e8..679017b 100644
+--- a/src/gui/.prev_configure.cmake
++++ b/src/gui/.prev_configure.cmake
+@@ -648,7 +648,7 @@
+ qt_feature("vnc" PRIVATE
+     SECTION "Platform plugins"
+     LABEL "VNC"
+-    CONDITION ( UNIX AND NOT ANDROID AND NOT APPLE AND NOT WASM ) AND ( QT_FEATURE_regularexpression AND QT_FEATURE_network )
++    CONDITION ( UNIX AND NOT ANDROID AND NOT APPLE AND NOT EMSCRIPTEN ) AND ( QT_FEATURE_regularexpression AND QT_FEATURE_network )
+ )
+ qt_feature("mtdev" PRIVATE
+     LABEL "mtdev"
+@@ -676,7 +676,7 @@
+ qt_feature("opengl-desktop"
+     LABEL "Desktop OpenGL"
+     AUTODETECT NOT WIN32
+-    CONDITION ( WIN32 AND ( MSVC OR WrapOpenGL_FOUND ) ) OR ( NOT WATCHOS AND NOT WIN32 AND NOT WASM AND WrapOpenGL_FOUND )
++    CONDITION ( WIN32 AND ( MSVC OR WrapOpenGL_FOUND ) ) OR ( NOT WATCHOS AND NOT WIN32 AND NOT EMSCRIPTEN AND WrapOpenGL_FOUND )
+     ENABLE INPUT_opengl STREQUAL 'desktop'
+     DISABLE INPUT_opengl STREQUAL 'es2' OR INPUT_opengl STREQUAL 'dynamic' OR INPUT_opengl STREQUAL 'no'
+ )
+@@ -720,7 +720,7 @@
+ qt_feature("eglfs" PRIVATE
+     SECTION "Platform plugins"
+     LABEL "EGLFS"
+-    CONDITION NOT ANDROID AND NOT APPLE AND NOT WIN32 AND NOT WASM AND QT_FEATURE_egl
++    CONDITION NOT ANDROID AND NOT APPLE AND NOT WIN32 AND NOT EMSCRIPTEN AND QT_FEATURE_egl
+ )
+ qt_feature("eglfs_brcm" PRIVATE
+     LABEL "EGLFS Raspberry Pi"
+diff --git a/src/gui/configure.cmake b/src/gui/configure.cmake
+index 12b7e55..af55d7a 100644
+--- a/src/gui/configure.cmake
++++ b/src/gui/configure.cmake
+@@ -35,7 +35,9 @@
+ if(QT_FEATURE_system_zlib)
+     qt_add_qmake_lib_dependency(freetype zlib)
+ endif()
+-qt_find_package(Fontconfig PROVIDED_TARGETS Fontconfig::Fontconfig MODULE_NAME gui QMAKE_LIB fontconfig)
++if(QT_FEATURE_fontconfig)
++    qt_find_package(Fontconfig PROVIDED_TARGETS Fontconfig::Fontconfig MODULE_NAME gui QMAKE_LIB fontconfig)
++endif()
+ qt_add_qmake_lib_dependency(fontconfig freetype)
+ qt_find_package(gbm PROVIDED_TARGETS gbm::gbm MODULE_NAME gui QMAKE_LIB gbm)
+ qt_find_package(WrapSystemHarfbuzz 2.6.0 PROVIDED_TARGETS WrapSystemHarfbuzz::WrapSystemHarfbuzz MODULE_NAME gui QMAKE_LIB harfbuzz)
+@@ -409,32 +411,63 @@
+ ")
+ 
+ # opengles3
+-qt_config_compile_test(opengles3
+-    LABEL "OpenGL ES 3.0"
+-    LIBRARIES
+-        GLESv2::GLESv2
+-    CODE
+-"#ifdef __APPLE__
+-#  include <OpenGLES/ES3/gl.h>
+-#else
+-#  define GL_GLEXT_PROTOTYPES
+-#  include <GLES3/gl3.h>
+-#endif
++if(WASM)
++    qt_config_compile_test(opengles3
++        LABEL "OpenGL ES 3.0"
++        LIBRARIES
++            GLESv2::GLESv2
++        COMPILE_OPTIONS "-s FULL_ES3=1"
++        CODE
++    "#ifdef __APPLE__
++    #  include <OpenGLES/ES3/gl.h>
++    #else
++    #  define GL_GLEXT_PROTOTYPES
++    #  include <GLES3/gl3.h>
++    #endif
+ 
+ 
+-int main(int argc, char **argv)
+-{
+-    (void)argc; (void)argv;
+-    /* BEGIN TEST: */
+-static GLfloat f[6];
+-glGetStringi(GL_EXTENSIONS, 0);
+-glReadBuffer(GL_COLOR_ATTACHMENT1);
+-glUniformMatrix2x3fv(0, 0, GL_FALSE, f);
+-glMapBufferRange(GL_ARRAY_BUFFER, 0, 0, GL_MAP_READ_BIT);
+-    /* END TEST: */
+-    return 0;
+-}
+-")
++    int main(int argc, char **argv)
++    {
++        (void)argc; (void)argv;
++        /* BEGIN TEST: */
++    static GLfloat f[6];
++    glGetStringi(GL_EXTENSIONS, 0);
++    glReadBuffer(GL_COLOR_ATTACHMENT1);
++    glUniformMatrix2x3fv(0, 0, GL_FALSE, f);
++    glMapBufferRange(GL_ARRAY_BUFFER, 0, 0, GL_MAP_READ_BIT);
++        /* END TEST: */
++        return 0;
++    }
++    ")
++else()
++    qt_config_compile_test(opengles3
++        LABEL "OpenGL ES 3.0"
++        LIBRARIES
++            GLESv2::GLESv2
++        CODE
++    "#ifdef __APPLE__
++    #  include <OpenGLES/ES3/gl.h>
++    #else
++    #  define GL_GLEXT_PROTOTYPES
++    #  include <GLES3/gl3.h>
++    #endif
++
++
++    int main(int argc, char **argv)
++    {
++        (void)argc; (void)argv;
++        /* BEGIN TEST: */
++    static GLfloat f[6];
++    glGetStringi(GL_EXTENSIONS, 0);
++    glReadBuffer(GL_COLOR_ATTACHMENT1);
++    glUniformMatrix2x3fv(0, 0, GL_FALSE, f);
++    glMapBufferRange(GL_ARRAY_BUFFER, 0, 0, GL_MAP_READ_BIT);
++        /* END TEST: */
++        return 0;
++    }
++    ")
++
++endif()
+ 
+ # opengles31
+ qt_config_compile_test(opengles31
+diff --git a/src/platformsupport/CMakeLists.txt b/src/platformsupport/CMakeLists.txt
+index b9d99ed..eaf2d07 100644
+--- a/src/platformsupport/CMakeLists.txt
++++ b/src/platformsupport/CMakeLists.txt
+@@ -1,9 +1,9 @@
+ # Generated from platformsupport.pro.
+ 
+-add_subdirectory(devicediscovery)
+ add_subdirectory(fbconvenience)
+ if(QT_FEATURE_evdev OR QT_FEATURE_integrityhid OR QT_FEATURE_libinput OR QT_FEATURE_tslib OR QT_FEATURE_xkbcommon)
+     add_subdirectory(input)
++    add_subdirectory(devicediscovery)
+ endif()
+ if(QT_FEATURE_kms)
+     add_subdirectory(kmsconvenience)
+diff --git a/src/plugins/platforms/CMakeLists.txt b/src/plugins/platforms/CMakeLists.txt
+index bb24656..8f66836 100644
+--- a/src/plugins/platforms/CMakeLists.txt
++++ b/src/plugins/platforms/CMakeLists.txt
+@@ -47,7 +47,7 @@
+     # add_subdirectory(haiku) # special case TODO
+ endif()
+ if(WASM)
+-    # add_subdirectory(wasm) # special case TODO
++     add_subdirectory(wasm)
+ endif()
+ if(QT_FEATURE_integrityfb)
+     # add_subdirectory(integrity) # special case TODO
+diff --git a/src/plugins/platforms/wasm/CMakeLists.txt b/src/plugins/platforms/wasm/CMakeLists.txt
+new file mode 100644
+index 0000000..c1fc82c
+--- /dev/null
++++ b/src/plugins/platforms/wasm/CMakeLists.txt
+@@ -0,0 +1,78 @@
++# Generated from wasm.pro.
++
++#####################################################################
++## QWasmIntegrationPlugin Plugin:
++#####################################################################
++
++qt_internal_add_plugin(QWasmIntegrationPlugin
++    OUTPUT_NAME qwasm
++    DEFAULT_IF ${QT_QPA_DEFAULT_PLATFORM} MATCHES wasm # special case
++    TYPE platforms
++    STATIC
++    SOURCES
++        main.cpp
++        qwasmclipboard.cpp qwasmclipboard.h
++        qwasmcompositor.cpp qwasmcompositor.h
++        qwasmcursor.cpp qwasmcursor.h
++        qwasmeventdispatcher.cpp qwasmeventdispatcher.h
++        qwasmeventtranslator.cpp qwasmeventtranslator.h
++        qwasmfontdatabase.cpp qwasmfontdatabase.h
++        qwasmintegration.cpp qwasmintegration.h
++        qwasmoffscreensurface.cpp qwasmoffscreensurface.h
++        qwasmopenglcontext.cpp qwasmopenglcontext.h
++        qwasmscreen.cpp qwasmscreen.h
++        qwasmservices.cpp qwasmservices.h
++        qwasmstring.cpp qwasmstring.h
++        qwasmstylepixmaps_p.h
++        qwasmtheme.cpp qwasmtheme.h
++        qwasmwindow.cpp qwasmwindow.h
++    DEFINES
++        QT_EGL_NO_X11
++        QT_NO_FOREACH
++    PUBLIC_LIBRARIES
++        Qt::Core
++        Qt::CorePrivate
++        Qt::Gui
++        Qt::GuiPrivate
++)
++
++# Resources:
++set_source_files_properties("${QT_SOURCE_TREE}/src/3rdparty/wasm/Vera.ttf" PROPERTIES QT_RESOURCE_ALIAS "Vera.ttf")
++set_source_files_properties("${QT_SOURCE_TREE}/src/3rdparty/wasm/DejaVuSans.ttf" PROPERTIES QT_RESOURCE_ALIAS "DejaVuSans.ttf")
++set_source_files_properties("${QT_SOURCE_TREE}/src/3rdparty/wasm/DejaVuSansMono.ttf" PROPERTIES QT_RESOURCE_ALIAS "DejaVuSansMono.ttf")
++## FIXME
++set(wasmfonts_resource_files
++    "${QT_SOURCE_TREE}/src/3rdparty/wasm/Vera.ttf"
++    "${QT_SOURCE_TREE}/src/3rdparty/wasm/DejaVuSans.ttf"
++    "${QT_SOURCE_TREE}/src/3rdparty/wasm/DejaVuSansMono.ttf"
++)
++
++qt_internal_add_resource(QWasmIntegrationPlugin "wasmfonts"
++    PREFIX
++        "/fonts"
++    FILES
++        ${wasmfonts_resource_files}
++)
++qt_internal_extend_target(QWasmIntegrationPlugin CONDITION QT_FEATURE_opengl
++    SOURCES
++        qwasmbackingstore.cpp qwasmbackingstore.h
++    PUBLIC_LIBRARIES
++        Qt::OpenGL
++        Qt::OpenGLPrivate
++)
++
++#### Keys ignored in scope 4:.:.:wasm.pro:NOT TARGET___equals____ss_QT_DEFAULT_QPA_PLUGIN:
++# PLUGIN_EXTENDS = "-"
++
++    qt_copy_or_install(FILES
++        wasm_shell.html
++        DESTINATION "${CMAKE_INSTALL_PREFIX}/plugins/platforms/"
++    )
++    qt_copy_or_install(FILES
++        qtloader.js
++        DESTINATION "${CMAKE_INSTALL_PREFIX}/plugins/platforms/"
++    )
++    qt_copy_or_install(FILES
++        qtlogo.svg
++        DESTINATION "${CMAKE_INSTALL_PREFIX}/plugins/platforms/"
++    )
+diff --git a/src/plugins/platforms/wasm/qwasmintegration.cpp b/src/plugins/platforms/wasm/qwasmintegration.cpp
+index 15d396f..3bbd20c 100644
+--- a/src/plugins/platforms/wasm/qwasmintegration.cpp
++++ b/src/plugins/platforms/wasm/qwasmintegration.cpp
+@@ -62,6 +62,11 @@
+ using namespace emscripten;
+ QT_BEGIN_NAMESPACE
+ 
++static void initResources()
++{
++    Q_INIT_RESOURCE(wasmfonts);
++}
++
+ static void browserBeforeUnload(emscripten::val)
+ {
+     QWasmIntegration::QWasmBrowserExit();
+@@ -110,6 +115,7 @@
+       m_desktopServices(nullptr),
+       m_clipboard(new QWasmClipboard)
+ {
++    initResources();
+     s_instance = this;
+ 
+     // We expect that qtloader.js has populated Module.qtCanvasElements with one or more canvases.
