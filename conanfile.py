@@ -294,6 +294,8 @@ class QtConan(ConanFile):
             self.requires("openssl/1.1.1i")
         if self.options.with_pcre2:
             self.requires("pcre2/10.33")
+        if self.options.with_vulkan:
+            self.requires("vulkan-loader/1.2.162.0")
 
         if self.options.with_glib:
             self.requires("glib/2.67.1")
@@ -494,18 +496,7 @@ class QtConan(ConanFile):
 
         self._cmake.definitions["FEATURE_system_zlib"] = "ON"
 
-        # FIXME : port to cmake
-        #if self.options.opengl == "no":
-        #    args += ["-no-opengl"]
-        #elif self.options.opengl == "desktop":
-        #    args += ["-opengl desktop"]
-        #elif self.options.opengl == "dynamic":
-        #    args += ["-opengl dynamic"]
-        #
-        #if self.options.with_vulkan:
-        #    args.append("-vulkan")
-        #else:
-        #    args.append("-no-vulkan")
+        self._cmake.definitions["INPUT_opengl"] = self.options.opengl
 
         # openSSL
         if not self.options.openssl:
@@ -516,9 +507,6 @@ class QtConan(ConanFile):
             else:
                 self._cmake.definitions["INPUT_openssl"] = "linked"
 
-        # FIXME: port to cmake
-        # args.append("--zstd=" + ("yes" if self.options.with_zstd else "no"))
-        #
         #if self.options.qtmultimedia:
         #    args.append("--alsa=" + ("yes" if self.options.with_libalsa else "no"))
 
@@ -529,7 +517,9 @@ class QtConan(ConanFile):
                               ("with_pq", "sql_psql"),
                               ("with_odbc", "sql_odbc"),
                               ("GUI", "gui"),
-                              ("widgets", "widgets")]:
+                              ("widgets", "widgets"),
+                              ("with_zstd", "zstd"),
+                              ("with_vulkan", "vulkan")]:
             self._cmake.definitions["FEATURE_%s" % conf_arg] = ("ON" if getattr(self.options, opt) else "OFF")
             
 
