@@ -277,7 +277,7 @@ class QtConan(ConanFile):
         #     if self.options.qtwebengine:
         #         self.options.with_fontconfig = True
 
-        assert self.version == self._submodules['qtbase']['branch']
+        assert self.version.startswith(self._submodules['qtbase']['branch'])
 
         def _enablemodule(mod):
             if mod != 'qtbase':
