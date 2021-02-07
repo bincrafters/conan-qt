@@ -132,6 +132,9 @@ class QtConan(ConanFile):
         self.build_requires('pkgconf/1.7.3')
         if not tools.which("ninja"):
             self.build_requires("ninja/1.10.2")
+        if not tools.which("perl"):
+            if self.settings.os == "Windows":
+                self.build_requires("strawberryperl/[>=5.26.0]")
         # FIXME : is qtwebengine a qt6 module ?
         # if self.options.qtwebengine:
         #     # gperf, bison, flex, python >= 2.7.5 & < 3
