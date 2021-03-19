@@ -291,19 +291,19 @@ class QtConan(ConanFile):
 
     def requirements(self):
         if self.options.openssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1j")
         if self.options.with_pcre2:
             self.requires("pcre2/10.33")
 
         if self.options.with_glib:
-            self.requires("glib/2.67.1")
+            self.requires("glib/2.67.6")
         # FIXME
         #if self.options.with_doubleconversion and not self.options.multiconfiguration:
         #    self.requires("double-conversion/3.1.5")
         if self.options.with_freetype and not self.options.multiconfiguration:
             self.requires("freetype/2.10.4")
         if self.options.with_fontconfig:
-            self.requires("fontconfig/2.13.92")
+            self.requires("fontconfig/2.13.93")
         if self.options.with_icu:
             self.requires("icu/68.2")
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
@@ -335,9 +335,9 @@ class QtConan(ConanFile):
         if self.options.GUI and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.0.3")
+                self.requires("xkbcommon/1.1.0")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.8")
+            self.requires("zstd/1.4.9")
         # FIXME : is qtwebengine a qt6 module ?
         # if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
         #     self.requires("xorg/system")
