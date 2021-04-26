@@ -3,18 +3,21 @@ env:
   CONAN_DOCKER_ENTRY_SCRIPT: 'conan remove "*" -b -f'
 
 
-# bincrafters-conventions:gha-workflow-version:8
+on: [push, pull_request]
+
+# bincrafters-conventions:gha-workflow-version:10
 # You can add custom environment variables above the version tag
 # Do not modify the tag or anything below the tag
 # This script gets automatically updated
-
+#
 # Possible configurations:
 # env:
 #   splitByBuildTypes: "false"  # Possible values "false", "true", default: false
-
+#
 # You can furthermore set any environment variable understood by Conan and Conan Package Tools
-
-on: [push, pull_request]
+#
+# You can also update the event triggers, which default to
+# on: [push, pull_request]
 
 name: conan
 
@@ -33,7 +36,7 @@ jobs:
           python-version: "3.8"
       - name: Install Package Tools
         run: |
-          pip install git+https://github.com/bincrafters/bincrafters-package-tools@develop
+          pip install bincrafters_package_tools
           conan user
       - name: Generate Job Matrix
         id: set-matrix
@@ -61,7 +64,7 @@ jobs:
         env:
           BPT_MATRIX: ${{toJson(matrix.config)}}
         run: |
-          pip install git+https://github.com/bincrafters/bincrafters-package-tools@develop
+          pip install bincrafters_package_tools
           # remove newlines from matrix first
           matrix=$(echo ${BPT_MATRIX})
           bincrafters-package-tools prepare-env --platform gha --config "${matrix}"
